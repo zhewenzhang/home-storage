@@ -16,7 +16,6 @@ export default function Home() {
   const { 
     locations, 
     items, 
-    floorPlan,
     selectedLocationId, 
     setSelectedLocationId,
     searchQuery 
@@ -88,10 +87,12 @@ export default function Home() {
             className="relative bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden"
             style={{ height: '300px' }}
           >
-            {/* 绘制位置区域 - 使用与 FloorPlan 相同的样式 */}
+            {/* 绘制位置区域 - 使用与 FloorPlan 相同的坐标系 (800x600) */}
             {locations.map((location) => {
               const config = ROOM_TYPES[(location as any).roomType as keyof typeof ROOM_TYPES] || { border: '#8B7355', icon: '📍' };
               const isSelected = selectedLocationId === location.id;
+              const containerWidth = 800;
+              const containerHeight = 600;
               
               return (
                 <div
@@ -100,10 +101,10 @@ export default function Home() {
                     isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : 'hover:ring-2 hover:ring-primary/30'
                   }`}
                   style={{
-                    left: `${(location.bounds.x / (floorPlan?.width || 800)) * 100}%`,
-                    top: `${(location.bounds.y / (floorPlan?.height || 600)) * 100}%`,
-                    width: `${(location.bounds.width / (floorPlan?.width || 800)) * 100}%`,
-                    height: `${(location.bounds.height / (floorPlan?.height || 600)) * 100}%`,
+                    left: `${(location.bounds.x / containerWidth) * 100}%`,
+                    top: `${(location.bounds.y / containerHeight) * 100}%`,
+                    width: `${(location.bounds.width / containerWidth) * 100}%`,
+                    height: `${(location.bounds.height / containerHeight) * 100}%`,
                     background: `linear-gradient(135deg, ${config.color || '#F5F0E8'} 0%, ${config.color ? config.color + 'CC' : '#E8E0D5'} 100%)`,
                     border: `2px solid ${isSelected ? '#3B82F6' : config.border}`,
                   }}
