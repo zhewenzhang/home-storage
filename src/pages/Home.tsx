@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Plus, Package, MapPin, ArrowRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
-// 房间类型配置 - 与 FloorPlan 页面一致
+// 房间类型配置 - 与 FloorPlan 页面完全一致
 const ROOM_TYPES = {
   living: { name: '客厅', color: '#F5F0E8', border: '#8B7355', icon: '🛋️' },
   bedroom: { name: '卧室', color: '#E8EEF5', border: '#6B8BA4', icon: '🛏️' },
@@ -11,6 +11,9 @@ const ROOM_TYPES = {
   balcony: { name: '阳台', color: '#E8F4E8', border: '#7AA37A', icon: '🌿' },
   study: { name: '书房', color: '#F0EDF5', border: '#8B7AA4', icon: '📚' },
 };
+
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 600;
 
 export default function Home() {
   const { 
@@ -63,7 +66,7 @@ export default function Home() {
         <span className="font-medium text-primary">添加新物品</span>
       </Link>
 
-      {/* Floor Plan */}
+      {/* Floor Plan - 与编辑页完全一致的显示方式 */}
       <div className="card">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-lg">家庭平面图</h2>
@@ -73,7 +76,7 @@ export default function Home() {
         </div>
         
         {locations.length === 0 ? (
-          <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center" style={{ height: '300px' }}>
+          <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center" style={{ height: '400px' }}>
             <div className="text-center">
               <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-2" />
               <p className="text-gray-500 mb-3">还没有添加位置</p>
@@ -84,40 +87,36 @@ export default function Home() {
           </div>
         ) : (
           <div 
-            className="relative bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden mx-auto"
+            className="relative bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden"
             style={{ 
               width: '100%',
-              maxWidth: '600px',
               height: '0',
-              paddingBottom: '75%' // 4:3 aspect ratio
+              paddingBottom: '75%' // 800:600 = 4:3
             }}
           >
-            {/* 绘制位置区域 - 与编辑页 800x600 一致 */}
-            {locations.map((location) => {
-              const config = ROOM_TYPES[(location as any).roomType as keyof typeof ROOM_TYPES] || { border: '#8B7355', icon: '📍' };
+            {locations.map(location => {
+              const config = ROOM_TYPES[(location as any).roomType as keyof typeof ROOM_TYPES] || ROOM_TYPES.living;
               const isSelected = selectedLocationId === location.id;
-              const containerWidth = 800;
-              const containerHeight = 600;
               
               return (
                 <div
                   key={location.id}
-                  className={`absolute rounded-lg cursor-pointer flex items-center justify-center text-xs font-medium transition-all ${
+                  className={`absolute rounded-lg flex items-center justify-center text-sm font-medium cursor-pointer transition-all ${
                     isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : 'hover:ring-2 hover:ring-primary/30'
                   }`}
                   style={{
-                    left: `${(location.bounds.x / containerWidth) * 100}%`,
-                    top: `${(location.bounds.y / containerHeight) * 100}%`,
-                    width: `${(location.bounds.width / containerWidth) * 100}%`,
-                    height: `${(location.bounds.height / containerHeight) * 100}%`,
-                    background: `linear-gradient(135deg, ${config.color || '#F5F0E8'} 0%, ${config.color ? config.color + 'CC' : '#E8E0D5'} 100%)`,
+                    left: `${(location.bounds.x / CANVAS_WIDTH) * 100}%`,
+                    top: `${(location.bounds.y / CANVAS_HEIGHT) * 100}%`,
+                    width: `${(location.bounds.width / CANVAS_WIDTH) * 100}%`,
+                    height: `${(location.bounds.height / CANVAS_HEIGHT) * 100}%`,
+                    background: `linear-gradient(135deg, ${config.color} 0%, ${config.color}CC 100%)`,
                     border: `2px solid ${isSelected ? '#3B82F6' : config.border}`,
                   }}
-                  onClick={() => setSelectedLocationId(
-                    selectedLocationId === location.id ? null : location.id
-                  )}
+                  onClick={() => setSelectedLocationId(isSelected ? null : location.id)}
                 >
-                  <span style={{ color: config.border, fontSize: '9px' }}>{config.icon} {location.name}</span>
+                  <span style={{ color: config.border, fontSize: '10px', whiteSpace: 'nowrap' }}>
+                    {config.icon} {location.name}
+                  </span>
                 </div>
               );
             })}
