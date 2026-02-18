@@ -85,7 +85,11 @@ export default function Home() {
         ) : (
           <div 
             className="relative bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden"
-            style={{ height: '300px' }}
+            style={{ 
+              height: '0',
+              paddingBottom: '75%', // 4:3 aspect ratio (600/800 = 75%)
+              minHeight: '300px'
+            }}
           >
             {/* 绘制位置区域 - 使用与 FloorPlan 相同的坐标系 (800x600) */}
             {locations.map((location) => {
@@ -97,7 +101,7 @@ export default function Home() {
               return (
                 <div
                   key={location.id}
-                  className={`absolute rounded-lg cursor-pointer flex items-center justify-center text-sm font-medium transition-all ${
+                  className={`absolute rounded-lg cursor-pointer flex items-center justify-center text-xs font-medium transition-all ${
                     isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : 'hover:ring-2 hover:ring-primary/30'
                   }`}
                   style={{
@@ -112,7 +116,7 @@ export default function Home() {
                     selectedLocationId === location.id ? null : location.id
                   )}
                 >
-                  <span style={{ color: config.border }}>{config.icon} {location.name}</span>
+                  <span style={{ color: config.border, fontSize: '10px' }}>{config.icon} {location.name}</span>
                 </div>
               );
             })}
