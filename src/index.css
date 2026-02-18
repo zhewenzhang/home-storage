@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans SC', system-ui, sans-serif;
+  background-color: #FAFAFA;
+  color: #2D3748;
+  min-height: 100vh;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 80px;
+  }
+}
+
+/* 卡片样式 */
+.card {
+  @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  @apply shadow-md;
+  transform: translateY(-2px);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  @apply bg-primary text-white px-4 py-2 rounded-xl font-medium transition-all;
+}
+
+.btn-primary:hover {
+  @apply opacity-90;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-medium transition-all;
+}
+
+.btn-secondary:hover {
+  @apply bg-gray-200;
+}
+
+/* 输入框样式 */
+.input {
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all;
+}
+
+/* 平面图区域 */
+.floor-plan-area {
+  @apply relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-dashed border-gray-300;
+  min-height: 400px;
+}
+
+.floor-plan-area.active {
+  @apply border-primary bg-primary/5;
+}
+
+/* 位置标记 */
+.location-marker {
+  @apply absolute cursor-pointer rounded-lg flex items-center justify-center text-white font-medium text-sm transition-all;
+  background: linear-gradient(135deg, #4A90A4 0%, #3D7A8C 100%);
+  box-shadow: 0 4px 12px rgba(74, 144, 164, 0.3);
+}
+
+.location-marker:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(74, 144, 164, 0.4);
+}
+
+.location-marker.selected {
+  @apply ring-4 ring-accent ring-offset-2;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s ease forwards;
+}
+
+/* 底部导航 */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-around items-center z-50;
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+.bottom-nav-item {
+  @apply flex flex-col items-center justify-center p-2 rounded-xl transition-all;
+  min-width: 64px;
+}
+
+.bottom-nav-item.active {
+  @apply text-primary bg-primary/10;
+}
+
+.bottom-nav-item:not(.active) {
+  @apply text-gray-400;
+}
