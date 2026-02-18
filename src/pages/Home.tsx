@@ -84,14 +84,15 @@ export default function Home() {
           </div>
         ) : (
           <div 
-            className="relative bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden"
+            className="relative bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden mx-auto"
             style={{ 
+              width: '100%',
+              maxWidth: '600px',
               height: '0',
-              paddingBottom: '75%', // 4:3 aspect ratio (600/800 = 75%)
-              minHeight: '300px'
+              paddingBottom: '75%' // 4:3 aspect ratio
             }}
           >
-            {/* 绘制位置区域 - 使用与 FloorPlan 相同的坐标系 (800x600) */}
+            {/* 绘制位置区域 - 与编辑页 800x600 一致 */}
             {locations.map((location) => {
               const config = ROOM_TYPES[(location as any).roomType as keyof typeof ROOM_TYPES] || { border: '#8B7355', icon: '📍' };
               const isSelected = selectedLocationId === location.id;
@@ -116,7 +117,7 @@ export default function Home() {
                     selectedLocationId === location.id ? null : location.id
                   )}
                 >
-                  <span style={{ color: config.border, fontSize: '10px' }}>{config.icon} {location.name}</span>
+                  <span style={{ color: config.border, fontSize: '9px' }}>{config.icon} {location.name}</span>
                 </div>
               );
             })}
