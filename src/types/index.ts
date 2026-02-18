@@ -13,6 +13,7 @@ export interface Location {
   name: string;
   type: 'room' | 'cabinet' | 'drawer' | 'shelf' | 'box';
   parentId: string | null;
+  roomType?: string;
   bounds: {
     x: number;
     y: number;

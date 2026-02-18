@@ -32,11 +32,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content */}
-      <main className="p-4 pb-24">
+      <main className="p-4 pb-24 md:pl-64 md:pb-4">
         {children}
       </main>
 
-      {/* Bottom Nav - Mobile */}
+      {/* Bottom Nav - Mobile Only */}
       <nav className="md:hidden bottom-nav">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
@@ -52,14 +52,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
 
-      {/* Sidebar - Desktop */}
-      <nav className="hidden md:flex fixed left-0 top-0 h-full w-56 bg-white border-r border-gray-200 flex-col p-4 pt-20">
+      {/* Sidebar - Desktop Only */}
+      <nav className="hidden md:flex fixed left-0 top-0 h-full w-56 bg-white border-r border-gray-200 flex-col p-4 pt-16 z-30">
+        <div className="text-sm font-semibold text-gray-400 mb-4 px-4">导航</div>
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) => 
-              `flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-all ${
+              `flex items-center gap-3 px-4 py-3 rounded-xl mb-1 transition-all ${
                 isActive 
                   ? 'bg-primary text-white' 
                   : 'text-gray-600 hover:bg-gray-100'
@@ -71,11 +72,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </NavLink>
         ))}
       </nav>
-
-      {/* Desktop padding */}
-      <div className="hidden md:block pl-56">
-        {/* Already handled by main padding */}
-      </div>
     </div>
   );
 }

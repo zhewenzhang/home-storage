@@ -1,8 +1,20 @@
 import { useState, useRef } from 'react';
-import { Plus, Move, Trash2 } from 'lucide-react';
+import { Plus, Move, Trash2, GripHorizontal, LayoutGrid } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
-type Tool = 'select' | 'add' | 'move';
+type Tool = 'select' | 'add';
+
+const GRID_SIZE = 20;
+
+// 房间类型配置 - 更美观的室内设计风格
+const ROOM_TYPES = {
+  living: { name: '客厅', color: '#F5F0E8', border: '#8B7355', icon: '🛋️', pattern: 'linear-gradient(135deg, #F5F0E8 0%, #E8E0D5 100%)' },
+  bedroom: { name: '卧室', color: '#E8EEF5', border: '#6B8BA4', icon: '🛏️', pattern: 'linear-gradient(135deg, #E8EEF5 0%, #D8E2ED 100%)' },
+  kitchen: { name: '厨房', color: '#FFF5E6', border: '#C49A6C', icon: '🍳', pattern: 'linear-gradient(135deg, #FFF5E6 0%, #FFE8D0 100%)' },
+  bathroom: { name: '卫生间', color: '#E8F5E9', border: '#6B9B7A', icon: '🚿', pattern: 'linear-gradient(135deg, #E8F5E9 0%, #D4EBD8 100%)' },
+  balcony: { name: '阳台', color: '#E8F4E8', border: '#7AA37A', icon: '🌿', pattern: 'linear-gradient(135deg, #E8F4E8 0%, #D8EBD8 100%)' },
+  study: { name: '书房', color: '#F0EDF5', border: '#8B7AA4', icon: '📚', pattern: 'linear-gradient(135deg, #F0EDF5 0%, #E5E0EE 100%)' },
+};
 
 export default function FloorPlan() {
   const { locations, floorPlan, addLocation, updateLocation, setSelectedLocationId } = useStore();
@@ -10,103 +22,159 @@ export default function FloorPlan() {
   
   const [tool, setTool] = useState<Tool>('select');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeDir, setResizeDir] = useState<string>('');
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, locX: 0, locY: 0, width: 0, height: 0 });
 
-  // 预设房间模板
-  const roomTemplates = [
-    { name: '客厅', width: 200, height: 150 },
-    { name: '主卧', width: 160, height: 140 },
-    { name: '次卧', width: 140, height: 120 },
-    { name: '厨房', width: 120, height: 100 },
-    { name: '卫生间', width: 80, height: 100 },
-    { name: '阳台', width: 100, height: 80 },
-  ];
+  const snapToGrid = (value: number) => Math.round(value / GRID_SIZE) * GRID_SIZE;
 
-  // 添加新位置
-  const addNewLocation = (template?: { name: string; width: number; height: number }) => {
+  const addNewLocation = (type?: string) => {
+    const roomType = type && ROOM_TYPES[type as keyof typeof ROOM_TYPES] ? type : 'living';
+    const config = ROOM_TYPES[roomType as keyof typeof ROOM_TYPES];
+    
     const newLocation = {
-      name: template?.name || '新位置',
+      name: config.name,
       type: 'room' as const,
       parentId: null,
+      roomType: roomType,
       bounds: {
-        x: 50 + Math.random() * 200,
-        y: 50 + Math.random() * 150,
-        width: template?.width || 150,
-        height: template?.height || 100,
+        x: snapToGrid(40 + Math.random() * 100),
+        y: snapToGrid(40 + Math.random() * 80),
+        width: snapToGrid(160),
+        height: snapToGrid(120),
       }
     };
     
     addLocation(newLocation);
   };
 
-  // 处理点击/拖拽
   const handleMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!containerRef.current) return;
     
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
     
     if (tool === 'add') {
-      // 添加新区域
       addNewLocation();
-    } else if (tool === 'select') {
-      // 检查是否点击了某个位置
-      const clickedLocation = locations.find(loc => {
-        const bx = (loc.bounds.x / (floorPlan?.width || 800)) * 100;
-        const by = (loc.bounds.y / (floorPlan?.height || 600)) * 100;
-        const bw = (loc.bounds.width / (floorPlan?.width || 800)) * 100;
-        const bh = (loc.bounds.height / (floorPlan?.height || 600)) * 100;
-        
-        const px = (x / rect.width) * 100;
-        const py = (y / rect.height) * 100;
-        
-        return px >= bx && px <= bx + bw && py >= by && py <= by + bh;
-      });
+      return;
+    }
+    
+    const clickedLocation = locations.find(loc => {
+      const bx = loc.bounds.x;
+      const by = loc.bounds.y;
+      const bw = loc.bounds.width;
+      const bh = loc.bounds.height;
       
-      if (clickedLocation) {
-        setSelectedId(clickedLocation.id);
-        setSelectedLocationId(clickedLocation.id);
-        
-        // 开始拖拽
-        const offsetX = x - (clickedLocation.bounds.x / (floorPlan?.width || 800)) * rect.width;
-        const offsetY = y - (clickedLocation.bounds.y / (floorPlan?.height || 600)) * rect.height;
-        setDragOffset({ x: offsetX, y: offsetY });
-      } else {
-        setSelectedId(null);
-        setSelectedLocationId(null);
-      }
+      return mouseX >= bx && mouseX <= bx + bw && mouseY >= by && mouseY <= by + bh;
+    });
+    
+    if (clickedLocation) {
+      setSelectedId(clickedLocation.id);
+      setSelectedLocationId(clickedLocation.id);
+      setIsDragging(true);
+      setDragStart({
+        x: mouseX,
+        y: mouseY,
+        locX: clickedLocation.bounds.x,
+        locY: clickedLocation.bounds.y,
+        width: clickedLocation.bounds.width,
+        height: clickedLocation.bounds.height,
+      });
+    } else {
+      setSelectedId(null);
+      setSelectedLocationId(null);
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current || !selectedId || tool !== 'move') return;
+    if (!containerRef.current || !selectedId) return;
     
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - dragOffset.x;
-    const y = e.clientY - rect.top - dragOffset.y;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
     
-    // 转换为百分比
-    const newX = Math.max(0, (x / rect.width) * (floorPlan?.width || 800));
-    const newY = Math.max(0, (y / rect.height) * (floorPlan?.height || 600));
-    
-    const loc = locations.find(l => l.id === selectedId);
-    if (loc) {
+    if (isDragging && !isResizing) {
+      let newX = dragStart.locX + (mouseX - dragStart.x);
+      let newY = dragStart.locY + (mouseY - dragStart.y);
+      
+      newX = snapToGrid(newX);
+      newY = snapToGrid(newY);
+      
+      newX = Math.max(0, Math.min(newX, (floorPlan?.width || 800) - 40));
+      newY = Math.max(0, Math.min(newY, (floorPlan?.height || 600) - 40));
+      
       updateLocation(selectedId, {
-        bounds: {
-          ...loc.bounds,
-          x: newX,
-          y: newY
+        bounds: { ...locations.find(l => l.id === selectedId)!.bounds, x: newX, y: newY }
+      });
+    } else if (isResizing) {
+      const loc = locations.find(l => l.id === selectedId);
+      if (!loc) return;
+      
+      let newWidth = dragStart.width;
+      let newHeight = dragStart.height;
+      let newX = dragStart.locX;
+      let newY = dragStart.locY;
+      
+      const dx = mouseX - dragStart.x;
+      const dy = mouseY - dragStart.y;
+      
+      if (resizeDir.includes('e')) newWidth = Math.max(60, dragStart.width + dx);
+      if (resizeDir.includes('s')) newHeight = Math.max(40, dragStart.height + dy);
+      if (resizeDir.includes('w')) {
+        const newLocX = dragStart.locX + dx;
+        if (newLocX >= 0 && newLocX < dragStart.locX + dragStart.width - 60) {
+          newWidth = dragStart.width - dx;
+          newX = newLocX;
         }
+      }
+      if (resizeDir.includes('n')) {
+        const newLocY = dragStart.locY + dy;
+        if (newLocY >= 0 && newLocY < dragStart.locY + dragStart.height - 40) {
+          newHeight = dragStart.height - dy;
+          newY = newLocY;
+        }
+      }
+      
+      newX = snapToGrid(newX);
+      newY = snapToGrid(newY);
+      newWidth = snapToGrid(newWidth);
+      newHeight = snapToGrid(newHeight);
+      
+      updateLocation(selectedId, {
+        bounds: { x: newX, y: newY, width: newWidth, height: newHeight }
       });
     }
   };
 
   const handleMouseUp = () => {
-    // nothing
+    setIsDragging(false);
+    setIsResizing(false);
+    setResizeDir('');
   };
 
-  // 删除选中位置
+  const handleResizeStart = (e: React.MouseEvent, direction: string) => {
+    e.stopPropagation();
+    if (!selectedId || !containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const loc = locations.find(l => l.id === selectedId);
+    if (!loc) return;
+    
+    setIsResizing(true);
+    setResizeDir(direction);
+    setDragStart({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      locX: loc.bounds.x,
+      locY: loc.bounds.y,
+      width: loc.bounds.width,
+      height: loc.bounds.height,
+    });
+  };
+
   const handleDelete = () => {
     if (selectedId) {
       updateLocation(selectedId, { 
@@ -119,20 +187,28 @@ export default function FloorPlan() {
 
   return (
     <div className="space-y-4 animate-fadeIn">
-      {/* Header */}
+      {/* 标题区域 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">平面图编辑</h2>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <LayoutGrid className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">平面图编辑</h2>
+            <p className="text-xs text-gray-500">拖拽调整房间位置和大小</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setTool('select')}
-            className={`p-2 rounded-xl ${tool === 'select' ? 'bg-primary text-white' : 'bg-gray-100'}`}
+            className={`p-2.5 rounded-xl transition-all ${tool === 'select' ? 'bg-primary text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             title="选择"
           >
             <Move className="w-5 h-5" />
           </button>
           <button
             onClick={() => setTool('add')}
-            className={`p-2 rounded-xl ${tool === 'add' ? 'bg-primary text-white' : 'bg-gray-100'}`}
+            className={`p-2.5 rounded-xl transition-all ${tool === 'add' ? 'bg-primary text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             title="添加区域"
           >
             <Plus className="w-5 h-5" />
@@ -140,91 +216,125 @@ export default function FloorPlan() {
         </div>
       </div>
 
-      {/* Quick Add Templates */}
+      {/* 房间模板 */}
       <div className="card">
-        <h3 className="font-semibold mb-3">快速添加房间</h3>
-        <div className="grid grid-cols-3 gap-2">
-          {roomTemplates.map(template => (
+        <h3 className="font-semibold text-gray-700 mb-3">添加房间</h3>
+        <div className="grid grid-cols-6 gap-2">
+          {Object.entries(ROOM_TYPES).map(([key, config]) => (
             <button
-              key={template.name}
-              onClick={() => addNewLocation(template)}
-              className="p-3 rounded-xl bg-gray-50 hover:bg-primary/10 transition-all text-center"
+              key={key}
+              onClick={() => addNewLocation(key)}
+              className="p-2 rounded-xl bg-gray-50 hover:bg-primary/10 transition-all text-center group"
             >
-              <p className="font-medium text-sm">{template.name}</p>
-              <p className="text-xs text-gray-400">{template.width}×{template.height}</p>
+              <span className="text-xl block group-hover:scale-110 transition-transform">{config.icon}</span>
+              <p className="font-medium text-xs mt-1 text-gray-600 group-hover:text-primary">{config.name}</p>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Floor Plan Canvas */}
+      {/* 平面图画布 */}
       <div className="card">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold">{floorPlan?.name || '我的家'}</h3>
-          <div className="flex gap-2">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-700">{floorPlan?.name || '我的家'}</h3>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">{locations.length} 个房间</span>
             <button
               onClick={handleDelete}
               disabled={!selectedId}
-              className="p-2 rounded-lg bg-red-50 disabled:opacity-50"
+              className="p-2 rounded-lg bg-red-50 hover:bg-red-100 disabled:opacity-30 disabled:hover:bg-red-50 transition-all"
             >
               <Trash2 className="w-4 h-4 text-red-500" />
             </button>
           </div>
         </div>
 
-        {/* Drawing Area */}
+        {/* 画布区域 */}
         <div
           ref={containerRef}
-          className={`floor-plan-area cursor-${tool === 'move' ? 'move' : tool === 'add' ? 'crosshair' : 'default'}`}
+          className="relative bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden"
           style={{
-            background: `
+            width: '100%',
+            height: '400px',
+            backgroundImage: `
               linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
               linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)
             `,
-            backgroundSize: '20px 20px'
+            backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
           }}
-          onMouseDown={handleMouseDown}
+          onMouseDown={(e) => handleMouseDown(e)}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
-          {locations.map(location => (
-            <div
-              key={location.id}
-              className={`absolute rounded-lg flex items-center justify-center text-white font-medium text-sm cursor-pointer transition-all ${
-                selectedId === location.id 
-                  ? 'ring-4 ring-accent ring-offset-2' 
-                  : 'hover:ring-2 hover:ring-primary/50'
-              }`}
-              style={{
-                left: `${(location.bounds.x / (floorPlan?.width || 800)) * 100}%`,
-                top: `${(location.bounds.y / (floorPlan?.height || 600)) * 100}%`,
-                width: `${(location.bounds.width / (floorPlan?.width || 800)) * 100}%`,
-                height: `${(location.bounds.height / (floorPlan?.height || 600)) * 100}%`,
-                background: 'linear-gradient(135deg, #4A90A4 0%, #3D7A8C 100%)',
-                boxShadow: '0 4px 12px rgba(74, 144, 164, 0.3)',
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedId(location.id);
-                setSelectedLocationId(location.id);
-              }}
-            >
-              <span className="px-2 truncate">{location.name}</span>
+          {/* 空白提示 */}
+          {locations.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+              <div className="text-center">
+                <LayoutGrid className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                <p>点击上方房间按钮添加</p>
+              </div>
             </div>
-          ))}
+          )}
+
+          {locations.map(location => {
+            const config = ROOM_TYPES[(location as any).roomType as keyof typeof ROOM_TYPES] || ROOM_TYPES.living;
+            const isSelected = selectedId === location.id;
+            
+            return (
+              <div
+                key={location.id}
+                className={`absolute rounded-lg cursor-pointer transition-all duration-150 ${
+                  isSelected ? 'ring-2 ring-blue-500 ring-offset-2 shadow-lg' : 'hover:ring-2 hover:ring-primary/30 hover:shadow-md'
+                }`}
+                style={{
+                  left: location.bounds.x,
+                  top: location.bounds.y,
+                  width: location.bounds.width,
+                  height: location.bounds.height,
+                  background: config.pattern,
+                  border: `3px solid ${isSelected ? '#3B82F6' : config.border}`,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isDragging) {
+                    setSelectedId(location.id);
+                    setSelectedLocationId(location.id);
+                  }
+                }}
+                onMouseDown={(e) => handleMouseDown(e)}
+              >
+                {/* 房间名称 */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="text-sm font-semibold" style={{ color: config.border }}>
+                    {config.icon} {location.name}
+                  </span>
+                </div>
+                
+                {/* 调整大小手柄 */}
+                {isSelected && (
+                  <div 
+                    className="absolute -right-1 -bottom-1 w-5 h-5 bg-blue-500 rounded-full cursor-se-resize flex items-center justify-center shadow-md hover:bg-blue-600 transition-colors"
+                    onMouseDown={(e) => handleResizeStart(e, 'se')}
+                  >
+                    <GripHorizontal className="w-3 h-3 text-white" />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Tips */}
-        <p className="text-sm text-gray-500 mt-3 text-center">
-          点击位置可查看物品，或拖拽调整位置
+        {/* 提示 */}
+        <p className="text-sm text-gray-500 mt-4 text-center">
+          点击选择房间 → 拖拽移动位置 → 右下角调整大小
         </p>
       </div>
 
-      {/* Selected Location Info */}
+      {/* 选中信息 */}
       {selectedId && (
-        <div className="card animate-slideUp">
-          <h3 className="font-semibold mb-2">已选中位置</h3>
+        <div className="card animate-slideUp border-l-4 border-l-primary">
+          <h3 className="font-semibold text-gray-700 mb-2">已选中位置</h3>
           <p className="text-primary font-medium">
             {locations.find(l => l.id === selectedId)?.name}
           </p>
