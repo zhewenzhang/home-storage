@@ -1,194 +1,348 @@
 import { Link } from 'react-router-dom';
-import { Plus, Package, MapPin, ArrowRight } from 'lucide-react';
+import { Plus, Package, MapPin, ArrowRight, Zap } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { useMemo, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
-// 房间类型配置 - 与 FloorPlan 页面完全一致
-const ROOM_TYPES = {
-  living: { name: '客厅', color: '#F5F0E8', border: '#8B7355', icon: '🛋️' },
-  bedroom: { name: '卧室', color: '#E8EEF5', border: '#6B8BA4', icon: '🛏️' },
-  kitchen: { name: '厨房', color: '#FFF5E6', border: '#C49A6C', icon: '🍳' },
-  bathroom: { name: '卫生间', color: '#E8F5E9', border: '#6B9B7A', icon: '🚿' },
-  balcony: { name: '阳台', color: '#E8F4E8', border: '#7AA37A', icon: '🌿' },
-  study: { name: '书房', color: '#F0EDF5', border: '#8B7AA4', icon: '📚' },
+
+// 收纳标记类型
+const CABINET_TYPES: Record<string, { icon: string; color: string }> = {
+  cabinet: { icon: '🗄️', color: '#8B6D4B' },
+  wardrobe: { icon: '👔', color: '#6B5E8B' },
+  shelf: { icon: '📚', color: '#5E6B8B' },
+  drawer: { icon: '🗃️', color: '#6B8B5E' },
+  box: { icon: '📦', color: '#8B8B5E' },
 };
 
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
-
 export default function Home() {
-  const { 
-    locations, 
-    items, 
-    selectedLocationId, 
+  const {
+    locations,
+    items,
+    selectedLocationId,
     setSelectedLocationId,
-    searchQuery 
+    searchQuery
   } = useStore();
 
-  const filteredItems = searchQuery
-    ? items.filter(item => 
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.includes(searchQuery)
-      )
-    : items;
+  const roomLocations = useMemo(() => locations.filter(l => l.type === 'room'), [locations]);
+  const cabinetLocations = useMemo(() => locations.filter(l => l.type !== 'room'), [locations]);
+
+  // 获取用户名
+  const [userName, setUserName] = useState('');
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data }) => {
+      const u = data.user;
+      if (!u) return;
+
+      // 优先从 profiles 表读取
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', u.id)
+        .single();
+
+      const name = profile?.display_name
+        || u.user_metadata?.display_name
+        || u.email?.split('@')[0]
+        || '';
+      setUserName(name);
+    });
+  }, []);
+
+  // 搜索过滤
+  const filteredItems = useMemo(() => {
+    if (!searchQuery) return items;
+    const q = searchQuery.toLowerCase();
+    return items.filter(item =>
+      item.name.toLowerCase().includes(q) ||
+      item.category.includes(q)
+    );
+  }, [items, searchQuery]);
+
+  // 搜索高亮的位置 IDs（包括收纳标记及其父房间）
+  const matchedLocationIds = useMemo(() => {
+    if (!searchQuery) return new Set<string>();
+    const ids = new Set<string>();
+    for (const item of filteredItems) {
+      if (item.locationId) {
+        ids.add(item.locationId);
+        // 如果匹配的是收纳标记，也高亮其父房间
+        const loc = locations.find(l => l.id === item.locationId);
+        if (loc?.parentId) ids.add(loc.parentId);
+      }
+    }
+    return ids;
+  }, [searchQuery, filteredItems, locations]);
 
   const selectedLocation = locations.find(l => l.id === selectedLocationId);
-  const selectedLocationItems = selectedLocationId 
-    ? filteredItems.filter(item => item.locationId === selectedLocationId)
-    : [];
+
+  const displayItems = searchQuery
+    ? filteredItems
+    : (selectedLocationId
+      ? items.filter(i => i.locationId === selectedLocationId)
+      : items.slice(-10) // 最近10个
+    );
+
+  const sortedDisplayItems = useMemo(() => [...displayItems].reverse(), [displayItems]);
 
   return (
-    <div className="space-y-4 animate-fadeIn">
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Package className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{items.length}</p>
-            <p className="text-sm text-gray-500">物品总数</p>
-          </div>
-        </div>
-        <div className="card flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-            <MapPin className="w-6 h-6 text-accent" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{locations.length}</p>
-            <p className="text-sm text-gray-500">存储位置</p>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-8 animate-enter pb-20">
 
-      {/* Quick Add */}
-      <Link to="/items/new" className="card flex items-center justify-center gap-2 py-4 border-primary/20 border-dashed">
-        <Plus className="w-5 h-5 text-primary" />
-        <span className="font-medium text-primary">添加新物品</span>
-      </Link>
-
-      {/* Floor Plan - 与编辑页完全一致的显示方式 */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-lg">家庭平面图</h2>
-          <Link to="/floorplan" className="text-sm text-primary flex items-center gap-1">
-            编辑 <ArrowRight className="w-4 h-4" />
+      {/* 顶部统计 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* 欢迎卡片 */}
+        <div className="card-highlight md:col-span-1 rounded-3xl p-7 relative overflow-hidden group min-h-[160px] flex flex-col justify-between">
+          <div className="relative z-10">
+            <h2 className="text-3xl font-bold mb-1">Hi {userName || 'there'} 👋</h2>
+            <p className="opacity-80 text-sm mb-4">让每一个物品都有家可归</p>
+          </div>
+          <Link to="/items/new" className="relative z-10 bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-3 rounded-xl transition-all inline-flex items-center gap-2 text-sm font-bold w-fit">
+            <Plus className="w-4 h-4" /> 快速记录
           </Link>
+          <Zap className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500 rotate-12" />
         </div>
-        
-        {locations.length === 0 ? (
-          <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center" style={{ height: '400px' }}>
-            <div className="text-center">
-              <MapPin className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-              <p className="text-gray-500 mb-3">还没有添加位置</p>
-              <Link to="/floorplan" className="btn-primary text-sm">
-                去添加位置
-              </Link>
-            </div>
+
+        <div className="card flex items-center gap-5">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(143,188,143,0.2)' }}>
+            <Package className="w-8 h-8" style={{ color: '#6B9B7A' }} />
           </div>
-        ) : (
-          <div 
-            className="relative bg-white rounded-xl border-2 border-dashed border-gray-200 overflow-hidden"
-            style={{ 
-              width: '100%',
-              height: '0',
-              paddingBottom: '75%' // 800:600 = 4:3
-            }}
-          >
-            {locations.map(location => {
-              const config = ROOM_TYPES[(location as any).roomType as keyof typeof ROOM_TYPES] || ROOM_TYPES.living;
-              const isSelected = selectedLocationId === location.id;
-              
-              return (
-                <div
-                  key={location.id}
-                  className={`absolute rounded-lg flex items-center justify-center text-sm font-medium cursor-pointer transition-all ${
-                    isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : 'hover:ring-2 hover:ring-primary/30'
-                  }`}
-                  style={{
-                    left: `${(location.bounds.x / CANVAS_WIDTH) * 100}%`,
-                    top: `${(location.bounds.y / CANVAS_HEIGHT) * 100}%`,
-                    width: `${(location.bounds.width / CANVAS_WIDTH) * 100}%`,
-                    height: `${(location.bounds.height / CANVAS_HEIGHT) * 100}%`,
-                    background: `linear-gradient(135deg, ${config.color} 0%, ${config.color}CC 100%)`,
-                    border: `2px solid ${isSelected ? '#3B82F6' : config.border}`,
-                  }}
-                  onClick={() => setSelectedLocationId(isSelected ? null : location.id)}
-                >
-                  <span style={{ color: config.border, fontSize: '10px', whiteSpace: 'nowrap' }}>
-                    {config.icon} {location.name}
-                  </span>
-                </div>
-              );
-            })}
+          <div>
+            <p className="text-4xl font-extrabold" style={{ color: '#2A4D63' }}>{items.length}</p>
+            <p className="text-gray-500 font-medium">在库物品</p>
           </div>
-        )}
+        </div>
+
+        <div className="card flex items-center gap-5">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,160,122,0.2)' }}>
+            <MapPin className="w-8 h-8" style={{ color: '#E07A5F' }} />
+          </div>
+          <div>
+            <p className="text-4xl font-extrabold" style={{ color: '#2A4D63' }}>{locations.length}</p>
+            <p className="text-gray-500 font-medium">存储位置</p>
+          </div>
+        </div>
       </div>
 
-      {/* Selected Location Items */}
-      {selectedLocation && (
-        <div className="card animate-slideUp border-l-4 border-l-primary">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold">
-              {selectedLocation.name} 的物品 ({selectedLocationItems.length})
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* 左侧：平面图 */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <MapPin className="w-5 h-5" style={{ color: '#3B6D8C' }} />
+              {searchQuery ? '搜索定位' : '家庭平面图'}
             </h3>
-            <button 
-              onClick={() => setSelectedLocationId(null)}
-              className="text-sm text-gray-500"
-            >
-              清除
-            </button>
+            <Link to="/floorplan" className="text-sm font-bold flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all" style={{ color: '#3B6D8C' }}>
+              编辑户型 <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-          
-          {selectedLocationItems.length === 0 ? (
-            <p className="text-gray-400 text-center py-4">这个位置还没有物品</p>
-          ) : (
-            <div className="space-y-2">
-              {selectedLocationItems.map(item => (
+
+          <div className="card p-1 min-h-[400px]">
+            {locations.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-10 space-y-4 min-h-[400px]">
+                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center">
+                  <MapPin className="w-10 h-10 text-gray-300" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg text-gray-600">还没有绘图</h4>
+                  <p className="text-gray-400 text-sm max-w-xs mx-auto">绘制家庭平面图，开始可视化管理您的物品位置</p>
+                </div>
+                <Link to="/floorplan" className="btn-primary">开始绘制</Link>
+              </div>
+            ) : (
+              (() => {
+                const allLocs = locations.filter(l => l.bounds.x >= 0); // 排除隐藏位置
+                if (allLocs.length === 0) return <div className="h-[400px] flex items-center justify-center text-gray-400">无可显示内容</div>;
+
+                const allX = allLocs.map(l => l.bounds.x);
+                const allY = allLocs.map(l => l.bounds.y);
+                const allR = allLocs.map(l => l.bounds.x + l.bounds.width);
+                const allB = allLocs.map(l => l.bounds.y + l.bounds.height);
+
+                const PADDING = 60;
+                const viewX = Math.min(...allX) - PADDING;
+                const viewY = Math.min(...allY) - PADDING;
+                const viewW = Math.max(400, Math.max(...allR) - Math.min(...allX) + PADDING * 2);
+                const viewH = Math.max(300, Math.max(...allB) - Math.min(...allY) + PADDING * 2);
+
+                return (
+                  <div className="w-full h-[450px] flex items-center justify-center overflow-hidden rounded-2xl relative" style={{ backgroundColor: '#F8F6F0' }}>
+                    <svg width="100%" height="100%" viewBox={`${viewX} ${viewY} ${viewW} ${viewH}`} preserveAspectRatio="xMidYMid meet">
+                      {/* === 房间层（建筑图风格） === */}
+                      {roomLocations.map(location => {
+                        const isSelected = selectedLocationId === location.id;
+                        const isMatched = matchedLocationIds.has(location.id);
+                        const isDimmed = !!searchQuery && !isMatched;
+                        const b = location.bounds;
+                        const SCALE = 0.3 / 20; // GRID_SIZE=20
+                        const wM = (b.width * SCALE).toFixed(2);
+                        const hM = (b.height * SCALE).toFixed(2);
+                        const area = (b.width * SCALE * b.height * SCALE).toFixed(1);
+                        const WALL = 3;
+
+                        return (
+                          <g
+                            key={location.id}
+                            onClick={() => setSelectedLocationId(isSelected ? null : location.id)}
+                            style={{ cursor: 'pointer', opacity: isDimmed ? 0.2 : 1, transition: 'opacity 0.3s' }}
+                          >
+                            {/* 搜索/选中高亮 */}
+                            {(isSelected || isMatched) && (
+                              <rect x={b.x - 6} y={b.y - 6} width={b.width + 12} height={b.height + 12}
+                                fill="none" stroke={isMatched ? '#EF4444' : '#2563EB'}
+                                strokeWidth="3" opacity="0.5" className="animate-pulse"
+                              />
+                            )}
+                            {/* 墙体 */}
+                            <rect x={b.x} y={b.y} width={b.width} height={b.height}
+                              fill="#FFFFFF"
+                              stroke={isSelected || isMatched ? (isMatched ? '#EF4444' : '#2563EB') : '#3A3A3A'}
+                              strokeWidth={WALL}
+                            />
+                            {/* 房间名 + 面积 */}
+                            <text x={b.x + b.width / 2} y={b.y + b.height / 2 - 6}
+                              textAnchor="middle" fontSize="13" fontWeight="700" fill="#3A3A3A"
+                              style={{ pointerEvents: 'none' }}
+                            >
+                              {location.name}
+                            </text>
+                            <text x={b.x + b.width / 2} y={b.y + b.height / 2 + 12}
+                              textAnchor="middle" fontSize="11" fontWeight="600" fill="#999"
+                              style={{ pointerEvents: 'none' }}
+                            >
+                              {area}m²
+                            </text>
+                            {/* 尺寸标注 — 顶部 */}
+                            <text x={b.x + b.width / 2} y={b.y - 8}
+                              textAnchor="middle" fontSize="9" fill="#888" fontFamily="monospace"
+                              style={{ pointerEvents: 'none' }}
+                            >
+                              {wM}m
+                            </text>
+                            {/* 尺寸标注 — 左侧 */}
+                            <text x={b.x - 8} y={b.y + b.height / 2}
+                              textAnchor="middle" fontSize="9" fill="#888" fontFamily="monospace"
+                              transform={`rotate(-90 ${b.x - 8} ${b.y + b.height / 2})`}
+                              style={{ pointerEvents: 'none' }}
+                            >
+                              {hM}m
+                            </text>
+                          </g>
+                        );
+                      })}
+
+                      {/* === 收纳标记层（圆点） === */}
+                      {cabinetLocations.filter(l => l.bounds.x >= 0).map(location => {
+                        const config = CABINET_TYPES[(location as any).roomType as keyof typeof CABINET_TYPES] || CABINET_TYPES.cabinet;
+                        const isMatched = matchedLocationIds.has(location.id);
+                        const isSelected = selectedLocationId === location.id;
+                        const isDimmed = !!searchQuery && !isMatched;
+                        const cx = location.bounds.x + 16;
+                        const cy = location.bounds.y + 16;
+                        const r = 14;
+
+                        return (
+                          <g
+                            key={location.id}
+                            onClick={(e) => { e.stopPropagation(); setSelectedLocationId(isSelected ? null : location.id); }}
+                            style={{ cursor: 'pointer', opacity: isDimmed ? 0.2 : 1, transition: 'opacity 0.3s' }}
+                          >
+                            {/* 搜索高亮光环 */}
+                            {isMatched && (
+                              <circle cx={cx} cy={cy} r={r + 6}
+                                fill="none" stroke="#EF4444" strokeWidth="2" className="animate-pulse"
+                              />
+                            )}
+                            {/* 圆点 */}
+                            <circle cx={cx} cy={cy} r={r}
+                              fill={isSelected ? '#3B82F6' : config.color}
+                              stroke="white" strokeWidth="2"
+                            />
+                            {/* 图标 */}
+                            <text x={cx} y={cy + 5} textAnchor="middle" fontSize="12" style={{ pointerEvents: 'none' }}>
+                              {config.icon}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                );
+              })()
+            )}
+          </div>
+
+          <div className="rounded-xl p-4 text-xs flex gap-2" style={{ backgroundColor: 'rgba(59,109,140,0.06)', color: 'rgba(59,109,140,0.8)' }}>
+            <span className="font-bold">提示:</span>
+            {searchQuery ? '地图上高亮显示的区域包含您搜索的物品，虚线框标记为收纳位置。' : '点击房间/收纳标记可查看其中的物品详情。'}
+          </div>
+        </div>
+
+        {/* 右侧：物品列表 */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xl font-bold text-gray-900">
+              {searchQuery ? `"${searchQuery}" 的结果` : (selectedLocation ? selectedLocation.name : '最近添加')}
+            </h3>
+            {selectedLocationId && !searchQuery && (
+              <button onClick={() => setSelectedLocationId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors bg-gray-100 px-2 py-1 rounded-md">
+                显示全部
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+            {sortedDisplayItems.length === 0 ? (
+              <div className="text-center py-20 space-y-4 flex flex-col items-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Package className="w-8 h-8 text-gray-300" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-500">{searchQuery ? '未找到相关物品' : '暂无物品'}</h4>
+                  <p className="text-sm text-gray-400">{searchQuery ? '换个关键词试试？' : '点击左侧房间或添加物品'}</p>
+                </div>
+                {!searchQuery && selectedLocationId && (
+                  <Link to={`/items/new?locationId=${selectedLocationId}`} className="btn-primary text-sm py-2 px-4 mt-2">
+                    <Plus className="w-4 h-4" /> 放入物品
+                  </Link>
+                )}
+              </div>
+            ) : (
+              sortedDisplayItems.slice(0, 50).map(item => (
                 <Link
                   key={item.id}
                   to={`/items/${item.id}`}
-                  className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all"
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all group"
                 >
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-gray-500">{item.category}</p>
+                  <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                    📦
                   </div>
-                  <span className="text-sm text-gray-400">x{item.quantity}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <p className="font-bold text-gray-900 truncate group-hover:text-[#3B6D8C] transition-colors text-lg leading-tight">{item.name}</p>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-lg" style={{ backgroundColor: 'rgba(59,109,140,0.1)', color: '#2A4D63' }}>x{item.quantity}</span>
+                    </div>
+                    <p className="text-xs text-gray-400 flex items-center gap-2 mt-1">
+                      <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">{item.category}</span>
+                      <span className="text-gray-300">|</span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {locations.find(l => l.id === item.locationId)?.name || '未分配'}
+                      </span>
+                    </p>
+                  </div>
                 </Link>
-              ))}
-            </div>
-          )}
-          
-          <Link 
-            to={`/items/new?locationId=${selectedLocationId}`}
-            className="mt-3 w-full btn-primary text-center block"
-          >
-            在这里添加物品
-          </Link>
-        </div>
-      )}
+              ))
+            )}
 
-      {/* Recent Items */}
-      {!selectedLocationId && filteredItems.length > 0 && (
-        <div className="card">
-          <h3 className="font-semibold mb-3">最近添加</h3>
-          <div className="space-y-2">
-            {filteredItems.slice(-5).reverse().map(item => (
-              <Link
-                key={item.id}
-                to={`/items/${item.id}`}
-                className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-all"
-              >
-                <div>
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-sm text-gray-500">{item.category}</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-gray-400" />
-              </Link>
-            ))}
+            {!searchQuery && !selectedLocationId && items.length > 10 && (
+              <div className="text-center pt-4">
+                <Link to="/items" className="text-sm font-bold transition-colors inline-block px-4 py-2 rounded-xl" style={{ color: '#3B6D8C', backgroundColor: 'rgba(59,109,140,0.06)' }}>
+                  查看全部物品 →
+                </Link>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
