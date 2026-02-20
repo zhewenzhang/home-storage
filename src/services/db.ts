@@ -4,10 +4,11 @@ import type { Item, Location, FloorPlan } from '../types';
 
 // ====== Locations ======
 
-export async function fetchLocations(): Promise<Location[]> {
+export async function fetchLocations(familyId: string): Promise<Location[]> {
     const { data, error } = await supabase
         .from('locations')
         .select('*')
+        .eq('user_id', familyId)
         .order('created_at', { ascending: true });
     if (error) throw error;
     return (data || []).map(row => ({
@@ -20,11 +21,9 @@ export async function fetchLocations(): Promise<Location[]> {
     }));
 }
 
-export async function insertLocation(loc: Omit<Location, 'id'>) {
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) throw new Error('未登录');
+export async function insertLocation(loc: Omit<Location, 'id'>, familyId: string) {
     const { data, error } = await supabase.from('locations').insert({
-        user_id: user.id,
+        user_id: familyId,
         name: loc.name,
         type: loc.type,
         parent_id: loc.parentId || null,
@@ -53,10 +52,11 @@ export async function deleteLocationDB(id: string) {
 
 // ====== Items ======
 
-export async function fetchItems(): Promise<Item[]> {
+export async function fetchItems(familyId: string): Promise<Item[]> {
     const { data, error } = await supabase
         .from('items')
         .select('*')
+        .eq('user_id', familyId)
         .order('created_at', { ascending: true });
     if (error) throw error;
     return (data || []).map(row => ({
@@ -70,11 +70,9 @@ export async function fetchItems(): Promise<Item[]> {
     }));
 }
 
-export async function insertItem(item: Omit<Item, 'id' | 'createdAt'>) {
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) throw new Error('未登录');
+export async function insertItem(item: Omit<Item, 'id' | 'createdAt'>, familyId: string) {
     const { data, error } = await supabase.from('items').insert({
-        user_id: user.id,
+        user_id: familyId,
         name: item.name,
         category: item.category,
         quantity: item.quantity,
@@ -103,10 +101,11 @@ export async function deleteItemDB(id: string) {
 
 // ====== Floor Plans ======
 
-export async function fetchFloorPlan(): Promise<FloorPlan | null> {
+export async function fetchFloorPlan(familyId: string): Promise<FloorPlan | null> {
     const { data, error } = await supabase
         .from('floor_plans')
         .select('*')
+        .eq('user_id', familyId)
         .limit(1)
         .single();
     if (error) {

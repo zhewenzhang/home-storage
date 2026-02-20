@@ -1,11 +1,14 @@
+import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Package, MapPin, LayoutGrid, Search, LogOut } from 'lucide-react';
+import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { signOut } from '../services/auth';
 import AIChat from './AIChat';
+import FamilyModal from './FamilyModal';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { searchQuery, setSearchQuery } = useStore();
+  const { searchQuery, setSearchQuery, activeFamilyId, joinedFamilies } = useStore();
+  const [isFamilyModalOpen, setIsFamilyModalOpen] = useState(false);
   const location = useLocation();
 
   const getPageTitle = () => {
@@ -55,6 +58,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )}
             </NavLink>
           ))}
+
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <button
+              onClick={() => setIsFamilyModalOpen(true)}
+              className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${activeFamilyId ? 'bg-[#3B6D8C]/10 text-[#2A4D63]' : 'text-gray-500 hover:bg-gray-50'}`}
+            >
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5" />
+                <span className="font-medium">家庭共享</span>
+              </div>
+              {activeFamilyId && (
+                <span className="text-[10px] bg-[#3B6D8C] text-white px-2 py-0.5 rounded-full">已切换</span>
+              )}
+            </button>
+          </div>
         </nav>
 
         <div className="p-6 border-t border-gray-50">
@@ -71,8 +89,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Header */}
         <header className="h-20 px-6 md:px-10 flex items-center justify-between border-b border-gray-100/50 bg-white/70 backdrop-blur-sm z-20">
-          <h2 className="text-2xl font-bold text-gray-900 hidden md:block animate-enter">
+          <h2 className="text-2xl font-bold text-gray-900 hidden md:flex items-center gap-3 animate-enter">
             {getPageTitle()}
+            {activeFamilyId && (
+              <span className="text-xs font-semibold bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full border border-yellow-200 shadow-sm">
+                当前: 共享家庭空间
+              </span>
+            )}
           </h2>
 
           <div className="md:hidden flex items-center gap-3">
@@ -83,7 +106,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-4 flex-1 md:flex-none justify-end md:w-96">
-            <div className="relative w-full max-w-md group">
+            <button onClick={() => setIsFamilyModalOpen(true)} className="md:hidden p-2 bg-gray-100 hover:bg-gray-200 rounded-full relative transition-colors">
+              <Users className="w-5 h-5 text-gray-700" />
+              {activeFamilyId && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-yellow-400 border-2 border-white rounded-full" />}
+            </button>
+            <div className="relative w-full max-w-md group hidden md:block">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-[#3B6D8C] transition-colors" />
               <input
                 type="text"
@@ -128,6 +155,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* AI 助手 */}
       <AIChat />
+
+      {/* 家庭共享弹窗 */}
+      <FamilyModal isOpen={isFamilyModalOpen} onClose={() => setIsFamilyModalOpen(false)} />
     </div>
   );
 }

@@ -5,6 +5,13 @@ import {
   fetchItems, insertItem, updateItemDB, deleteItemDB,
   fetchFloorPlan, updateFloorPlanDB,
 } from '../services/db';
+import { supabase } from '../lib/supabase';
+import { fetchJoinedFamilies } from '../services/family';
+
+export interface JoinedFamily {
+  ownerId: string;
+  displayName: string;
+}
 
 interface AppState {
   // Data
@@ -16,6 +23,10 @@ interface AppState {
   selectedLocationId: string | null;
   searchQuery: string;
   dataLoaded: boolean;
+
+  // Family / Share Status
+  activeFamilyId: string | null;
+  joinedFamilies: JoinedFamily[];
 
   // 从 Supabase 加载数据
   loadFromSupabase: () => Promise<void>;
@@ -34,9 +45,10 @@ interface AppState {
   // Floor Plan
   setFloorPlan: (floorPlan: FloorPlan) => void;
 
-  // UI
+  // UI / Family Status
   setSelectedLocationId: (id: string | null) => void;
   setSearchQuery: (query: string) => void;
+  setActiveFamilyId: (id: string | null) => void;
 
   // Getters
   getItemsByLocation: (locationId: string) => Item[];
@@ -44,6 +56,13 @@ interface AppState {
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 15);
+
+// 获取要查询和操作的真实目标家庭ID
+const getCurrentTargetId = async (activeFamilyId: string | null) => {
+  if (activeFamilyId) return activeFamilyId;
+  const user = (await supabase.auth.getUser()).data.user;
+  return user?.id || '';
+};
 
 export const useStore = create<AppState>()(
   (set, get) => ({
@@ -53,22 +72,30 @@ export const useStore = create<AppState>()(
     selectedLocationId: null,
     searchQuery: '',
     dataLoaded: false,
+    activeFamilyId: null,
+    joinedFamilies: [],
 
     // 从 Supabase 加载用户所有数据
     loadFromSupabase: async () => {
       try {
-        const [locs, itms, fp] = await Promise.all([
-          fetchLocations(),
-          fetchItems(),
-          fetchFloorPlan(),
+        const targetId = await getCurrentTargetId(get().activeFamilyId);
+        if (!targetId) return;
+
+        // 加载基本数据及加入的其他家庭列表
+        const [locs, itms, fp, joined] = await Promise.all([
+          fetchLocations(targetId),
+          fetchItems(targetId),
+          fetchFloorPlan(targetId),
+          fetchJoinedFamilies(),
         ]);
         set({
           locations: locs,
           items: itms,
           floorPlan: fp || { id: 'default', name: '我的家', width: 800, height: 600 },
+          joinedFamilies: joined,
           dataLoaded: true,
         });
-        console.log(`[Store] 从 Supabase 加载: ${locs.length} 位置, ${itms.length} 物品`);
+        console.log(`[Store] 从 Supabase 加载: ${locs.length} 位置, ${itms.length} 物品, targetId=${targetId}`);
       } catch (err) {
         console.error('[Store] Supabase 加载失败:', err);
         set({ dataLoaded: true }); // 标记已尝试加载
@@ -79,16 +106,19 @@ export const useStore = create<AppState>()(
       items: [], locations: [],
       floorPlan: { id: 'default', name: '我的家', width: 800, height: 600 },
       dataLoaded: false,
+      activeFamilyId: null,
+      joinedFamilies: [],
     }),
 
     // Items — 先更新本地再同步 Supabase
-    addItem: (item) => {
+    addItem: async (item) => {
       const tempId = generateId();
       const newItem = { ...item, id: tempId, createdAt: Date.now() };
       set((state) => ({ items: [...state.items, newItem] }));
 
+      const targetId = await getCurrentTargetId(get().activeFamilyId);
       // 异步同步到 Supabase
-      insertItem(item).then(realId => {
+      insertItem(item, targetId).then(realId => {
         // 用 Supabase 返回的真实 ID 替换临时 ID
         set((state) => ({
           items: state.items.map(i => i.id === tempId ? { ...i, id: realId } : i),
@@ -109,13 +139,14 @@ export const useStore = create<AppState>()(
     },
 
     // Locations
-    addLocation: (location) => {
+    addLocation: async (location) => {
       const tempId = generateId();
       set((state) => ({
         locations: [...state.locations, { ...location, id: tempId }],
       }));
 
-      insertLocation(location).then(realId => {
+      const targetId = await getCurrentTargetId(get().activeFamilyId);
+      insertLocation(location, targetId).then(realId => {
         set((state) => ({
           locations: state.locations.map(l => l.id === tempId ? { ...l, id: realId } : l),
           // 同步更新引用此位置的 items
@@ -150,6 +181,10 @@ export const useStore = create<AppState>()(
     // UI
     setSelectedLocationId: (id) => set({ selectedLocationId: id }),
     setSearchQuery: (query) => set({ searchQuery: query }),
+    setActiveFamilyId: (id) => {
+      set({ activeFamilyId: id, dataLoaded: false });
+      get().loadFromSupabase();
+    },
 
     // Getters
     getItemsByLocation: (locationId) =>
