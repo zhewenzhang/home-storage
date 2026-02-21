@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Plus, Package, MapPin, ArrowRight, Zap } from 'lucide-react';
+import { Plus, Package, MapPin, ArrowRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useMemo, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
