@@ -138,11 +138,11 @@ export default function Items() {
                       <p className="font-bold text-gray-900 truncate">{item.name}</p>
                       <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                     </Link>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Link to={`/items/${item.id}`} className="p-2 rounded-xl hover:bg-white transition-all">
+                    <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2 md:mt-0">
+                      <Link to={`/items/${item.id}`} className="p-2 rounded-xl hover:bg-white transition-all bg-white md:bg-transparent shadow-sm md:shadow-none">
                         <Edit className="w-4 h-4 text-gray-400" />
                       </Link>
-                      <button onClick={() => setDeleteTarget({ id: item.id, name: item.name })} className="p-2 rounded-xl hover:bg-red-50 transition-all">
+                      <button onClick={() => setDeleteTarget({ id: item.id, name: item.name })} className="p-2 rounded-xl hover:bg-red-50 transition-all bg-white md:bg-transparent shadow-sm md:shadow-none">
                         <Trash2 className="w-4 h-4 text-red-400" />
                       </button>
                     </div>
@@ -167,11 +167,11 @@ export default function Items() {
                       <p className="font-bold text-gray-900 truncate">{item.name}</p>
                       <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                     </Link>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Link to={`/items/${item.id}`} className="p-2 rounded-xl hover:bg-white">
+                    <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2 md:mt-0">
+                      <Link to={`/items/${item.id}`} className="p-2 rounded-xl hover:bg-white bg-white md:bg-transparent shadow-sm md:shadow-none">
                         <Edit className="w-4 h-4 text-gray-400" />
                       </Link>
-                      <button onClick={() => setDeleteTarget({ id: item.id, name: item.name })} className="p-2 rounded-xl hover:bg-red-50">
+                      <button onClick={() => setDeleteTarget({ id: item.id, name: item.name })} className="p-2 rounded-xl hover:bg-red-50 bg-white md:bg-transparent shadow-sm md:shadow-none">
                         <Trash2 className="w-4 h-4 text-red-400" />
                       </button>
                     </div>

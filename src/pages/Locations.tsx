@@ -314,11 +314,11 @@ export default function Locations() {
                             <span className="text-sm font-bold text-gray-700">{child.name}</span>
                             <span className="text-xs text-gray-400 ml-2">{getItemCount(child.id)} 件</span>
                           </div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => handleEdit(child)} className="p-1 rounded-lg hover:bg-white">
+                          <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => handleEdit(child)} className="p-1.5 rounded-lg hover:bg-white bg-white md:bg-transparent shadow-sm md:shadow-none">
                               <Edit className="w-3.5 h-3.5 text-gray-400" />
                             </button>
-                            <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-1 rounded-lg hover:bg-red-50">
+                            <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-1.5 rounded-lg hover:bg-red-50 bg-white md:bg-transparent shadow-sm md:shadow-none">
                               <Trash2 className="w-3.5 h-3.5 text-red-400" />
                             </button>
                           </div>
@@ -342,7 +342,7 @@ export default function Locations() {
                     <div key={child.id} className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 group">
                       <span className="text-lg">{config.icon}</span>
                       <span className="text-sm font-bold text-gray-700 flex-1">{child.name}</span>
-                      <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-1 rounded-lg hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-2 rounded-lg hover:bg-red-50 md:opacity-0 group-hover:opacity-100 transition-opacity bg-white md:bg-transparent shadow-sm md:shadow-none">
                         <Trash2 className="w-3.5 h-3.5 text-red-400" />
                       </button>
                     </div>

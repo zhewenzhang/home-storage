@@ -86,13 +86,15 @@ export default function FloorPlan() {
     setShowCabinetPicker(false);
   };
 
-  const getMousePos = (e: React.MouseEvent) => {
+  const getMousePos = (e: React.MouseEvent | React.TouchEvent) => {
     if (!containerRef.current) return { x: 0, y: 0 };
     const rect = containerRef.current.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     const { x: mouseX, y: mouseY } = getMousePos(e);
 
@@ -124,7 +126,7 @@ export default function FloorPlan() {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (!containerRef.current || !selectedId) return;
     const { x: mouseX, y: mouseY } = getMousePos(e);
     const loc = locations.find(l => l.id === selectedId);
@@ -166,7 +168,7 @@ export default function FloorPlan() {
 
   const handleMouseUp = () => { setIsDragging(false); setIsResizing(false); setResizeDir(''); };
 
-  const handleResizeStart = (e: React.MouseEvent, direction: string) => {
+  const handleResizeStart = (e: React.MouseEvent | React.TouchEvent, direction: string) => {
     e.stopPropagation();
     if (!selectedId || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -174,8 +176,10 @@ export default function FloorPlan() {
     if (!loc) return;
     setIsResizing(true);
     setResizeDir(direction);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     setDragStart({
-      x: e.clientX - rect.left, y: e.clientY - rect.top,
+      x: clientX - rect.left, y: clientY - rect.top,
       locX: loc.bounds.x, locY: loc.bounds.y,
       width: loc.bounds.width, height: loc.bounds.height,
     });
@@ -302,6 +306,9 @@ export default function FloorPlan() {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onTouchStart={handleMouseDown}
+          onTouchMove={handleMouseMove}
+          onTouchEnd={handleMouseUp}
           onClick={() => { setShowRoomPicker(false); setShowCabinetPicker(false); }}
         >
           {/* 空白提示 */}
@@ -366,17 +373,21 @@ export default function FloorPlan() {
                   <>
                     <div className="absolute -right-3 -bottom-3 w-6 h-6 bg-blue-600 rounded-full cursor-se-resize flex items-center justify-center shadow-lg hover:bg-blue-700 z-30"
                       onMouseDown={(e) => handleResizeStart(e, 'se')}
+                      onTouchStart={(e) => handleResizeStart(e, 'se')}
                     >
                       <GripHorizontal className="w-3.5 h-3.5 text-white" />
                     </div>
                     <div className="absolute -left-2.5 -top-2.5 w-5 h-5 bg-blue-500 rounded-full cursor-nw-resize shadow-md z-30"
                       onMouseDown={(e) => handleResizeStart(e, 'nw')}
+                      onTouchStart={(e) => handleResizeStart(e, 'nw')}
                     />
                     <div className="absolute -right-2.5 -top-2.5 w-5 h-5 bg-blue-500 rounded-full cursor-ne-resize shadow-md z-30"
                       onMouseDown={(e) => handleResizeStart(e, 'ne')}
+                      onTouchStart={(e) => handleResizeStart(e, 'ne')}
                     />
                     <div className="absolute -left-2.5 -bottom-2.5 w-5 h-5 bg-blue-500 rounded-full cursor-sw-resize shadow-md z-30"
                       onMouseDown={(e) => handleResizeStart(e, 'sw')}
+                      onTouchStart={(e) => handleResizeStart(e, 'sw')}
                     />
                   </>
                 )}

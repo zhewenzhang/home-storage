@@ -127,7 +127,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-10 scroll-smooth">
+        <main className="flex-1 overflow-y-auto p-4 pb-32 md:p-10 scroll-smooth">
           <div className="max-w-6xl mx-auto animate-enter">
             {children}
           </div>
