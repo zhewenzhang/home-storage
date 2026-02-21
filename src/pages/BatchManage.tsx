@@ -22,12 +22,16 @@ export default function BatchManage() {
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
     const [isSaving, setIsSaving] = useState(false);
 
-    // 批量修改弹窗状态
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [batchCategory, setBatchCategory] = useState('');
     const [batchLocationId, setBatchLocationId] = useState('');
+    const [batchRoomId, setBatchRoomId] = useState('');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // 计算位置树：取出所有房间及其子收纳点
+    const rootRooms = locations.filter(l => l.type === 'room');
+    const getSubLocations = (parentId: string) => locations.filter(l => l.parentId === parentId);
 
     useEffect(() => {
         // 页面加载或 items 变动时，初始化 drafts
@@ -81,6 +85,23 @@ export default function BatchManage() {
         }, ...drafts]);
     };
 
+    const handleDuplicateSelected = () => {
+        if (selectedKeys.size === 0) return;
+        const newDrafts: DraftItem[] = [];
+        drafts.forEach(d => {
+            if (selectedKeys.has(d.key)) {
+                newDrafts.push({
+                    ...d,
+                    key: 'draft_' + Math.random().toString(36).substring(2),
+                    id: null,
+                    status: 'added' // 复制的新行始终视为"新增"
+                });
+            }
+        });
+        setDrafts([...newDrafts, ...drafts]);
+        setSelectedKeys(new Set()); // 复制完清空选择
+    };
+
     const handleBatchDelete = () => {
         if (selectedKeys.size === 0) return;
         setDrafts(prev => prev.map(d => {
@@ -98,17 +119,29 @@ export default function BatchManage() {
             if (selectedKeys.has(d.key)) {
                 let newStatus = d.status;
                 if (d.status === 'unchanged') newStatus = 'updated';
+
+                // 位置逻辑：优先使用具体的收纳(batchLocationId)，如果不选收纳，则使用所选房间(batchRoomId)。如果清除位置则清空。
+                let finalLocationId = d.locationId;
+                if (batchLocationId === 'none') {
+                    finalLocationId = '';
+                } else if (batchLocationId) {
+                    finalLocationId = batchLocationId;
+                } else if (batchRoomId && batchRoomId !== 'none') {
+                    finalLocationId = batchRoomId;
+                }
+
                 return {
                     ...d,
                     status: newStatus,
                     category: batchCategory || d.category,
-                    locationId: batchLocationId === 'none' ? '' : (batchLocationId || d.locationId)
+                    locationId: finalLocationId
                 };
             }
             return d;
         }));
         setIsEditModalOpen(false);
         setBatchCategory('');
+        setBatchRoomId('');
         setBatchLocationId('');
     };
 
@@ -213,7 +246,21 @@ export default function BatchManage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    {/* 操作区 */}
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="px-6 py-2.5 text-white rounded-xl text-sm font-medium shadow-md hover:bg-[#1E3A4C] hover:-translate-y-0.5 transition-all flex items-center gap-2"
+                        style={{ backgroundColor: '#2A4D63' }}
+                    >
+                        <Save className="w-4 h-4" />
+                        {isSaving ? '存档中...' : '保存修改'}
+                    </button>
+                </div>
+            </div>
+
+            {/* 操作栏 */}
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-2">
                     <input
                         type="file"
                         accept=".csv,.txt"
@@ -222,49 +269,46 @@ export default function BatchManage() {
                         onChange={handleFileUpload}
                     />
                     <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors shadow-sm"
-                    >
-                        <Upload className="w-4 h-4" />
-                        CSV导入
-                    </button>
-                    <button
                         onClick={handleAddRow}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors shadow-sm"
+                        className="btn-outline px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 rounded-lg border border-gray-200 transition-colors"
                     >
-                        <Plus className="w-4 h-4" />
-                        新增空行
-                    </button>
-
-                    <div className="w-px h-6 bg-gray-200 mx-2 hidden md:block"></div>
-
-                    <button
-                        onClick={() => setIsEditModalOpen(true)}
-                        disabled={selectedKeys.size === 0}
-                        className="px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-xl text-sm font-medium text-indigo-700 hover:bg-indigo-100 flex items-center gap-2 transition-colors disabled:opacity-50"
-                    >
-                        <Settings2 className="w-4 h-4" />
-                        批量归类 ({selectedKeys.size})
+                        <Plus className="w-4 h-4" /> 新增行
                     </button>
                     <button
-                        onClick={handleBatchDelete}
-                        disabled={selectedKeys.size === 0}
-                        className="px-4 py-2 bg-red-50 border border-red-100 rounded-xl text-sm font-medium text-red-600 hover:bg-red-100 flex items-center gap-2 transition-colors disabled:opacity-50"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="btn-outline px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 rounded-lg border border-gray-200 transition-colors"
                     >
-                        <Trash2 className="w-4 h-4" />
-                        删除选中 ({selectedKeys.size})
-                    </button>
-
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="px-5 py-2 text-white rounded-xl text-sm font-medium shadow-md hover:opacity-90 transition-all flex items-center gap-2 ml-auto md:ml-0"
-                        style={{ backgroundColor: '#2A4D63' }}
-                    >
-                        <Save className="w-4 h-4" />
-                        {isSaving ? '存档中...' : '提交批量更改'}
+                        <Upload className="w-4 h-4" /> CSV导入
                     </button>
                 </div>
+
+                {selectedKeys.size > 0 && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-lg border border-blue-100/50 animate-enter">
+                        <span className="text-sm text-blue-800 font-medium px-2">已选 {selectedKeys.size} 项</span>
+                        <div className="w-px h-4 bg-blue-200"></div>
+                        <button
+                            onClick={() => setIsEditModalOpen(true)}
+                            className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                            title="批量设置类别和位置"
+                        >
+                            <Settings2 className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={handleDuplicateSelected}
+                            className="p-1.5 text-green-600 hover:bg-green-100 rounded-md transition-colors font-semibold text-xs flex items-center gap-1"
+                            title="复制选中的数据"
+                        >
+                            复制
+                        </button>
+                        <button
+                            onClick={handleBatchDelete}
+                            className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors"
+                            title="批量删除"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -327,9 +371,25 @@ export default function BatchManage() {
                                             value={draft.locationId}
                                             onChange={e => updateDraft(draft.key, { locationId: e.target.value })}
                                             className="w-full bg-transparent border-0 focus:ring-2 focus:ring-[#3B6D8C]/30 rounded-md px-2 py-1 outline-none text-sm text-gray-600"
+                                            title="如需精细分配可在此选择。或者通过上方批量归类指定。"
                                         >
                                             <option value="">-- 未分配 --</option>
-                                            {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.name}</option>)}
+                                            {rootRooms.map(room => (
+                                                <optgroup key={room.id} label={room.name}>
+                                                    <option value={room.id}>📍 {room.name} (仅房间)</option>
+                                                    {getSubLocations(room.id).map(sub => (
+                                                        <option key={sub.id} value={sub.id}>┖ {sub.name}</option>
+                                                    ))}
+                                                </optgroup>
+                                            ))}
+                                            {/* 游离在房间外的收纳点 */}
+                                            {locations.filter(l => l.type !== 'room' && !l.parentId).length > 0 && (
+                                                <optgroup label="其他收纳点">
+                                                    {locations.filter(l => l.type !== 'room' && !l.parentId).map(sub => (
+                                                        <option key={sub.id} value={sub.id}>┖ {sub.name}</option>
+                                                    ))}
+                                                </optgroup>
+                                            )}
                                         </select>
                                     </td>
                                     <td className="p-2">
@@ -386,17 +446,32 @@ export default function BatchManage() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">移动至位置</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">移动至指定房间</label>
                                 <select
                                     className="input-field py-2 w-full text-sm"
-                                    value={batchLocationId}
-                                    onChange={e => setBatchLocationId(e.target.value)}
+                                    value={batchRoomId}
+                                    onChange={e => { setBatchRoomId(e.target.value); setBatchLocationId(''); }}
                                 >
-                                    <option value="">-- 不修改位置 --</option>
+                                    <option value="">-- 不修改房间 --</option>
                                     <option value="none">-- 移出位置 (置空) --</option>
-                                    {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                                    {rootRooms.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                                 </select>
                             </div>
+
+                            {/* 当选中某个房间时，才显示该房间的子集（收纳）。或者如果没有选中房间，允许留空。 */}
+                            {batchRoomId && batchRoomId !== 'none' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">存入房间内具体收纳</label>
+                                    <select
+                                        className="input-field py-2 w-full text-sm"
+                                        value={batchLocationId}
+                                        onChange={e => setBatchLocationId(e.target.value)}
+                                    >
+                                        <option value="">-- （仅暂存房间） --</option>
+                                        {getSubLocations(batchRoomId).map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                                    </select>
+                                </div>
+                            )}
                         </div>
                         <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
                             <button

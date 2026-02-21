@@ -12,6 +12,8 @@ import { fetchJoinedFamilies } from '../services/family';
 export interface JoinedFamily {
   ownerId: string;
   displayName: string;
+  originalName?: string;
+  aliasName?: string;
 }
 
 interface AppState {
@@ -31,6 +33,7 @@ interface AppState {
 
   // 从 Supabase 加载数据
   loadFromSupabase: () => Promise<void>;
+  reloadJoinedFamilies: () => Promise<void>;
   clearLocalData: () => void;
 
   // Items
@@ -106,6 +109,11 @@ export const useStore = create<AppState>()(
         console.error('[Store] Supabase 加载失败:', err);
         set({ dataLoaded: true }); // 标记已尝试加载
       }
+    },
+
+    reloadJoinedFamilies: async () => {
+      const joined = await fetchJoinedFamilies();
+      set({ joinedFamilies: joined });
     },
 
     clearLocalData: () => set({
