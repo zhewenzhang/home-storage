@@ -85,56 +85,52 @@ export default function Home() {
   const sortedDisplayItems = useMemo(() => [...displayItems].reverse(), [displayItems]);
 
   return (
-    <div className="space-y-8 animate-enter pb-20">
+    <div className="space-y-6 md:space-y-8 animate-enter pb-20">
 
-      {/* 顶部统计极简直排版 */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
-        {/* 欢迎卡片 - 移动端占满2列且变扁，电脑端维持 */}
-        <div className="col-span-2 md:col-span-1 card-highlight rounded-2xl md:rounded-3xl p-4 md:p-7 relative overflow-hidden group flex flex-row md:flex-col justify-between items-center md:items-start min-h-0 md:min-h-[160px]">
-          <div className="relative z-10">
-            <h2 className="text-xl md:text-3xl font-bold md:mb-1">Hi {userName || 'there'} 👋</h2>
-            <p className="opacity-80 text-xs md:text-sm hidden md:block">让每一个物品都有家可归</p>
-          </div>
-          <Link to="/items/new" className="relative z-10 bg-white/20 hover:bg-white/30 backdrop-blur-md px-3 py-2 md:px-4 md:py-3 rounded-xl transition-all flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-bold w-fit mb-0 md:mb-0">
-            <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" /> 快速记录
-          </Link>
-          <Zap className="hidden md:block absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500 rotate-12" />
+      {/* 电脑端才显示的超级大欢迎卡片 */}
+      <div className="hidden md:flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-2">
+        <div>
+          <h2 className="text-3xl font-bold flex items-center gap-3">
+            Hi {userName || 'there'} 👋
+          </h2>
+          <p className="opacity-80 text-sm mt-1 text-gray-500">让每一个物品都有家可归</p>
         </div>
-
-        {/* 统计横滑小卡 */}
-        <div className="card flex flex-col md:flex-row items-center gap-2 md:gap-5 p-3 md:p-5 text-center md:text-left justify-center">
-          <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(143,188,143,0.2)' }}>
-            <Package className="w-5 h-5 md:w-8 md:h-8" style={{ color: '#6B9B7A' }} />
+        <div className="flex gap-4">
+          <div className="text-center px-6 border-r border-gray-100">
+            <p className="text-3xl font-extrabold text-[#2A4D63]">{items.length}</p>
+            <p className="text-xs text-gray-400 font-bold tracking-wider mt-1">在库物品</p>
           </div>
-          <div>
-            <p className="text-2xl md:text-4xl font-extrabold" style={{ color: '#2A4D63' }}>{items.length}</p>
-            <p className="text-[10px] md:text-sm text-gray-500 font-medium whitespace-nowrap">在库物品</p>
-          </div>
-        </div>
-
-        <div className="card flex flex-col md:flex-row items-center gap-2 md:gap-5 p-3 md:p-5 text-center md:text-left justify-center">
-          <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,160,122,0.2)' }}>
-            <MapPin className="w-5 h-5 md:w-8 md:h-8" style={{ color: '#E07A5F' }} />
-          </div>
-          <div>
-            <p className="text-2xl md:text-4xl font-extrabold" style={{ color: '#2A4D63' }}>{locations.length}</p>
-            <p className="text-[10px] md:text-sm text-gray-500 font-medium whitespace-nowrap">存储位置</p>
+          <div className="text-center px-6">
+            <p className="text-3xl font-extrabold text-[#2A4D63]">{locations.length}</p>
+            <p className="text-xs text-gray-400 font-bold tracking-wider mt-1">存储位置</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 左侧：平面图 */}
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        {/* 左侧：平面图 (移动端排第一视点) */}
+        <div className="lg:col-span-2 space-y-3 md:space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
               <MapPin className="w-5 h-5" style={{ color: '#3B6D8C' }} />
               {searchQuery ? '搜索定位' : '家庭平面图'}
             </h3>
-            <Link to="/floorplan" className="text-sm font-bold flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all" style={{ color: '#3B6D8C' }}>
-              编辑户型 <ArrowRight className="w-4 h-4" />
-            </Link>
+            <div className="flex gap-2">
+              {/* 移动端专属的快捷操作入口 (横滑小胶囊) */}
+              <div className="md:hidden flex items-center gap-2 mr-2">
+                <div className="bg-gray-100 px-2 py-1 rounded-md text-xs font-bold text-gray-600">
+                  📦 {items.length}
+                </div>
+                <div className="bg-gray-100 px-2 py-1 rounded-md text-xs font-bold text-gray-600">
+                  📍 {locations.length}
+                </div>
+              </div>
+              <Link to="/floorplan" className="text-xs md:text-sm font-bold flex items-center gap-1 bg-white px-2 md:px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all text-[#3B6D8C]">
+                编辑户型 <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
+              </Link>
+            </div>
           </div>
+
 
           <div className="card p-1 min-h-[400px]">
             {locations.length === 0 ? (
@@ -277,10 +273,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 右侧：物品列表 */}
-        <div className="lg:col-span-1 space-y-4">
+        {/* 右侧：物品列表 (移动端放在地图下方) */}
+        <div className="lg:col-span-1 space-y-3 md:space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900">
               {searchQuery ? `"${searchQuery}" 的结果` : (selectedLocation ? selectedLocation.name : '最近添加')}
             </h3>
             {selectedLocationId && !searchQuery && (

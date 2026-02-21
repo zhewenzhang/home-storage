@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
-import { Trash2, Plus, Upload, Save, Settings2, Database, X } from 'lucide-react';
+import { Trash2, Plus, Upload, Save, Settings2, Database, X, MapPin } from 'lucide-react';
 import type { Item } from '../types';
 
 interface DraftItem {
@@ -312,112 +312,226 @@ export default function BatchManage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="overflow-x-auto pb-4">
-                    <table className="w-full text-left border-collapse min-w-[900px]">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100 text-sm font-semibold text-gray-500">
-                                <th className="p-4 w-12 text-center">
+                <div className="overflow-x-auto pb-4 custom-scrollbar">
+                    {/* PC 端表格 / 移动端卡片列表 */}
+                    <div className="min-w-full inline-block align-middle">
+                        <div className="hidden md:block">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b border-gray-100 text-sm font-semibold text-gray-500">
+                                        <th className="p-4 w-12 text-center">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C] cursor-pointer"
+                                                checked={visibleDrafts.length > 0 && selectedKeys.size === visibleDrafts.length}
+                                                onChange={toggleSelectAll}
+                                            />
+                                        </th>
+                                        <th className="p-4">物品名称</th>
+                                        <th className="p-4 w-32">分类</th>
+                                        <th className="p-4 w-40">所属位置</th>
+                                        <th className="p-4 w-20">数量</th>
+                                        <th className="p-4">描述备注</th>
+                                        <th className="p-4 w-24 text-center">状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {visibleDrafts.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={7} className="p-8 text-center text-gray-400">
+                                                暂无数据，点击上方“新增空行”开始填写。
+                                            </td>
+                                        </tr>
+                                    ) : visibleDrafts.map(draft => (
+                                        <tr key={draft.key} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${selectedKeys.has(draft.key) ? 'bg-[#3B6D8C]/5' : ''}`}>
+                                            <td className="p-3 text-center">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C] cursor-pointer"
+                                                    checked={selectedKeys.has(draft.key)}
+                                                    onChange={() => toggleSelect(draft.key)}
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <input
+                                                    value={draft.name}
+                                                    onChange={e => updateDraft(draft.key, { name: e.target.value })}
+                                                    placeholder="物品名称"
+                                                    className="w-full bg-transparent border-0 focus:ring-2 focus:ring-[#3B6D8C]/30 rounded-md px-2 py-1.5 outline-none font-bold text-gray-800"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <select
+                                                    value={draft.category}
+                                                    onChange={e => updateDraft(draft.key, { category: e.target.value })}
+                                                    className="w-full bg-gray-50/50 border border-gray-100 hover:border-gray-200 focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-600 transition-colors cursor-pointer"
+                                                >
+                                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                                </select>
+                                            </td>
+                                            <td className="p-2">
+                                                <select
+                                                    value={draft.locationId}
+                                                    onChange={e => updateDraft(draft.key, { locationId: e.target.value })}
+                                                    className="w-full bg-gray-50/50 border border-gray-100 hover:border-gray-200 focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-600 transition-colors cursor-pointer"
+                                                    title="如需精细分配可在此选择。或者通过上方批量归类指定。"
+                                                >
+                                                    <option value="">-- 未分配 --</option>
+                                                    {rootRooms.map(room => (
+                                                        <optgroup key={room.id} label={room.name}>
+                                                            <option value={room.id}>📍 {room.name} (仅房间)</option>
+                                                            {getSubLocations(room.id).map(sub => (
+                                                                <option key={sub.id} value={sub.id}>┖ {sub.name}</option>
+                                                            ))}
+                                                        </optgroup>
+                                                    ))}
+                                                    {/* 游离在房间外的收纳点 */}
+                                                    {locations.filter(l => l.type !== 'room' && !l.parentId).length > 0 && (
+                                                        <optgroup label="其他收纳点">
+                                                            {locations.filter(l => l.type !== 'room' && !l.parentId).map(sub => (
+                                                                <option key={sub.id} value={sub.id}>┖ {sub.name}</option>
+                                                            ))}
+                                                        </optgroup>
+                                                    )}
+                                                </select>
+                                            </td>
+                                            <td className="p-2">
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={draft.quantity}
+                                                    onChange={e => updateDraft(draft.key, { quantity: parseInt(e.target.value) || 1 })}
+                                                    className="w-16 bg-transparent border border-gray-100 hover:border-gray-200 focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-800 font-medium text-center transition-colors"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <input
+                                                    value={draft.description}
+                                                    onChange={e => updateDraft(draft.key, { description: e.target.value })}
+                                                    placeholder="追加备注 (可选)"
+                                                    className="w-full bg-transparent border border-transparent hover:border-gray-200 focus:bg-white focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-500 transition-all placeholder:text-gray-300"
+                                                />
+                                            </td>
+                                            <td className="p-2 text-center">
+                                                {draft.status === 'unchanged' && <span className="text-gray-300 text-xs">—</span>}
+                                                {draft.status === 'added' && <span className="inline-block px-2 py-1 bg-green-50 border border-green-100 text-green-700 rounded-md text-xs font-semibold">新增待存</span>}
+                                                {draft.status === 'updated' && <span className="inline-block px-2 py-1 bg-blue-50 border border-blue-100 text-[#3B6D8C] rounded-md text-xs font-semibold">已修改</span>}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* 移动端卡片视图 */}
+                        <div className="md:hidden flex flex-col divide-y divide-gray-100">
+                            {/* 移动端全选控制条 */}
+                            <div className="p-3 bg-gray-50 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C]"
                                         checked={visibleDrafts.length > 0 && selectedKeys.size === visibleDrafts.length}
                                         onChange={toggleSelectAll}
                                     />
-                                </th>
-                                <th className="p-4">物品名称</th>
-                                <th className="p-4 w-40">分类</th>
-                                <th className="p-4 w-48">所属位置</th>
-                                <th className="p-4 w-24">数量</th>
-                                <th className="p-4">描述备注</th>
-                                <th className="p-4 w-24 text-center">修改状态</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                                    {selectedKeys.size > 0 ? `已选 ${selectedKeys.size} 项` : '全选 / 取消全选'}
+                                </label>
+                            </div>
+
                             {visibleDrafts.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="p-8 text-center text-gray-400">
-                                        暂无数据，点击上方“新增空行”开始填写。
-                                    </td>
-                                </tr>
-                            ) : visibleDrafts.map(draft => (
-                                <tr key={draft.key} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${selectedKeys.has(draft.key) ? 'bg-[#3B6D8C]/5' : ''}`}>
-                                    <td className="p-3 text-center">
-                                        <input
-                                            type="checkbox"
-                                            className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C]"
-                                            checked={selectedKeys.has(draft.key)}
-                                            onChange={() => toggleSelect(draft.key)}
-                                        />
-                                    </td>
-                                    <td className="p-2">
-                                        <input
-                                            value={draft.name}
-                                            onChange={e => updateDraft(draft.key, { name: e.target.value })}
-                                            placeholder="物品名称"
-                                            className="w-full bg-transparent border-0 focus:ring-2 focus:ring-[#3B6D8C]/30 rounded-md px-2 py-1 outline-none font-medium text-gray-700"
-                                        />
-                                    </td>
-                                    <td className="p-2">
-                                        <select
-                                            value={draft.category}
-                                            onChange={e => updateDraft(draft.key, { category: e.target.value })}
-                                            className="w-full bg-transparent border-0 focus:ring-2 focus:ring-[#3B6D8C]/30 rounded-md px-2 py-1 outline-none text-sm text-gray-600"
-                                        >
-                                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
-                                    </td>
-                                    <td className="p-2">
-                                        <select
-                                            value={draft.locationId}
-                                            onChange={e => updateDraft(draft.key, { locationId: e.target.value })}
-                                            className="w-full bg-transparent border-0 focus:ring-2 focus:ring-[#3B6D8C]/30 rounded-md px-2 py-1 outline-none text-sm text-gray-600"
-                                            title="如需精细分配可在此选择。或者通过上方批量归类指定。"
-                                        >
-                                            <option value="">-- 未分配 --</option>
-                                            {rootRooms.map(room => (
-                                                <optgroup key={room.id} label={room.name}>
-                                                    <option value={room.id}>📍 {room.name} (仅房间)</option>
-                                                    {getSubLocations(room.id).map(sub => (
-                                                        <option key={sub.id} value={sub.id}>┖ {sub.name}</option>
+                                <div className="p-8 text-center text-gray-400 text-sm">暂无数据，点击上方添加。</div>
+                            ) : (
+                                visibleDrafts.map(draft => (
+                                    <div key={draft.key} className={`p-4 flex gap-3 transition-colors ${selectedKeys.has(draft.key) ? 'bg-[#3B6D8C]/5' : ''}`}>
+                                        <div className="pt-1 select-none">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C]"
+                                                checked={selectedKeys.has(draft.key)}
+                                                onChange={() => toggleSelect(draft.key)}
+                                            />
+                                        </div>
+                                        <div className="flex-1 space-y-3 min-w-0">
+                                            {/* Top row: Name & Status */}
+                                            <div className="flex justify-between items-start gap-2">
+                                                <input
+                                                    value={draft.name}
+                                                    onChange={e => updateDraft(draft.key, { name: e.target.value })}
+                                                    placeholder="物品名称..."
+                                                    className="flex-1 bg-transparent border-0 border-b border-gray-200 focus:border-[#3B6D8C] px-0 py-1 outline-none font-bold text-gray-800 text-base"
+                                                />
+                                                <div className="flex-shrink-0 pt-1">
+                                                    {draft.status === 'added' && <span className="inline-block px-1.5 py-0.5 bg-green-50 border border-green-100 text-green-700 rounded text-[10px] font-semibold">新增</span>}
+                                                    {draft.status === 'updated' && <span className="inline-block px-1.5 py-0.5 bg-blue-50 border border-blue-100 text-[#3B6D8C] rounded text-[10px] font-semibold">修改</span>}
+                                                </div>
+                                            </div>
+
+                                            {/* Middle row: Category & Quanity */}
+                                            <div className="flex gap-2">
+                                                <div className="flex-1">
+                                                    <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1 tracking-wider">分类</label>
+                                                    <select
+                                                        value={draft.category}
+                                                        onChange={e => updateDraft(draft.key, { category: e.target.value })}
+                                                        className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-700 font-medium"
+                                                    >
+                                                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                                    </select>
+                                                </div>
+                                                <div className="w-20 flex-shrink-0">
+                                                    <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1 tracking-wider">数量</label>
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        value={draft.quantity}
+                                                        onChange={e => updateDraft(draft.key, { quantity: parseInt(e.target.value) || 1 })}
+                                                        className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-center text-gray-800 font-bold"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Location row */}
+                                            <div>
+                                                <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1 tracking-wider flex items-center gap-1">
+                                                    <MapPin className="w-3 h-3" /> 存储位置
+                                                </label>
+                                                <select
+                                                    value={draft.locationId}
+                                                    onChange={e => updateDraft(draft.key, { locationId: e.target.value })}
+                                                    className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-[#3B6D8C] font-medium"
+                                                >
+                                                    <option value="">-- 未分配 --</option>
+                                                    {rootRooms.map(room => (
+                                                        <optgroup key={room.id} label={room.name}>
+                                                            <option value={room.id}>📍 {room.name} (仅房间)</option>
+                                                            {getSubLocations(room.id).map(sub => (
+                                                                <option key={sub.id} value={sub.id}>┖ {sub.name}</option>
+                                                            ))}
+                                                        </optgroup>
                                                     ))}
-                                                </optgroup>
-                                            ))}
-                                            {/* 游离在房间外的收纳点 */}
-                                            {locations.filter(l => l.type !== 'room' && !l.parentId).length > 0 && (
-                                                <optgroup label="其他收纳点">
-                                                    {locations.filter(l => l.type !== 'room' && !l.parentId).map(sub => (
-                                                        <option key={sub.id} value={sub.id}>┖ {sub.name}</option>
-                                                    ))}
-                                                </optgroup>
-                                            )}
-                                        </select>
-                                    </td>
-                                    <td className="p-2">
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            value={draft.quantity}
-                                            onChange={e => updateDraft(draft.key, { quantity: parseInt(e.target.value) || 1 })}
-                                            className="w-16 bg-transparent border-0 focus:ring-2 focus:ring-[#3B6D8C]/30 rounded-md px-2 py-1 outline-none text-sm text-gray-600 text-center"
-                                        />
-                                    </td>
-                                    <td className="p-2">
-                                        <input
-                                            value={draft.description}
-                                            onChange={e => updateDraft(draft.key, { description: e.target.value })}
-                                            placeholder="备注信息"
-                                            className="w-full bg-transparent border-0 focus:ring-2 focus:ring-[#3B6D8C]/30 rounded-md px-2 py-1 outline-none text-sm text-gray-500"
-                                        />
-                                    </td>
-                                    <td className="p-2 text-center">
-                                        {draft.status === 'unchanged' && <span className="text-gray-300 text-xs">—</span>}
-                                        {draft.status === 'added' && <span className="inline-block px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-semibold">新增待存</span>}
-                                        {draft.status === 'updated' && <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">已修改</span>}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                                    {locations.filter(l => l.type !== 'room' && !l.parentId).length > 0 && (
+                                                        <optgroup label="其他收纳点">
+                                                            {locations.filter(l => l.type !== 'room' && !l.parentId).map(sub => (
+                                                                <option key={sub.id} value={sub.id}>┖ {sub.name}</option>
+                                                            ))}
+                                                        </optgroup>
+                                                    )}
+                                                </select>
+                                            </div>
+
+                                            {/* Note row */}
+                                            <input
+                                                value={draft.description}
+                                                onChange={e => updateDraft(draft.key, { description: e.target.value })}
+                                                placeholder="添加备注..."
+                                                className="w-full bg-transparent border-0 border-b border-transparent focus:border-gray-200 px-0 py-1.5 outline-none text-xs text-gray-400 placeholder:text-gray-300 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
