@@ -87,37 +87,38 @@ export default function Home() {
   return (
     <div className="space-y-8 animate-enter pb-20">
 
-      {/* 顶部统计 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* 欢迎卡片 */}
-        <div className="card-highlight md:col-span-1 rounded-3xl p-7 relative overflow-hidden group min-h-[160px] flex flex-col justify-between">
+      {/* 顶部统计极简直排版 */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+        {/* 欢迎卡片 - 移动端占满2列且变扁，电脑端维持 */}
+        <div className="col-span-2 md:col-span-1 card-highlight rounded-2xl md:rounded-3xl p-4 md:p-7 relative overflow-hidden group flex flex-row md:flex-col justify-between items-center md:items-start min-h-0 md:min-h-[160px]">
           <div className="relative z-10">
-            <h2 className="text-3xl font-bold mb-1">Hi {userName || 'there'} 👋</h2>
-            <p className="opacity-80 text-sm mb-4">让每一个物品都有家可归</p>
+            <h2 className="text-xl md:text-3xl font-bold md:mb-1">Hi {userName || 'there'} 👋</h2>
+            <p className="opacity-80 text-xs md:text-sm hidden md:block">让每一个物品都有家可归</p>
           </div>
-          <Link to="/items/new" className="relative z-10 bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-3 rounded-xl transition-all inline-flex items-center gap-2 text-sm font-bold w-fit">
-            <Plus className="w-4 h-4" /> 快速记录
+          <Link to="/items/new" className="relative z-10 bg-white/20 hover:bg-white/30 backdrop-blur-md px-3 py-2 md:px-4 md:py-3 rounded-xl transition-all flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-bold w-fit mb-0 md:mb-0">
+            <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" /> 快速记录
           </Link>
-          <Zap className="absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500 rotate-12" />
+          <Zap className="hidden md:block absolute -right-4 -bottom-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500 rotate-12" />
         </div>
 
-        <div className="card flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(143,188,143,0.2)' }}>
-            <Package className="w-8 h-8" style={{ color: '#6B9B7A' }} />
+        {/* 统计横滑小卡 */}
+        <div className="card flex flex-col md:flex-row items-center gap-2 md:gap-5 p-3 md:p-5 text-center md:text-left justify-center">
+          <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(143,188,143,0.2)' }}>
+            <Package className="w-5 h-5 md:w-8 md:h-8" style={{ color: '#6B9B7A' }} />
           </div>
           <div>
-            <p className="text-4xl font-extrabold" style={{ color: '#2A4D63' }}>{items.length}</p>
-            <p className="text-gray-500 font-medium">在库物品</p>
+            <p className="text-2xl md:text-4xl font-extrabold" style={{ color: '#2A4D63' }}>{items.length}</p>
+            <p className="text-[10px] md:text-sm text-gray-500 font-medium whitespace-nowrap">在库物品</p>
           </div>
         </div>
 
-        <div className="card flex items-center gap-5">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,160,122,0.2)' }}>
-            <MapPin className="w-8 h-8" style={{ color: '#E07A5F' }} />
+        <div className="card flex flex-col md:flex-row items-center gap-2 md:gap-5 p-3 md:p-5 text-center md:text-left justify-center">
+          <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,160,122,0.2)' }}>
+            <MapPin className="w-5 h-5 md:w-8 md:h-8" style={{ color: '#E07A5F' }} />
           </div>
           <div>
-            <p className="text-4xl font-extrabold" style={{ color: '#2A4D63' }}>{locations.length}</p>
-            <p className="text-gray-500 font-medium">存储位置</p>
+            <p className="text-2xl md:text-4xl font-extrabold" style={{ color: '#2A4D63' }}>{locations.length}</p>
+            <p className="text-[10px] md:text-sm text-gray-500 font-medium whitespace-nowrap">存储位置</p>
           </div>
         </div>
       </div>

@@ -269,16 +269,16 @@ export default function AIChat() {
     return (
         <>
             <button onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                className="fixed bottom-28 md:bottom-6 right-4 md:right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
                 style={{ background: 'linear-gradient(135deg, #3B6D8C 0%, #2A4D63 100%)', boxShadow: '0 4px 20px rgba(59,109,140,0.4)' }}
             >
                 {isOpen ? <X className="w-6 h-6 text-white" /> : <Sparkles className="w-6 h-6 text-white" />}
             </button>
 
             {isOpen && (
-                <div className="fixed bottom-24 right-6 z-50 flex flex-col overflow-hidden"
+                <div className="fixed bottom-32 md:bottom-24 right-4 md:right-6 z-50 flex flex-col overflow-hidden"
                     style={{
-                        width: '420px', maxWidth: 'calc(100vw - 48px)',
+                        width: '420px', maxWidth: 'calc(100vw - 32px)',
                         height: '580px', maxHeight: 'calc(100vh - 140px)',
                         borderRadius: '1.5rem', background: 'rgba(255,255,255,0.95)',
                         backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)',

@@ -312,8 +312,8 @@ export default function BatchManage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto pb-4">
+                    <table className="w-full text-left border-collapse min-w-[900px]">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-sm font-semibold text-gray-500">
                                 <th className="p-4 w-12 text-center">
