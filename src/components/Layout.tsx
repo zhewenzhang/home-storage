@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus } from 'lucide-react';
+import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus, Settings } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { signOut } from '../services/auth';
 import AIChat from './AIChat';
@@ -18,6 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       case '/locations': return '存储位置';
       case '/floorplan': return '平面图';
       case '/batch': return '批量管理';
+      case '/settings': return '系统设置';
       default: return 'HomeBox';
     }
   };
@@ -163,10 +164,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <span className="text-[10px] font-bold">家庭分享</span>
         </button>
 
-        <button onClick={() => signOut()} className="flex flex-col items-center p-2 rounded-xl transition-all text-gray-400 hover:text-red-500">
-          <LogOut className="w-6 h-6 mb-1" />
-          <span className="text-[10px] font-bold">退出</span>
-        </button>
+        <NavLink to="/settings" className={({ isActive }) => `flex flex-col items-center p-2 rounded-xl transition-all ${isActive ? 'text-[#3B6D8C]' : 'text-gray-400 hover:text-gray-600'}`}>
+          <Settings className="w-6 h-6 mb-1" />
+          <span className="text-[10px] font-bold">设置</span>
+        </NavLink>
       </nav>
 
       {/* AI 助手 */}

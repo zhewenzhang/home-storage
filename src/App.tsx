@@ -12,6 +12,7 @@ import Locations from './pages/Locations';
 import FloorPlan from './pages/FloorPlan';
 import AuthPage from './pages/AuthPage';
 import BatchManage from './pages/BatchManage';
+import Settings from './pages/Settings';
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -77,6 +78,7 @@ function App() {
           <Route path="/locations" element={<Locations />} />
           <Route path="/floorplan" element={<FloorPlan />} />
           <Route path="/batch" element={<BatchManage />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Layout>
