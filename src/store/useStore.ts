@@ -4,6 +4,7 @@ import {
   fetchLocations, insertLocation, updateLocationDB, deleteLocationDB,
   fetchItems, insertItem, updateItemDB, deleteItemDB,
   fetchFloorPlan, updateFloorPlanDB,
+  batchInsertItemsDB, batchUpdateItemsDB, batchDeleteItemsDB
 } from '../services/db';
 import { supabase } from '../lib/supabase';
 import { fetchJoinedFamilies } from '../services/family';
@@ -36,6 +37,11 @@ interface AppState {
   addItem: (item: Omit<Item, 'id' | 'createdAt'>) => void;
   updateItem: (id: string, updates: Partial<Item>) => void;
   deleteItem: (id: string) => void;
+  processBatch: (
+    adds: Omit<Item, 'id' | 'createdAt'>[],
+    updates: { id: string, changes: Partial<Item> }[],
+    deletes: string[]
+  ) => Promise<void>;
 
   // Locations
   addLocation: (location: Omit<Location, 'id'>) => void;
@@ -136,6 +142,20 @@ export const useStore = create<AppState>()(
     deleteItem: (id) => {
       set((state) => ({ items: state.items.filter(item => item.id !== id) }));
       deleteItemDB(id).catch(err => console.error('[Store] 删除物品失败:', err));
+    },
+
+    processBatch: async (adds, updates, deletes) => {
+      try {
+        const targetId = await getCurrentTargetId(get().activeFamilyId);
+        if (adds.length > 0) await batchInsertItemsDB(adds, targetId);
+        if (updates.length > 0) await batchUpdateItemsDB(updates);
+        if (deletes.length > 0) await batchDeleteItemsDB(deletes);
+        // 执行完毕后完整刷新数据
+        await get().loadFromSupabase();
+      } catch (err) {
+        console.error('[Store] 批量操作失败:', err);
+        throw err;
+      }
     },
 
     // Locations

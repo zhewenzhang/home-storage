@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { getOrCreateInviteCode, joinFamilyByCode, leaveFamily } from '../services/family';
-import { Share2, Users, ClipboardCopy, Check, UserPlus, LogOut, Home as HomeIcon, X } from 'lucide-react';
+import { Users, ClipboardCopy, Check, UserPlus, LogOut, Home as HomeIcon, X } from 'lucide-react';
 
 export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
     const { activeFamilyId, setActiveFamilyId, joinedFamilies, loadFromSupabase } = useStore();

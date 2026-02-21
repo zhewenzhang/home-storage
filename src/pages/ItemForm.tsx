@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, Trash2, X, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, AlertTriangle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { DEFAULT_CATEGORIES, Item } from '../types';
 
@@ -153,10 +153,10 @@ export default function ItemForm() {
                     key={cat}
                     type="button"
                     onClick={() => setForm({ ...form, category: cat })}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${form.category === cat
-                        ? 'bg-[#3B6D8C] text-white border-[#3B6D8C] shadow-md'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-[#6B9AC4]'
-                      }`}
+                    className={`px - 4 py - 2 rounded - xl text - sm font - bold transition - all border ${form.category === cat
+                      ? 'bg-[#3B6D8C] text-white border-[#3B6D8C] shadow-md'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#6B9AC4]'
+                      } `}
                   >
                     {cat}
                   </button>
@@ -214,7 +214,7 @@ export default function ItemForm() {
             >
               <option value="">选择位置...</option>
               {rooms.map(room => (
-                <optgroup key={room.id} label={`🏠 ${room.name}`}>
+                <optgroup key={room.id} label={`🏠 ${room.name} `}>
                   <option value={room.id}>{room.name}（整个房间）</option>
                   {getChildLocations(room.id).map(child => (
                     <option key={child.id} value={child.id}>

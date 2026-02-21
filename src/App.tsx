@@ -11,6 +11,7 @@ import ItemForm from './pages/ItemForm';
 import Locations from './pages/Locations';
 import FloorPlan from './pages/FloorPlan';
 import AuthPage from './pages/AuthPage';
+import BatchManage from './pages/BatchManage';
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -75,6 +76,7 @@ function App() {
           <Route path="/items/:id" element={<ItemForm />} />
           <Route path="/locations" element={<Locations />} />
           <Route path="/floorplan" element={<FloorPlan />} />
+          <Route path="/batch" element={<BatchManage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Layout>

@@ -128,3 +128,30 @@ export async function updateFloorPlanDB(fp: FloorPlan) {
     }).eq('id', fp.id);
     if (error) throw error;
 }
+
+// ====== Batch Operations ======
+
+export async function batchInsertItemsDB(items: Array<Omit<Item, 'id' | 'createdAt'>>, familyId: string) {
+    if (items.length === 0) return;
+    const payload = items.map(item => ({
+        user_id: familyId,
+        name: item.name,
+        category: item.category,
+        quantity: item.quantity,
+        description: item.description || '',
+        location_id: item.locationId || null,
+    }));
+    const { error } = await supabase.from('items').insert(payload);
+    if (error) throw error;
+}
+
+export async function batchUpdateItemsDB(updates: Array<{ id: string, changes: Partial<Item> }>) {
+    if (updates.length === 0) return;
+    await Promise.all(updates.map(u => updateItemDB(u.id, u.changes)));
+}
+
+export async function batchDeleteItemsDB(ids: string[]) {
+    if (ids.length === 0) return;
+    const { error } = await supabase.from('items').delete().in('id', ids);
+    if (error) throw error;
+}

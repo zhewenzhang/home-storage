@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit, Home, Box, X, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Edit, Home, X, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 // 位置类型图标映射
@@ -196,8 +196,8 @@ export default function Locations() {
                       type="button"
                       onClick={() => setForm({ ...form, type: key as any })}
                       className={`p-3 rounded-xl text-center transition-all border ${form.type === key
-                          ? 'bg-[#EAF4F8] border-[#3B6D8C] text-[#3B6D8C] shadow-md'
-                          : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                        ? 'bg-[#EAF4F8] border-[#3B6D8C] text-[#3B6D8C] shadow-md'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
                         }`}
                     >
                       <span className="text-xl block">{config.icon}</span>

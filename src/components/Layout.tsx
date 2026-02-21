@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users } from 'lucide-react';
+import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { signOut } from '../services/auth';
 import AIChat from './AIChat';
 import FamilyModal from './FamilyModal';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { searchQuery, setSearchQuery, activeFamilyId, joinedFamilies } = useStore();
+  const { searchQuery, setSearchQuery, activeFamilyId } = useStore();
   const [isFamilyModalOpen, setIsFamilyModalOpen] = useState(false);
   const location = useLocation();
 
@@ -17,6 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       case '/items': return '物品管理';
       case '/locations': return '存储位置';
       case '/floorplan': return '平面图';
+      case '/batch': return '批量管理';
       default: return 'HomeBox';
     }
   };
@@ -26,6 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { to: '/items', icon: Package, label: '全部物品' },
     { to: '/locations', icon: MapPin, label: '存储位置' },
     { to: '/floorplan', icon: LayoutGrid, label: '房型编辑' },
+    { to: '/batch', icon: Database, label: '批量管理' },
   ];
 
   return (
