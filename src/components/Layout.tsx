@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database } from 'lucide-react';
+import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { signOut } from '../services/auth';
 import AIChat from './AIChat';
@@ -107,20 +107,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <span className="font-bold text-lg">HomeBox</span>
           </div>
 
-          <div className="flex items-center gap-4 flex-1 md:flex-none justify-end md:w-96">
-            <button onClick={() => setIsFamilyModalOpen(true)} className="md:hidden p-2 bg-gray-100 hover:bg-gray-200 rounded-full relative transition-colors">
+          <div className="flex items-center gap-2 flex-1 md:flex-none justify-end md:w-96 pl-4">
+            <button onClick={() => setIsFamilyModalOpen(true)} className="hidden p-2 bg-gray-100 hover:bg-gray-200 rounded-full relative transition-colors">
               <Users className="w-5 h-5 text-gray-700" />
               {activeFamilyId && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-yellow-400 border-2 border-white rounded-full" />}
             </button>
-            <div className="relative w-full max-w-md group hidden md:block">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 group-focus-within:text-[#3B6D8C] transition-colors" />
+            <div className="relative w-full max-w-md group flex-1 md:flex-none">
+              <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-300 group-focus-within:text-[#3B6D8C] transition-colors" />
               <input
                 type="text"
-                placeholder="搜索物品..."
+                placeholder="搜索物品或位置..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field py-3 shadow-sm bg-white"
-                style={{ paddingLeft: '3rem' }}
+                className="input-field py-2 md:py-3 shadow-sm bg-white text-sm"
+                style={{ paddingLeft: '2.5rem' }}
               />
             </div>
           </div>
@@ -135,24 +135,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-white/90 backdrop-blur-xl border border-white/40 rounded-3xl p-2 flex justify-between items-center z-50"
-        style={{ boxShadow: '0 4px 30px rgba(59,109,140,0.15)' }}
+      <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-white/90 backdrop-blur-xl border border-white/40 rounded-3xl p-2 flex justify-around items-center z-50 shadow-2xl"
+        style={{ boxShadow: '0 8px 32px rgba(59,109,140,0.2)' }}
       >
-        {navItems.map(({ to, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              `p-4 rounded-2xl transition-all ${isActive
-                ? 'text-white shadow-lg transform -translate-y-2'
-                : 'text-gray-400 hover:bg-gray-50'
-              }`
-            }
-            style={({ isActive }) => isActive ? { backgroundColor: '#3B6D8C' } : {}}
-          >
-            <Icon className="w-6 h-6" />
-          </NavLink>
-        ))}
+        <NavLink to="/" className={({ isActive }) => `flex flex-col items-center p-2 rounded-xl transition-all ${isActive ? 'text-[#3B6D8C]' : 'text-gray-400 hover:text-gray-600'}`}>
+          <Home className="w-6 h-6 mb-1" />
+          <span className="text-[10px] font-bold">首页</span>
+        </NavLink>
+
+        <NavLink to="/batch" className={({ isActive }) => `flex flex-col items-center p-2 rounded-xl transition-all ${isActive ? 'text-[#3B6D8C]' : 'text-gray-400 hover:text-gray-600'}`}>
+          <Database className="w-6 h-6 mb-1" />
+          <span className="text-[10px] font-bold">批量录入</span>
+        </NavLink>
+
+        <NavLink to="/items/new" className="flex flex-col items-center -mt-8 relative group z-10">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-95 border-4 border-[#F8F9FA]" style={{ backgroundColor: '#EF4444' }}>
+            <Package className="w-7 h-7" />
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <Plus className="w-4 h-4 text-red-500 font-bold" />
+            </div>
+          </div>
+        </NavLink>
+
+        <button onClick={() => setIsFamilyModalOpen(true)} className={`flex flex-col items-center p-2 rounded-xl transition-all relative ${activeFamilyId ? 'text-[#3B6D8C]' : 'text-gray-400 hover:text-gray-600'}`}>
+          <Users className="w-6 h-6 mb-1" />
+          {activeFamilyId && <span className="absolute top-2 right-2 w-2 h-2 bg-yellow-400 border border-white rounded-full" />}
+          <span className="text-[10px] font-bold">家庭分享</span>
+        </button>
+
+        <button onClick={() => signOut()} className="flex flex-col items-center p-2 rounded-xl transition-all text-gray-400 hover:text-red-500">
+          <LogOut className="w-6 h-6 mb-1" />
+          <span className="text-[10px] font-bold">退出</span>
+        </button>
       </nav>
 
       {/* AI 助手 */}
