@@ -298,8 +298,13 @@ export default function AIChat() {
                         {messages.length > 0 && (
                             <button onClick={() => { setMessages([]); setStreamText(''); setPendingActions(null); }}
                                 className="p-2 rounded-xl" style={{ color: 'rgba(255,255,255,0.7)' }}
+                                title="清空对话"
                             ><Trash2 className="w-4 h-4" /></button>
                         )}
+                        <button onClick={() => setIsOpen(false)}
+                            className="p-2 rounded-xl" style={{ color: 'rgba(255,255,255,0.7)' }}
+                            title="关闭聊天"
+                        ><X className="w-5 h-5" /></button>
                     </div>
 
                     {/* Messages */}
