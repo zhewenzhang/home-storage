@@ -83,7 +83,7 @@ export const useStore = create<AppState>()(
     selectedLocationId: null,
     searchQuery: '',
     dataLoaded: false,
-    activeFamilyId: null,
+    activeFamilyId: (localStorage.getItem('homebox_active_family') === 'my_home' ? null : localStorage.getItem('homebox_active_family')) || null,
     joinedFamilies: [],
 
     // 从 Supabase 加载用户所有数据
@@ -99,6 +99,20 @@ export const useStore = create<AppState>()(
           fetchFloorPlan(targetId),
           fetchJoinedFamilies(),
         ]);
+        // 如果当前是自己的家（activeFamilyId 为 null），看看是不是有加入的家且应该默认显示
+        // 根据用户的需求：如果有加入的家庭，默认显示加入的。我们可以在第一次获取完 joinedFamilys 后，
+        // 如果 localStorage 没有主动设置过 my_home，且也没有指定，我们就默认切过去第一个加入的家
+        let currentActive = get().activeFamilyId;
+        const savedPref = localStorage.getItem('homebox_active_family');
+
+        if (!savedPref && currentActive === null && joined.length > 0) {
+          currentActive = joined[0].ownerId;
+          localStorage.setItem('homebox_active_family', currentActive);
+          // 这次需要重新抓一次那个家的数据，不用 Promise.all，直接递归一次即可，防止复杂化
+          set({ joinedFamilies: joined, activeFamilyId: currentActive });
+          return get().loadFromSupabase();
+        }
+
         set({
           locations: locs,
           items: itms,
@@ -118,13 +132,16 @@ export const useStore = create<AppState>()(
       set({ joinedFamilies: joined });
     },
 
-    clearLocalData: () => set({
-      items: [], locations: [],
-      floorPlan: { id: 'default', name: '我的家', width: 800, height: 600 },
-      dataLoaded: false,
-      activeFamilyId: null,
-      joinedFamilies: [],
-    }),
+    clearLocalData: () => {
+      localStorage.removeItem('homebox_active_family');
+      set({
+        items: [], locations: [],
+        floorPlan: { id: 'default', name: '我的家', width: 800, height: 600 },
+        dataLoaded: false,
+        activeFamilyId: null,
+        joinedFamilies: [],
+      });
+    },
 
     // Items — 先更新本地再同步 Supabase
     addItem: async (item) => {
@@ -212,6 +229,11 @@ export const useStore = create<AppState>()(
     setSelectedLocationId: (id) => set({ selectedLocationId: id }),
     setSearchQuery: (query) => set({ searchQuery: query }),
     setActiveFamilyId: (id) => {
+      if (id === null) {
+        localStorage.setItem('homebox_active_family', 'my_home'); // 特殊标记，用来表示用户主动就是要看自己的家
+      } else {
+        localStorage.setItem('homebox_active_family', id);
+      }
       set({ activeFamilyId: id, dataLoaded: false });
       get().loadFromSupabase();
     },
