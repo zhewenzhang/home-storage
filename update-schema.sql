@@ -28,6 +28,13 @@ ALTER TABLE IF EXISTS public.family_members ADD COLUMN IF NOT EXISTS alias_name 
 -- 2.2 为已存在的表补充指向 profiles 的外键，以便 PostgREST 能正确联表查询 (Profiles)
 DO $$
 BEGIN
+    -- 首先，清理掉由于脏数据导致外键创建失败的孤儿数据
+    -- 删除那些 owner_id 或 member_id 在 profiles 表中不存在的关系记录
+    DELETE FROM public.family_members 
+    WHERE owner_id NOT IN (SELECT id FROM public.profiles)
+       OR member_id NOT IN (SELECT id FROM public.profiles);
+
+    -- 然后安全地增加外键约束
     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'family_members_owner_id_profiles_fkey') THEN
         ALTER TABLE public.family_members ADD CONSTRAINT family_members_owner_id_profiles_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles (id) ON DELETE CASCADE;
     END IF;
