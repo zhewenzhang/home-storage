@@ -43,6 +43,22 @@ BEGIN
     END IF;
 END $$;
 
+-- 2.3 自动为缺失 Profile 的存量用户补齐 Profile，防止由于历史账号没被触发器捕获导致关联报错
+DO $$
+BEGIN
+    INSERT INTO public.profiles (id, email, display_name)
+    SELECT id, email, COALESCE(raw_user_meta_data->>'display_name', split_part(email, '@', 1))
+    FROM auth.users
+    WHERE id NOT IN (SELECT id FROM public.profiles)
+    ON CONFLICT (id) DO NOTHING;
+END $$;
+
+-- 2.4 （重要修正）更新 profiles 的 RLS 策略，让其他用户在联表时能够读取到家庭成员的昵称
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "用户只能查看自己的资料" ON public.profiles;
+DROP POLICY IF EXISTS "允许认证用户查看基础资料" ON public.profiles;
+CREATE POLICY "允许认证用户查看基础资料" ON public.profiles FOR SELECT USING (auth.role() = 'authenticated');
+
 -- 3. 判断访问权限的辅助函数
 CREATE OR REPLACE FUNCTION public.is_family_member(item_user_id UUID) RETURNS BOOLEAN AS $$
 BEGIN
@@ -65,6 +81,8 @@ RETURNS JSON AS $$
 DECLARE
   target_owner UUID;
   new_member UUID;
+  owner_email TEXT;
+  member_email TEXT;
 BEGIN
   new_member := auth.uid();
   
@@ -81,6 +99,17 @@ BEGIN
   IF target_owner = new_member THEN
     RETURN json_build_object('success', false, 'error', '不能加入自己的家庭');
   END IF;
+
+  -- 强制补齐可能缺失的 Profiles (Security Definer 特权)，避免触发外键违规报错 (ERROR 23503)
+  SELECT email INTO owner_email FROM auth.users WHERE id = target_owner;
+  INSERT INTO public.profiles (id, email, display_name) 
+  VALUES (target_owner, owner_email, COALESCE(split_part(owner_email, '@', 1), '未命名用户')) 
+  ON CONFLICT (id) DO NOTHING;
+  
+  SELECT email INTO member_email FROM auth.users WHERE id = new_member;
+  INSERT INTO public.profiles (id, email, display_name) 
+  VALUES (new_member, member_email, COALESCE(split_part(member_email, '@', 1), '未命名用户')) 
+  ON CONFLICT (id) DO NOTHING;
 
   INSERT INTO public.family_members (owner_id, member_id) 
   VALUES (target_owner, new_member)
