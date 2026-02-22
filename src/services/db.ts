@@ -106,17 +106,19 @@ export async function fetchFloorPlan(familyId: string): Promise<FloorPlan | null
         .from('floor_plans')
         .select('*')
         .eq('user_id', familyId)
-        .limit(1)
-        .single();
+        .limit(1);
     if (error) {
-        if (error.code === 'PGRST116') return null; // 没有数据
         throw error;
     }
+    if (!data || data.length === 0) {
+        return null;
+    }
+    const plan = data[0];
     return {
-        id: data.id,
-        name: data.name,
-        width: data.width,
-        height: data.height,
+        id: plan.id,
+        name: plan.name,
+        width: plan.width,
+        height: plan.height,
     };
 }
 

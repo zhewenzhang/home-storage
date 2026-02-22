@@ -119,31 +119,49 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-    -- 5. ======= 更新现有表的 RLS 策略 =======
+-- 5. ======= 更新现有表的 RLS 策略 =======
     
-    -- floor_plans
-    DROP POLICY IF EXISTS "用户只能查看自己的平面图" ON public.floor_plans;
-    DROP POLICY IF EXISTS "用户只能管理自己的平面图" ON public.floor_plans;
-    DROP POLICY IF EXISTS "查看自己和加入的平面图" ON public.floor_plans;
-    DROP POLICY IF EXISTS "管理自己和加入的平面图" ON public.floor_plans;
-    CREATE POLICY "查看自己和加入的平面图" ON public.floor_plans FOR SELECT USING (public.is_family_member(user_id));
-    CREATE POLICY "管理自己和加入的平面图" ON public.floor_plans FOR ALL USING (public.is_family_member(user_id)) WITH CHECK (public.is_family_member(user_id));
-    
-    -- locations
-    DROP POLICY IF EXISTS "用户只能查看自己的位置" ON public.locations;
-    DROP POLICY IF EXISTS "用户只能管理自己的位置" ON public.locations;
-    DROP POLICY IF EXISTS "查看自己和加入的位置" ON public.locations;
-    DROP POLICY IF EXISTS "管理自己和加入的位置" ON public.locations;
-    CREATE POLICY "查看自己和加入的位置" ON public.locations FOR SELECT USING (public.is_family_member(user_id));
-    CREATE POLICY "管理自己和加入的位置" ON public.locations FOR ALL USING (public.is_family_member(user_id)) WITH CHECK (public.is_family_member(user_id));
-    
-    -- items
-    DROP POLICY IF EXISTS "用户只能查看自己的物品" ON public.items;
-    DROP POLICY IF EXISTS "用户只能管理自己的物品" ON public.items;
-    DROP POLICY IF EXISTS "查看自己和加入的物品" ON public.items;
-    DROP POLICY IF EXISTS "管理自己和加入的物品" ON public.items;
-    CREATE POLICY "查看自己和加入的物品" ON public.items FOR SELECT USING (public.is_family_member(user_id));
-    CREATE POLICY "管理自己和加入的物品" ON public.items FOR ALL USING (public.is_family_member(user_id)) WITH CHECK (public.is_family_member(user_id));
+-- floor_plans
+DROP POLICY IF EXISTS "用户只能查看自己的平面图" ON public.floor_plans;
+DROP POLICY IF EXISTS "用户只能管理自己的平面图" ON public.floor_plans;
+DROP POLICY IF EXISTS "查看自己和加入的平面图" ON public.floor_plans;
+DROP POLICY IF EXISTS "管理自己和加入的平面图" ON public.floor_plans;
+CREATE POLICY "查看自己和加入的平面图" ON public.floor_plans FOR SELECT USING (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = floor_plans.user_id AND member_id = auth.uid())
+);
+CREATE POLICY "管理自己和加入的平面图" ON public.floor_plans FOR ALL USING (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = floor_plans.user_id AND member_id = auth.uid())
+) WITH CHECK (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = floor_plans.user_id AND member_id = auth.uid())
+);
+
+-- locations
+DROP POLICY IF EXISTS "用户只能查看自己的位置" ON public.locations;
+DROP POLICY IF EXISTS "用户只能管理自己的位置" ON public.locations;
+DROP POLICY IF EXISTS "查看自己和加入的位置" ON public.locations;
+DROP POLICY IF EXISTS "管理自己和加入的位置" ON public.locations;
+CREATE POLICY "查看自己和加入的位置" ON public.locations FOR SELECT USING (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = locations.user_id AND member_id = auth.uid())
+);
+CREATE POLICY "管理自己和加入的位置" ON public.locations FOR ALL USING (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = locations.user_id AND member_id = auth.uid())
+) WITH CHECK (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = locations.user_id AND member_id = auth.uid())
+);
+
+-- items
+DROP POLICY IF EXISTS "用户只能查看自己的物品" ON public.items;
+DROP POLICY IF EXISTS "用户只能管理自己的物品" ON public.items;
+DROP POLICY IF EXISTS "查看自己和加入的物品" ON public.items;
+DROP POLICY IF EXISTS "管理自己和加入的物品" ON public.items;
+CREATE POLICY "查看自己和加入的物品" ON public.items FOR SELECT USING (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid())
+);
+CREATE POLICY "管理自己和加入的物品" ON public.items FOR ALL USING (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid())
+) WITH CHECK (
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid())
+);
 
 -- 6. ======= 新表的 RLS 策略 =======
 
