@@ -46,7 +46,7 @@ export async function fetchJoinedFamilies(): Promise<{ ownerId: string, displayN
 
   const { data, error } = await supabase
     .from('family_members')
-    .select('owner_id, alias_name, profiles!inner(display_name)')
+    .select('owner_id, alias_name, profiles!family_members_owner_id_profiles_fkey (display_name)')
     .eq('member_id', user.id);
 
   if (error && error.code !== 'PGRST116') {
@@ -83,7 +83,7 @@ export async function fetchMyFamilyMembers(): Promise<{ memberId: string, displa
 
   const { data, error } = await supabase
     .from('family_members')
-    .select('member_id, created_at, profiles!family_members_member_id_fkey(display_name)')
+    .select('member_id, created_at, profiles!family_members_member_id_profiles_fkey (display_name)')
     .eq('owner_id', user.id);
 
   if (error && error.code !== 'PGRST116') {
