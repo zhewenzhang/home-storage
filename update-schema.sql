@@ -17,11 +17,24 @@ CREATE TABLE IF NOT EXISTS public.family_members (
   member_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   alias_name TEXT, -- 允许成员为家庭设置本地备注名称
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(owner_id, member_id)
+  UNIQUE(owner_id, member_id),
+  CONSTRAINT family_members_owner_id_profiles_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles (id) ON DELETE CASCADE,
+  CONSTRAINT family_members_member_id_profiles_fkey FOREIGN KEY (member_id) REFERENCES public.profiles (id) ON DELETE CASCADE
 );
 
 -- 2.1 修改了关系表后，通过独立语句增加列（以防已存在的表不执行上方语句）
 ALTER TABLE IF EXISTS public.family_members ADD COLUMN IF NOT EXISTS alias_name TEXT;
+
+-- 2.2 为已存在的表补充指向 profiles 的外键，以便 PostgREST 能正确联表查询 (Profiles)
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'family_members_owner_id_profiles_fkey') THEN
+        ALTER TABLE public.family_members ADD CONSTRAINT family_members_owner_id_profiles_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles (id) ON DELETE CASCADE;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'family_members_member_id_profiles_fkey') THEN
+        ALTER TABLE public.family_members ADD CONSTRAINT family_members_member_id_profiles_fkey FOREIGN KEY (member_id) REFERENCES public.profiles (id) ON DELETE CASCADE;
+    END IF;
+END $$;
 
 -- 3. 判断访问权限的辅助函数
 CREATE OR REPLACE FUNCTION public.is_family_member(item_user_id UUID) RETURNS BOOLEAN AS $$
