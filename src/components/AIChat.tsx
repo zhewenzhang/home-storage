@@ -47,12 +47,21 @@ export default function AIChat() {
     }, [isOpen]);
 
     // 获取所有位置选项（含当前 pending 中新建的）
-    const getLocationOptions = useCallback((): string[] => {
-        const existing = locations.map(l => l.name);
+    const getLocationOptions = useCallback(() => {
+        const existing = locations.map(l => ({ name: l.name, isRoom: l.type === 'room' }));
         const newOnes = (pendingActions || [])
             .filter(a => a.action === 'add_cabinet' || a.action === 'add_room')
-            .map(a => a.name);
-        return [...new Set([...existing, ...newOnes])];
+            .map(a => ({ name: a.name, isRoom: a.action === 'add_room' }));
+
+        const unique: { name: string, isRoom: boolean }[] = [];
+        const seen = new Set();
+        for (const item of [...existing, ...newOnes]) {
+            if (!seen.has(item.name)) {
+                seen.add(item.name);
+                unique.push(item);
+            }
+        }
+        return unique;
     }, [locations, pendingActions]);
 
     const getRoomOptions = useCallback((): string[] => {
@@ -395,7 +404,7 @@ export default function AIChat() {
                                                                     className="w-full appearance-none pl-2 pr-6 py-1 text-xs rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-blue-400"
                                                                 >
                                                                     <option value="">选择位置...</option>
-                                                                    {getLocationOptions().map(n => <option key={n} value={n}>{n}</option>)}
+                                                                    {getLocationOptions().map(opt => <option key={opt.name} value={opt.name}>{opt.isRoom ? '🏠 [位置] ' : '📦 [收纳] '}{opt.name}</option>)}
                                                                 </select>
                                                                 <ChevronDown className="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                             </div>

@@ -152,7 +152,7 @@ export async function parseIntentWithAI(
 
 位置层级(房间→[收纳点]):
 ${hierarchy}
-所有位置名: [${allNames}]
+所有已知位置名: [${allNames}]
 
 操作类型:
 - add_cabinet: 添加收纳家具, 字段: name,type(wardrobe/shelf/drawer/box/cabinet),parentRoom
@@ -161,21 +161,19 @@ ${hierarchy}
 - delete_item: 删除物品, 字段: name,locationName
 
 关键规则:
-1. locationName必须精确匹配"所有位置名"中的一个，或匹配同一句中新建的收纳名
-2. 优先选收纳点而非房间。"书房的柜子"→locationName="柜子"(如果存在)
-3. 中文数字:一=1,两=2,三=3
-4. "放到了/放在/存到/收到" 等表达 = add_item
-5. "添加/新增/创建/加入" + 家具名 = add_cabinet
-6. "删除/移除/去掉" = delete_item
-7. 复合指令：先add_cabinet再add_item到新建的收纳里
-8. "里面/裡面" 指代前面提到的收纳点
-9. name中不要包含"收纳-"前缀，直接用家具名如"置物柜1"
-10. 查询/建议类请求 = []
-11. 只输出JSON数组
+1. 【重要】严格区分「存放空间(柜/盒/箱/架/房间)」与「被存放的物品」！例如"杂物柜中加入杂物盒子"，"杂物柜"是收纳(add_cabinet或已存在的位置)，"杂物盒子"是被存放的物品(add_item)！
+2. locationName必须精确匹配"所有已知位置名"中的一个，或匹配同一句中新建的收纳名。优先使用收纳点而非房间。
+3. "放到了/放在/存到/收到" 等表达 = add_item
+4. "添加/新增/创建/加入" 接 具存放功能的家具词汇(柜/箱/盒/架/篓) = add_cabinet
+5. 复合指令：如果物品放入一个不存在的新柜子，先产生 add_cabinet，再产生 add_item 并将 locationName 设为该新柜子的 name。
+6. 中文数字:一=1,两=2,三=3
+7. name中不要包含"收纳-"前缀，直接用原词
+8. 查询/建议类请求 = []
+9. 只输出JSON数组
 
 示例:
-"杂物收纳柜中放着湿纸巾和口罩，帮我记录"
-[{"action":"add_item","name":"湿纸巾","category":"其他","quantity":1,"locationName":"杂物收纳柜"},{"action":"add_item","name":"口罩","category":"其他","quantity":1,"locationName":"杂物收纳柜"}]
+"帮我在客厅的杂物柜中加入杂物盒子"
+[{"action":"add_cabinet","name":"杂物柜","type":"cabinet","parentRoom":"客厅"},{"action":"add_item","name":"杂物盒子","category":"其他","quantity":1,"locationName":"杂物柜"}]
 
 "一次性内衣裤放到了书房的柜子里"
 [{"action":"add_item","name":"一次性内衣裤","category":"衣物","quantity":1,"locationName":"柜子"}]
@@ -183,11 +181,8 @@ ${hierarchy}
 "在书房里加入置物柜1，帮我把网络连接线放到里面"
 [{"action":"add_cabinet","name":"置物柜1","type":"shelf","parentRoom":"书房"},{"action":"add_item","name":"网络连接线","category":"电子产品","quantity":1,"locationName":"置物柜1"}]
 
-"客厅添加一个鞋柜，把拖鞋和运动鞋放进去"
-[{"action":"add_cabinet","name":"鞋柜","type":"cabinet","parentRoom":"客厅"},{"action":"add_item","name":"拖鞋","category":"衣物","quantity":1,"locationName":"鞋柜"},{"action":"add_item","name":"运动鞋","category":"衣物","quantity":1,"locationName":"鞋柜"}]
-
-"在客厅添加两个衣柜"
-[{"action":"add_cabinet","name":"衣柜1","type":"wardrobe","parentRoom":"客厅"},{"action":"add_cabinet","name":"衣柜2","type":"wardrobe","parentRoom":"客厅"}]
+"客厅添加一个鞋柜，把拖鞋放进去"
+[{"action":"add_cabinet","name":"鞋柜","type":"cabinet","parentRoom":"客厅"},{"action":"add_item","name":"拖鞋","category":"衣物","quantity":1,"locationName":"鞋柜"}]
 
 "把书房的PS5删掉"
 [{"action":"delete_item","name":"PS5","locationName":"书房"}]

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LogOut, User, MapPin, Database, ChevronRight, Moon, Bell, HelpCircle, Shield } from 'lucide-react';
+import { LogOut, User, MapPin, Database, ChevronRight, Moon, Bell, HelpCircle, Shield, Edit3, Check, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { signOut } from '../services/auth';
 import { Link } from 'react-router-dom';
@@ -9,11 +9,16 @@ export default function Settings() {
     const { locations, items } = useStore();
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [editNameValue, setEditNameValue] = useState('');
+    const [userId, setUserId] = useState<string | null>(null);
+    const [isSavingName, setIsSavingName] = useState(false);
 
     useEffect(() => {
         supabase.auth.getUser().then(async ({ data }) => {
             const u = data.user;
             if (!u) return;
+            setUserId(u.id);
             setEmail(u.email || '');
 
             const { data: profile } = await supabase
@@ -25,6 +30,27 @@ export default function Settings() {
             setName(profile?.display_name || u.user_metadata?.display_name || u.email?.split('@')[0] || '');
         });
     }, []);
+
+    const handleSaveName = async () => {
+        if (!userId || !editNameValue.trim() || editNameValue.trim() === name) {
+            setIsEditingName(false);
+            return;
+        }
+        setIsSavingName(true);
+        try {
+            // Update auth metadata
+            await supabase.auth.updateUser({ data: { display_name: editNameValue.trim() } });
+            // Update profile table
+            await supabase.from('profiles').update({ display_name: editNameValue.trim() }).eq('id', userId);
+            setName(editNameValue.trim());
+            setIsEditingName(false);
+        } catch (err: any) {
+            console.error('修改昵称失败:', err);
+            alert('修改昵称失败');
+        } finally {
+            setIsSavingName(false);
+        }
+    };
 
     return (
         <div className="max-w-3xl mx-auto space-y-6 pb-20 animate-enter">
@@ -42,8 +68,40 @@ export default function Settings() {
                     <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center border-4 border-white shadow-sm">
                         <User className="w-8 h-8 text-blue-600" />
                     </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-bold text-gray-900">{name}</h3>
+                    <div className="flex-1 min-w-0">
+                        {isEditingName ? (
+                            <div className="flex items-center gap-2 mb-1">
+                                <input
+                                    type="text"
+                                    value={editNameValue}
+                                    onChange={(e) => setEditNameValue(e.target.value)}
+                                    disabled={isSavingName}
+                                    className="flex-1 w-full px-2 py-1 text-sm border-b-2 border-blue-400 bg-transparent outline-none font-bold text-gray-900"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleSaveName();
+                                        if (e.key === 'Escape') setIsEditingName(false);
+                                    }}
+                                />
+                                <button onClick={handleSaveName} disabled={isSavingName} className="p-1 rounded text-green-600 hover:bg-green-50 transition-colors">
+                                    <Check className="w-4 h-4" />
+                                </button>
+                                <button onClick={() => setIsEditingName(false)} disabled={isSavingName} className="p-1 rounded text-gray-400 hover:bg-gray-100 transition-colors">
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="group flex items-center gap-2 mb-1">
+                                <h3 className="text-lg font-bold text-gray-900 truncate">{name}</h3>
+                                <button
+                                    onClick={() => { setEditNameValue(name); setIsEditingName(true); }}
+                                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-blue-50 text-blue-400 transition-all"
+                                    title="修改昵称"
+                                >
+                                    <Edit3 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
                         <p className="text-sm text-gray-500">{email}</p>
                     </div>
                     <button onClick={signOut} className="btn-outline px-4 py-2 text-sm text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300 flex items-center gap-2">
