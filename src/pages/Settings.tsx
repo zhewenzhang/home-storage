@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { LogOut, User, MapPin, Database, ChevronRight, Moon, Bell, HelpCircle, Shield, Edit3, Check, X } from 'lucide-react';
+import { LogOut, User, MapPin, Database, ChevronRight, Moon, Bell, HelpCircle, Shield, Edit3, Check, X, Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { signOut } from '../services/auth';
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { generateHouseHealthReport } from '../services/ai';
+import ReactMarkdown from 'react-markdown';
 
 export default function Settings() {
     const { locations, items } = useStore();
@@ -13,6 +15,10 @@ export default function Settings() {
     const [editNameValue, setEditNameValue] = useState('');
     const [userId, setUserId] = useState<string | null>(null);
     const [isSavingName, setIsSavingName] = useState(false);
+
+    // AI Report State
+    const [reportLoading, setReportLoading] = useState(false);
+    const [healthReport, setHealthReport] = useState<string | null>(null);
 
     useEffect(() => {
         supabase.auth.getUser().then(async ({ data }) => {
@@ -49,6 +55,20 @@ export default function Settings() {
             alert('修改昵称失败');
         } finally {
             setIsSavingName(false);
+        }
+    };
+
+    const handleGenerateReport = async () => {
+        setReportLoading(true);
+        setHealthReport(null);
+        try {
+            const report = await generateHouseHealthReport(locations, items);
+            setHealthReport(report);
+        } catch (error) {
+            console.error(error);
+            setHealthReport('生成失败，请检查网络或配置...');
+        } finally {
+            setReportLoading(false);
         }
     };
 
@@ -198,10 +218,58 @@ export default function Settings() {
                 </div>
             </div>
 
-            {/* AI 占位 */}
-            <div className="text-center pt-8 pb-10">
-                <p className="text-xs text-gray-400 font-mono tracking-widest uppercase">HomeBox Artificial Intelligence powered</p>
+            {/* AI 家庭大盘体检 */}
+            <div id="ai-health-check" className="card p-0 overflow-hidden border border-emerald-100/50 shadow-sm mt-4 relative bg-gradient-to-br from-emerald-50/30 to-teal-50/10">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/5 rounded-full blur-3xl" />
+                <div className="px-5 py-4 border-b border-emerald-100/50 relative">
+                    <h2 className="text-xs font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
+                        <Sparkles className="w-3.5 h-3.5" /> AI 家庭资产大盘体检
+                    </h2>
+                </div>
+
+                <div className="p-5 relative">
+                    {!healthReport && !reportLoading ? (
+                        <div className="text-center py-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="p-4 bg-emerald-100 rounded-full text-emerald-600">
+                                    <AlertCircle className="w-8 h-8" />
+                                </div>
+                            </div>
+                            <h3 className="font-bold text-gray-800 mb-2">一键扫描资产隐患</h3>
+                            <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+                                结合最新保质期追踪，AI管家将深度巡视您的 {items.length} 件物品，抓出烂账、提醒过期，并给出囤货建议。
+                            </p>
+                            <button
+                                onClick={handleGenerateReport}
+                                className="px-6 py-2.5 rounded-xl text-white font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow-md transition-all active:scale-95"
+                            >
+                                <Sparkles className="w-4 h-4 inline-block mr-1.5" /> 开始深度解读
+                            </button>
+                        </div>
+                    ) : reportLoading ? (
+                        <div className="text-center py-10 space-y-4">
+                            <RefreshCw className="w-8 h-8 text-emerald-500 animate-spin mx-auto" />
+                            <p className="text-sm font-bold text-emerald-700 animate-pulse">管家正在翻箱倒柜盘点...</p>
+                        </div>
+                    ) : (
+                        <div className="animate-enter">
+                            <div className="prose prose-sm md:prose-base prose-emerald max-w-none text-gray-700">
+                                <ReactMarkdown>{healthReport || ''}</ReactMarkdown>
+                            </div>
+                            <div className="mt-8 pt-4 border-t border-emerald-100/50 text-center">
+                                <button
+                                    onClick={handleGenerateReport}
+                                    className="text-sm font-bold text-emerald-600 hover:text-emerald-700 hover:underline"
+                                >
+                                    重新运行体检
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/*底部留白*/}
         </div>
     );
 }

@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus, Settings } from 'lucide-react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus, Settings, AlertTriangle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { signOut } from '../services/auth';
 import AIChat from './AIChat';
 import FamilyModal from './FamilyModal';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { searchQuery, setSearchQuery, activeFamilyId } = useStore();
+  const { items, searchQuery, setSearchQuery, activeFamilyId } = useStore();
   const [isFamilyModalOpen, setIsFamilyModalOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // 临期检查逻辑 (提前30天)
+  const expiringItemsCount = items.filter(item => {
+    if (!item.expiryDate) return false;
+    const days = (new Date(item.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24);
+    return days <= 30; // 包含已过期和30天内过期的
+  }).length;
 
   const getPageTitle = () => {
     switch (location.pathname) {
@@ -130,6 +138,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Scrollable Content */}
         <main className="flex-1 overflow-y-auto p-4 pb-32 md:p-10 scroll-smooth">
           <div className="max-w-6xl mx-auto animate-enter">
+            {expiringItemsCount > 0 && location.pathname !== '/items' && (
+              <div
+                onClick={() => navigate('/items')}
+                className="mb-6 bg-yellow-50 border border-yellow-200 p-3 md:p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-yellow-100 transition-colors shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-yellow-100 rounded-xl text-yellow-600"><AlertTriangle className="w-5 h-5" /></div>
+                  <div>
+                    <p className="font-bold text-yellow-800 text-sm md:text-base">发现 {expiringItemsCount} 件物品已过期或即将过期！</p>
+                    <p className="text-xs text-yellow-600 mt-0.5">点击前往物品列表排查隐患</p>
+                  </div>
+                </div>
+                <div className="text-yellow-600 text-sm font-bold bg-white px-3 py-1.5 rounded-lg border border-yellow-100 hidden sm:block">
+                  去处理 →
+                </div>
+              </div>
+            )}
             {children}
           </div>
         </main>

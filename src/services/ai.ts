@@ -473,3 +473,81 @@ export async function chatWithAI(
     const data = await response.json();
     return data.choices?.[0]?.message?.content || '抱歉，未能获取回复。';
 }
+
+// ====== 家庭资产 AI 智能体检 ======
+
+export async function generateHouseHealthReport(
+    locations: LocationData[],
+    items: ItemData[]
+): Promise<string> {
+    const rooms = locations.filter(l => l.type === 'room');
+    const cabinets = locations.filter(l => l.type !== 'room');
+
+    const hierarchy = rooms.map(r => {
+        const children = cabinets.filter(c => c.parentId === r.id);
+        const childInfo = children.map(c => {
+            const ci = items.filter(i => i.locationId === c.id);
+            return ci.length > 0 ? `${c.name}(${ci.map(i => `${i.name}×${i.quantity}${(i as any).expiryDate ? `[保质期:${(i as any).expiryDate}]` : ''}`).join(',')})` : c.name;
+        });
+        const ri = items.filter(i => i.locationId === r.id);
+        const rStr = ri.length > 0 ? `直接散落物品: ${ri.map(i => `${i.name}×${i.quantity}${(i as any).expiryDate ? `[保质期:${(i as any).expiryDate}]` : ''}`).join(',')}` : '';
+        return `🏠 ${r.name}:\n  收纳点: ${childInfo.join(', ') || '无'}\n  ${rStr}`;
+    }).join('\n\n');
+
+    const unassignedItems = items.filter(i => !i.locationId);
+    let unassignedStr = '';
+    if (unassignedItems.length > 0) {
+        unassignedStr = `\n\n❓ 未分配位置的物品:\n${unassignedItems.map(i => `${i.name}×${i.quantity}${(i as any).expiryDate ? `[保质期:${(i as any).expiryDate}]` : ''}`).join(', ')}`;
+    }
+
+    const todayDate = new Date().toISOString().split('T')[0];
+
+    const systemPrompt = `你是一位极具专业素养且带有一丝幽默感的「家庭超级管家」。今天的作用是为这个家庭的物品大盘进行一次「资产体检」。
+今天是 ${todayDate}。当前家里的所有存货数据如下（请仔细阅读，括号内为数量和用户填写的保质期）：
+
+${hierarchy}${unassignedStr}
+
+你需要出具一份体检报告，语言要口语化、亲切自然，不要使用冷冰冰的机器语调。报告必须包含以下3个部分（使用Markdown格式）：
+
+## 🧊 1. 隐患与常识诊断
+- 请发挥你的生活常识，从上面寻找那些【本质上容易腐坏、有保质期】（如牛奶、调料、药品、零食等）但用户【没有记录保质期】的物品。提醒他们尽早确认并补上。（如果没有此类物品，请夸赞他们记录得很完美）。
+
+## ⚠️ 2. 过期与囤积清退预警
+- 根据今天的日期 ${todayDate}，计算上面标了保质期的物品。如果已经过期，严厉警告建议扔掉；如果有在一个月内即将临期的，提醒赶紧消耗。
+- 分析数量：看看同一种东西（比如纸巾、口罩、药品等）是不是囤积得太多了，结合保质期和数量给出购物建议（例如："你的布洛芬囤了10盒，但半年后就过期了，下次打折请管住手"）。
+
+## 🌟 3. 收纳逻辑点评
+- 挑出一两个你觉得收纳位置很有趣、或者放错房间的物品（例如把洗脸巾放在了书房，把扳手放在了卧室）。幽默地吐槽一下，或者给他们合理的重新摆放建议。`;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`,
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'HomeBox-HealthCheck',
+            },
+            body: JSON.stringify({
+                model: MODEL,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: '管家，帮我做一次全家的物品大盘体检吧！' },
+                ],
+                stream: false,
+                max_tokens: 1500,
+                temperature: 0.6,
+            }),
+        });
+
+        if (!response.ok) {
+            return '抱歉，体检中心系统繁忙，请稍后再试。';
+        }
+
+        const data = await response.json();
+        return data.choices?.[0]?.message?.content?.trim() || 'AI 没有返回任何诊断结果。';
+    } catch (err) {
+        console.error('[AI健康检查] 请求失败:', err);
+        return '抱歉，体检中心系统出错。';
+    }
+}
