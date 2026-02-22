@@ -167,6 +167,9 @@ CREATE POLICY "管理自己和加入的物品" ON public.items FOR ALL USING (
   user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid() AND role = 'admin')
 );
 
+-- 5.1 增加保质期字段
+ALTER TABLE IF EXISTS public.items ADD COLUMN IF NOT EXISTS expiry_date DATE;
+
 -- 6. ======= 新表的 RLS 策略 =======
 
 ALTER TABLE public.family_invites ENABLE ROW LEVEL SECURITY;

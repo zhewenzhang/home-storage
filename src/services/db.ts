@@ -67,6 +67,7 @@ export async function fetchItems(familyId: string): Promise<Item[]> {
         description: row.description || '',
         locationId: row.location_id || '',
         createdAt: new Date(row.created_at).getTime(),
+        expiryDate: row.expiry_date || undefined,
     }));
 }
 
@@ -78,6 +79,7 @@ export async function insertItem(item: Omit<Item, 'id' | 'createdAt'>, familyId:
         quantity: item.quantity,
         description: item.description || '',
         location_id: item.locationId || null,
+        expiry_date: item.expiryDate || null,
     }).select().single();
     if (error) throw error;
     return data.id as string;
@@ -90,6 +92,7 @@ export async function updateItemDB(id: string, updates: Partial<Item>) {
     if (updates.quantity !== undefined) payload.quantity = updates.quantity;
     if (updates.description !== undefined) payload.description = updates.description;
     if (updates.locationId !== undefined) payload.location_id = updates.locationId;
+    if (updates.expiryDate !== undefined) payload.expiry_date = updates.expiryDate;
     const { error } = await supabase.from('items').update(payload).eq('id', id);
     if (error) throw error;
 }
@@ -142,6 +145,7 @@ export async function batchInsertItemsDB(items: Array<Omit<Item, 'id' | 'created
         quantity: item.quantity,
         description: item.description || '',
         location_id: item.locationId || null,
+        expiry_date: item.expiryDate || null,
     }));
     const { error } = await supabase.from('items').insert(payload);
     if (error) throw error;

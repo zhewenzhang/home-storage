@@ -63,6 +63,18 @@ export default function Items() {
     }
   };
 
+  const getExpiryLabel = (dateStr?: string) => {
+    if (!dateStr) return null;
+    const expiry = new Date(dateStr).getTime();
+    const now = new Date().getTime();
+    const diff = expiry - now;
+    const days = Math.ceil(diff / (1000 * 3600 * 24));
+
+    if (days < 0) return { text: `已过期 ${Math.abs(days)} 天`, color: 'bg-red-100 text-red-600', dot: 'bg-red-500' };
+    if (days <= 30) return { text: `还剩 ${days} 天`, color: 'bg-yellow-100 text-yellow-700', dot: 'bg-yellow-500' };
+    return { text: `还剩 ${Math.floor(days / 30)} 个月`, color: 'bg-green-50 text-green-600', dot: 'bg-green-500' };
+  };
+
   return (
     <div className="space-y-6 animate-enter max-w-3xl mx-auto">
       <ConfirmDialog
@@ -137,7 +149,13 @@ export default function Items() {
                 {items.map(item => (
                   <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50/80 group hover:bg-gray-100 transition-all">
                     <Link to={`/items/${item.id}`} className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 truncate">{item.name}</p>
+                      <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                        <p className="font-bold text-gray-900 truncate">{item.name}</p>
+                        {item.expiryDate && (() => {
+                          const l = getExpiryLabel(item.expiryDate);
+                          return l ? <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${l.color}`}><span className={`w-1.5 h-1.5 rounded-full ${l.dot}`}></span>{l.text}</span> : null;
+                        })()}
+                      </div>
                       <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                     </Link>
                     {canEdit() && (
@@ -168,7 +186,13 @@ export default function Items() {
                 {unassignedItems.map(item => (
                   <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50/80 group hover:bg-gray-100 transition-all">
                     <Link to={`/items/${item.id}`} className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 truncate">{item.name}</p>
+                      <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                        <p className="font-bold text-gray-900 truncate">{item.name}</p>
+                        {item.expiryDate && (() => {
+                          const l = getExpiryLabel(item.expiryDate);
+                          return l ? <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${l.color}`}><span className={`w-1.5 h-1.5 rounded-full ${l.dot}`}></span>{l.text}</span> : null;
+                        })()}
+                      </div>
                       <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                     </Link>
                     {canEdit() && (

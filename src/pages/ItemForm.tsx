@@ -57,6 +57,7 @@ export default function ItemForm() {
     quantity: 1,
     description: '',
     locationId: searchParams.get('locationId') || '',
+    expiryDate: '',
   });
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export default function ItemForm() {
           quantity: existing.quantity,
           description: existing.description,
           locationId: existing.locationId,
+          expiryDate: existing.expiryDate || '',
         });
       }
     }
@@ -232,6 +234,48 @@ export default function ItemForm() {
               )}
             </select>
           )}
+        </div>
+
+        {/* 📅 保质期设置 */}
+        <div className="card">
+          <label className="block text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
+            📅 保质期 <span className="text-xs text-gray-400 font-normal">(选填)</span>
+          </label>
+          <div className="space-y-4">
+            <input
+              type="date"
+              value={form.expiryDate || ''}
+              onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
+              className="input-field"
+            />
+            {/* 快捷按钮 */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: '清空', months: 0 },
+                { label: '+1个月', months: 1 },
+                { label: '+6个月', months: 6 },
+                { label: '+1年', months: 12 },
+                { label: '+3年(药品)', months: 36 }
+              ].map((btn, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => {
+                    if (btn.months === 0) {
+                      setForm({ ...form, expiryDate: '' });
+                      return;
+                    }
+                    const d = new Date();
+                    d.setMonth(d.getMonth() + btn.months);
+                    setForm({ ...form, expiryDate: d.toISOString().split('T')[0] });
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${btn.months === 0 ? 'bg-gray-100 text-gray-500 hover:bg-gray-200' : 'bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100'}`}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* 备注 */}

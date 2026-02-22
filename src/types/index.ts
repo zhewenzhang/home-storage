@@ -6,6 +6,7 @@ export interface Item {
   description: string;
   locationId: string;
   createdAt: number;
+  expiryDate?: string;
 }
 
 export interface Location {
@@ -29,7 +30,7 @@ export interface FloorPlan {
   height: number;
 }
 
-export type Category = 
+export type Category =
   | '电子产品'
   | '工具'
   | '衣物'
