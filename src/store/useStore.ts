@@ -14,6 +14,7 @@ export interface JoinedFamily {
   displayName: string;
   originalName?: string;
   aliasName?: string;
+  role: 'viewer' | 'admin';
 }
 
 interface AppState {
@@ -62,6 +63,7 @@ interface AppState {
   // Getters
   getItemsByLocation: (locationId: string) => Item[];
   getLocationById: (id: string) => Location | undefined;
+  canEdit: () => boolean;
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 15);
@@ -219,5 +221,11 @@ export const useStore = create<AppState>()(
       get().items.filter(item => item.locationId === locationId),
     getLocationById: (id) =>
       get().locations.find(loc => loc.id === id),
+    canEdit: () => {
+      const activeFam = get().activeFamilyId;
+      if (!activeFam) return true; // Own family => true
+      const joined = get().joinedFamilies.find(f => f.ownerId === activeFam);
+      return joined?.role === 'admin';
+    },
   })
 );

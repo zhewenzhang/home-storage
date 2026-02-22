@@ -40,13 +40,13 @@ export async function joinFamilyByCode(code: string): Promise<string> {
 }
 
 // 获取我加入的家庭成员列表
-export async function fetchJoinedFamilies(): Promise<{ ownerId: string, displayName: string }[]> {
+export async function fetchJoinedFamilies(): Promise<{ ownerId: string, displayName: string, role: 'viewer' | 'admin' }[]> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) return [];
 
   const { data, error } = await supabase
     .from('family_members')
-    .select('owner_id, alias_name, profiles!family_members_owner_id_profiles_fkey(display_name)')
+    .select('owner_id, alias_name, role, profiles!family_members_owner_id_profiles_fkey(display_name)')
     .eq('member_id', user.id);
 
   if (error && error.code !== 'PGRST116') {
@@ -58,7 +58,8 @@ export async function fetchJoinedFamilies(): Promise<{ ownerId: string, displayN
     ownerId: row.owner_id,
     displayName: row.alias_name || row.profiles?.display_name || '未命名家庭',
     originalName: row.profiles?.display_name || '未命名家庭',
-    aliasName: row.alias_name || ''
+    aliasName: row.alias_name || '',
+    role: row.role || 'viewer'
   }));
 }
 
@@ -77,13 +78,13 @@ export async function updateFamilyAlias(ownerId: string, aliasName: string): Pro
 }
 
 // 获取谁加入了我的家庭
-export async function fetchMyFamilyMembers(): Promise<{ memberId: string, displayName: string, joinedAt: string }[]> {
+export async function fetchMyFamilyMembers(): Promise<{ memberId: string, displayName: string, joinedAt: string, role: 'viewer' | 'admin' }[]> {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) return [];
 
   const { data, error } = await supabase
     .from('family_members')
-    .select('member_id, created_at, profiles!family_members_member_id_profiles_fkey(display_name)')
+    .select('member_id, created_at, role, profiles!family_members_member_id_profiles_fkey(display_name)')
     .eq('owner_id', user.id);
 
   if (error && error.code !== 'PGRST116') {
@@ -94,8 +95,23 @@ export async function fetchMyFamilyMembers(): Promise<{ memberId: string, displa
   return (data || []).map((row: any) => ({
     memberId: row.member_id,
     displayName: row.profiles?.display_name || '未知用户',
-    joinedAt: row.created_at
+    joinedAt: row.created_at,
+    role: row.role || 'viewer'
   }));
+}
+
+// 拥有者修改家庭成员权限
+export async function updateFamilyMemberRole(memberId: string, role: 'viewer' | 'admin'): Promise<void> {
+  const user = (await supabase.auth.getUser()).data.user;
+  if (!user) return;
+
+  const { error } = await supabase
+    .from('family_members')
+    .update({ role })
+    .eq('owner_id', user.id)
+    .eq('member_id', memberId);
+
+  if (error) throw error;
 }
 
 // 踢出家庭成员

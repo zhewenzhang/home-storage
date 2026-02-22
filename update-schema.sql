@@ -16,11 +16,15 @@ CREATE TABLE IF NOT EXISTS public.family_members (
   owner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   member_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   alias_name TEXT, -- 允许成员为家庭设置本地备注名称
+  role TEXT NOT NULL DEFAULT 'viewer' CHECK (role IN ('viewer', 'admin')), -- 权限等级控制
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(owner_id, member_id),
   CONSTRAINT family_members_owner_id_profiles_fkey FOREIGN KEY (owner_id) REFERENCES public.profiles (id) ON DELETE CASCADE,
   CONSTRAINT family_members_member_id_profiles_fkey FOREIGN KEY (member_id) REFERENCES public.profiles (id) ON DELETE CASCADE
 );
+
+-- 2.05 修改了关系表后，通过独立语句增加可能缺失的列
+ALTER TABLE IF EXISTS public.family_members ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'viewer' CHECK (role IN ('viewer', 'admin'));
 
 -- 2.1 修改了关系表后，通过独立语句增加列（以防已存在的表不执行上方语句）
 ALTER TABLE IF EXISTS public.family_members ADD COLUMN IF NOT EXISTS alias_name TEXT;
@@ -130,9 +134,9 @@ CREATE POLICY "查看自己和加入的平面图" ON public.floor_plans FOR SELE
   user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = floor_plans.user_id AND member_id = auth.uid())
 );
 CREATE POLICY "管理自己和加入的平面图" ON public.floor_plans FOR ALL USING (
-  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = floor_plans.user_id AND member_id = auth.uid())
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = floor_plans.user_id AND member_id = auth.uid() AND role = 'admin')
 ) WITH CHECK (
-  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = floor_plans.user_id AND member_id = auth.uid())
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = floor_plans.user_id AND member_id = auth.uid() AND role = 'admin')
 );
 
 -- locations
@@ -144,9 +148,9 @@ CREATE POLICY "查看自己和加入的位置" ON public.locations FOR SELECT US
   user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = locations.user_id AND member_id = auth.uid())
 );
 CREATE POLICY "管理自己和加入的位置" ON public.locations FOR ALL USING (
-  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = locations.user_id AND member_id = auth.uid())
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = locations.user_id AND member_id = auth.uid() AND role = 'admin')
 ) WITH CHECK (
-  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = locations.user_id AND member_id = auth.uid())
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = locations.user_id AND member_id = auth.uid() AND role = 'admin')
 );
 
 -- items
@@ -158,9 +162,9 @@ CREATE POLICY "查看自己和加入的物品" ON public.items FOR SELECT USING 
   user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid())
 );
 CREATE POLICY "管理自己和加入的物品" ON public.items FOR ALL USING (
-  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid())
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid() AND role = 'admin')
 ) WITH CHECK (
-  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid())
+  user_id = auth.uid() OR EXISTS (SELECT 1 FROM public.family_members WHERE owner_id = items.user_id AND member_id = auth.uid() AND role = 'admin')
 );
 
 -- 6. ======= 新表的 RLS 策略 =======
@@ -176,8 +180,8 @@ DROP POLICY IF EXISTS "成员和拥有者可见" ON public.family_members;
 CREATE POLICY "成员和拥有者可见" ON public.family_members FOR SELECT USING (auth.uid() = owner_id OR auth.uid() = member_id);
 DROP POLICY IF EXISTS "成员自己可退出或拥有者可踢出" ON public.family_members;
 CREATE POLICY "成员自己可退出或拥有者可踢出" ON public.family_members FOR DELETE USING (auth.uid() = owner_id OR auth.uid() = member_id);
--- 成员可以修改自己记录的alias_name (给别人的家庭加备注)
+-- 成员可以修改自己记录的alias_name (给别人的家庭加备注)，Owner可以修改role
 DROP POLICY IF EXISTS "成员可修改备注名" ON public.family_members;
-CREATE POLICY "成员可修改备注名" ON public.family_members FOR UPDATE USING (auth.uid() = member_id) WITH CHECK (auth.uid() = member_id);
+CREATE POLICY "成员可修改备注名或拥有者改权限" ON public.family_members FOR UPDATE USING (auth.uid() = member_id OR auth.uid() = owner_id) WITH CHECK (auth.uid() = member_id OR auth.uid() = owner_id);
 
 -- 完毕

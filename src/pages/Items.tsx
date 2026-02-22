@@ -37,7 +37,7 @@ function ConfirmDialog({
 }
 
 export default function Items() {
-  const { items, locations, deleteItem, searchQuery } = useStore();
+  const { items, locations, deleteItem, searchQuery, canEdit } = useStore();
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -79,10 +79,12 @@ export default function Items() {
           <h2 className="text-2xl font-bold">物品管理</h2>
           <p className="text-sm text-gray-500 mt-1">{items.length} 件物品</p>
         </div>
-        <Link to="/items/new" className="btn-primary">
-          <Plus className="w-4 h-4" />
-          添加物品
-        </Link>
+        {canEdit() && (
+          <Link to="/items/new" className="btn-primary">
+            <Plus className="w-4 h-4" />
+            添加物品
+          </Link>
+        )}
       </div>
 
       {/* 分类过滤 */}
@@ -138,14 +140,16 @@ export default function Items() {
                       <p className="font-bold text-gray-900 truncate">{item.name}</p>
                       <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                     </Link>
-                    <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2 md:mt-0">
-                      <Link to={`/items/${item.id}`} className="p-2 rounded-xl hover:bg-white transition-all bg-white md:bg-transparent shadow-sm md:shadow-none">
-                        <Edit className="w-4 h-4 text-gray-400" />
-                      </Link>
-                      <button onClick={() => setDeleteTarget({ id: item.id, name: item.name })} className="p-2 rounded-xl hover:bg-red-50 transition-all bg-white md:bg-transparent shadow-sm md:shadow-none">
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </button>
-                    </div>
+                    {canEdit() && (
+                      <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2 md:mt-0">
+                        <Link to={`/items/${item.id}`} className="p-2 rounded-xl hover:bg-white transition-all bg-white md:bg-transparent shadow-sm md:shadow-none">
+                          <Edit className="w-4 h-4 text-gray-400" />
+                        </Link>
+                        <button onClick={(e) => { e.preventDefault(); setDeleteTarget({ id: item.id, name: item.name }) }} className="p-2 rounded-xl hover:bg-red-50 transition-all bg-white md:bg-transparent shadow-sm md:shadow-none">
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -167,14 +171,16 @@ export default function Items() {
                       <p className="font-bold text-gray-900 truncate">{item.name}</p>
                       <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                     </Link>
-                    <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2 md:mt-0">
-                      <Link to={`/items/${item.id}`} className="p-2 rounded-xl hover:bg-white bg-white md:bg-transparent shadow-sm md:shadow-none">
-                        <Edit className="w-4 h-4 text-gray-400" />
-                      </Link>
-                      <button onClick={() => setDeleteTarget({ id: item.id, name: item.name })} className="p-2 rounded-xl hover:bg-red-50 bg-white md:bg-transparent shadow-sm md:shadow-none">
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </button>
-                    </div>
+                    {canEdit() && (
+                      <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2 md:mt-0">
+                        <Link to={`/items/${item.id}`} className="p-2 rounded-xl hover:bg-white bg-white md:bg-transparent shadow-sm md:shadow-none">
+                          <Edit className="w-4 h-4 text-gray-400" />
+                        </Link>
+                        <button onClick={(e) => { e.preventDefault(); setDeleteTarget({ id: item.id, name: item.name }) }} className="p-2 rounded-xl hover:bg-red-50 bg-white md:bg-transparent shadow-sm md:shadow-none">
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

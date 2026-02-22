@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { getOrCreateInviteCode, joinFamilyByCode, leaveFamily, fetchMyFamilyMembers, kickFamilyMember, updateFamilyAlias } from '../services/family';
-import { Users, ClipboardCopy, Check, UserPlus, LogOut, Home as HomeIcon, X, Edit3 } from 'lucide-react';
+import { getOrCreateInviteCode, joinFamilyByCode, leaveFamily, fetchMyFamilyMembers, kickFamilyMember, updateFamilyAlias, updateFamilyMemberRole } from '../services/family';
+import { Users, ClipboardCopy, Check, UserPlus, LogOut, Home as HomeIcon, X, Edit3, Shield, Eye } from 'lucide-react';
 
 export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
     const { activeFamilyId, setActiveFamilyId, joinedFamilies, loadFromSupabase } = useStore();
@@ -12,7 +12,7 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
     const [joinError, setJoinError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const [joinedUsers, setJoinedUsers] = useState<{ memberId: string, displayName: string, joinedAt: string }[]>([]);
+    const [joinedUsers, setJoinedUsers] = useState<{ memberId: string, displayName: string, joinedAt: string, role: string }[]>([]);
     const [editingAliasOwnerId, setEditingAliasOwnerId] = useState<string | null>(null);
     const [aliasEditValue, setAliasEditValue] = useState('');
 
@@ -83,6 +83,16 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
         } catch (err) {
             console.error(err);
             alert('修改备注失败');
+        }
+    };
+
+    const handleRoleChange = async (memberId: string, newRole: 'viewer' | 'admin') => {
+        try {
+            await updateFamilyMemberRole(memberId, newRole);
+            setJoinedUsers(prev => prev.map(u => u.memberId === memberId ? { ...u, role: newRole } : u));
+        } catch (err) {
+            console.error(err);
+            alert('更改权限失败');
         }
     };
 
@@ -217,7 +227,17 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
 
                                             {/* 显示共享状态与原名差异 */}
                                             <div className="flex flex-col">
-                                                <span className="text-xs text-gray-400">共享的家庭数据空间</span>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    {family.role === 'admin' ?
+                                                        <span className="flex items-center gap-1 text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded shadow-sm border border-green-100 font-medium">
+                                                            <Shield className="w-3 h-3" /> 可编辑
+                                                        </span> :
+                                                        <span className="flex items-center gap-1 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded shadow-sm border border-gray-200 font-medium">
+                                                            <Eye className="w-3 h-3" /> 仅观看
+                                                        </span>
+                                                    }
+                                                    <span className="text-xs text-gray-400">共享的家庭数据空间</span>
+                                                </div>
                                                 {family.aliasName && (
                                                     <span className="text-[10px] text-gray-300">原名: {family.originalName}</span>
                                                 )}
@@ -258,12 +278,23 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                                 <p className="text-[10px] text-gray-400">于 {new Date(u.joinedAt).toLocaleDateString()} 加入</p>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => handleKick(u.memberId, u.displayName)}
-                                            className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded bg-red-50 opacity-0 group-hover:opacity-100 transition-all font-medium"
-                                        >
-                                            移出
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <select
+                                                value={u.role}
+                                                onChange={(e) => handleRoleChange(u.memberId, e.target.value as 'viewer' | 'admin')}
+                                                className="text-xs bg-gray-100 border-none rounded py-1 pl-2 pr-6 outline-none cursor-pointer focus:ring-1 focus:ring-[#3B6D8C] font-medium text-gray-600"
+                                            >
+                                                <option value="viewer">👀 仅观看</option>
+                                                <option value="admin">✏️ 可编辑</option>
+                                            </select>
+                                            <button
+                                                onClick={() => handleKick(u.memberId, u.displayName)}
+                                                className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded bg-red-50 opacity-0 group-hover:opacity-100 transition-all font-medium"
+                                                title="移出家庭"
+                                            >
+                                                <LogOut className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))
                             ) : (
