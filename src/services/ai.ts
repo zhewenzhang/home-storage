@@ -1,5 +1,5 @@
 // OpenRouter AI 服务
-const API_KEY = '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';
+const API_KEY = (import.meta as any).env.VITE_AI_API_KEY || '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';
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = 'stepfun/step-3.5-flash:free';
 
