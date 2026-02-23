@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Plus, Trash2, Edit, Home, X, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Edit, Home, X, AlertTriangle, ChevronDown, ChevronRight, QrCode } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import QRCodeGenerator from '../components/QRCodeGenerator';
 
 // 位置类型图标映射
 const TYPE_CONFIG: Record<string, { icon: string; label: string }> = {
@@ -55,6 +56,7 @@ export default function Locations() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [qrTarget, setQrTarget] = useState<{ id: string; name: string } | null>(null);
 
   const [form, setForm] = useState<{
     name: string;
@@ -285,6 +287,13 @@ export default function Locations() {
                   </div>
                   <div className="flex gap-1">
                     <button
+                      onClick={() => setQrTarget({ id: room.id, name: room.name })}
+                      className="p-2 rounded-xl hover:bg-gray-100 transition-all"
+                      title="打印空间码"
+                    >
+                      <QrCode className="w-4 h-4 text-gray-400" />
+                    </button>
+                    <button
                       onClick={() => handleEdit(room)}
                       className="p-2 rounded-xl hover:bg-gray-100 transition-all"
                     >
@@ -315,6 +324,9 @@ export default function Locations() {
                             <span className="text-xs text-gray-400 ml-2">{getItemCount(child.id)} 件</span>
                           </div>
                           <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => setQrTarget({ id: child.id, name: child.name })} className="p-1.5 rounded-lg hover:bg-white bg-white md:bg-transparent shadow-sm md:shadow-none" title="打印空间码">
+                              <QrCode className="w-3.5 h-3.5 text-gray-400" />
+                            </button>
                             <button onClick={() => handleEdit(child)} className="p-1.5 rounded-lg hover:bg-white bg-white md:bg-transparent shadow-sm md:shadow-none">
                               <Edit className="w-3.5 h-3.5 text-gray-400" />
                             </button>
@@ -342,6 +354,9 @@ export default function Locations() {
                     <div key={child.id} className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 group">
                       <span className="text-lg">{config.icon}</span>
                       <span className="text-sm font-bold text-gray-700 flex-1">{child.name}</span>
+                      <button onClick={() => setQrTarget({ id: child.id, name: child.name })} className="p-2 mx-1 rounded-lg hover:bg-gray-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-white md:bg-transparent shadow-sm md:shadow-none" title="打印空间码">
+                        <QrCode className="w-3.5 h-3.5 text-gray-400" />
+                      </button>
                       <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-2 rounded-lg hover:bg-red-50 md:opacity-0 group-hover:opacity-100 transition-opacity bg-white md:bg-transparent shadow-sm md:shadow-none">
                         <Trash2 className="w-3.5 h-3.5 text-red-400" />
                       </button>
@@ -352,6 +367,14 @@ export default function Locations() {
             </div>
           )}
         </div>
+      )}
+
+      {qrTarget && (
+        <QRCodeGenerator
+          locationId={qrTarget.id}
+          locationName={qrTarget.name}
+          onClose={() => setQrTarget(null)}
+        />
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2, Edit, Search, Package, AlertTriangle } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { DEFAULT_CATEGORIES } from '../types';
@@ -38,6 +38,9 @@ function ConfirmDialog({
 
 export default function Items() {
   const { items, locations, deleteItem, searchQuery, canEdit } = useStore();
+  const [searchParams] = useSearchParams();
+  const filterLocationId = searchParams.get('locationId');
+
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -45,14 +48,17 @@ export default function Items() {
   const filteredItems = items.filter(item => {
     const matchSearch = !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.category.includes(searchQuery);
     const matchCat = !selectedCat || item.category === selectedCat;
-    return matchSearch && matchCat;
+    const matchLocation = !filterLocationId || item.locationId === filterLocationId;
+    return matchSearch && matchCat && matchLocation;
   });
 
   // 按位置分组
-  const itemsByLocation = locations.map(loc => ({
-    location: loc,
-    items: filteredItems.filter(item => item.locationId === loc.id)
-  })).filter(group => group.items.length > 0);
+  const itemsByLocation = locations
+    .filter(loc => !filterLocationId || loc.id === filterLocationId)
+    .map(loc => ({
+      location: loc,
+      items: filteredItems.filter(item => item.locationId === loc.id)
+    })).filter(group => group.items.length > 0);
 
   const unassignedItems = filteredItems.filter(item => !item.locationId);
 
