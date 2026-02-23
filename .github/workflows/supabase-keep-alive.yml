@@ -1,0 +1,39 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # 每天凌晨 0点 执行一次 (UTC 时间，即北京时间早上8点)
+    # 虽然 Supabase 限制是 7 天，但每天萍一次最稳妥且零成本
+    - cron: '0 0 * * *'
+  # 允许手动在 GitHub Actions 面板点击触发
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          # 此处引用 GitHub 仓库中的 Secrets
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "错误: 未在 GitHub Repository Secrets 中找到 VITE_SUPABASE_URL 或 VITE_SUPABASE_ANON_KEY"
+            echo "请前往 GitHub 仓库 -> Settings -> Secrets and variables -> Actions 中添加这两个变量。"
+            exit 1
+          fi
+
+          echo "开始向 Supabase 发送唤醒请求..."
+          
+          # 向 public schema 发送一个极其轻量的查询以模拟活跃访问
+          # 哪怕因为 RLS 权限返回空数据，也完全算作一次有效 Active 唤醒记录
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${VITE_SUPABASE_URL}/rest/v1/locations?select=id&limit=1" \
+            -H "apikey: ${VITE_SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${VITE_SUPABASE_ANON_KEY}")
+
+          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 204 ]; then
+            echo "✅ Supabase 唤醒成功 (HTTP ${HTTP_STATUS})"
+          else
+            echo "⚠️ 唤醒请求发出，但收到非预期状态码 (HTTP ${HTTP_STATUS})"
+          fi
