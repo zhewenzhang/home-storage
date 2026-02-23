@@ -233,6 +233,7 @@ export default function ItemForm() {
                 <input
                   type="file"
                   accept="image/*"
+                  capture="environment"
                   className="hidden"
                   onChange={handleImageUpload}
                   disabled={isUploading}
