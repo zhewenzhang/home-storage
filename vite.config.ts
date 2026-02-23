@@ -17,14 +17,9 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'https://cdn.iconscout.com/icon/free/png-256/free-box-186-431526.png',
-            sizes: '256x256',
-            type: 'image/png',
-          },
-          {
-            src: 'https://cdn.iconscout.com/icon/free/png-512/free-box-186-431526.png',
-            sizes: '512x512',
-            type: 'image/png',
+            src: 'https://api.iconify.design/lucide:package.svg?color=%233B6D8C',
+            sizes: '192x192 512x512',
+            type: 'image/svg+xml',
             purpose: 'any maskable',
           }
         ]

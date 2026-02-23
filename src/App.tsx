@@ -8,12 +8,27 @@ import Layout from './components/Layout';
 import AuthPage from './pages/AuthPage';
 import Home from './pages/Home';
 
-const Items = React.lazy(() => import('./pages/Items'));
-const ItemForm = React.lazy(() => import('./pages/ItemForm'));
-const Locations = React.lazy(() => import('./pages/Locations'));
-const FloorPlan = React.lazy(() => import('./pages/FloorPlan'));
-const BatchManage = React.lazy(() => import('./pages/BatchManage'));
-const Settings = React.lazy(() => import('./pages/Settings'));
+// 解决 Zeabur 重新部署后，旧缓存请求新分包导致 Failed to fetch dynamically imported module 的问题
+const lazyWithRetries = (componentImport: () => Promise<any>) =>
+  React.lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch dynamically imported module')) {
+        // 如果是从缓存加载了旧的 JS 发起对不存在的新哈希的请求，重载整个 SPA 获取最新 index.html
+        window.location.reload();
+        return { default: () => <div>Loading...</div> }; // 防御性返回
+      }
+      throw error;
+    }
+  });
+
+const Items = lazyWithRetries(() => import('./pages/Items'));
+const ItemForm = lazyWithRetries(() => import('./pages/ItemForm'));
+const Locations = lazyWithRetries(() => import('./pages/Locations'));
+const FloorPlan = lazyWithRetries(() => import('./pages/FloorPlan'));
+const BatchManage = lazyWithRetries(() => import('./pages/BatchManage'));
+const Settings = lazyWithRetries(() => import('./pages/Settings'));
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
