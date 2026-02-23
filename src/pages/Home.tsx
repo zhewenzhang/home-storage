@@ -3,6 +3,7 @@ import { Plus, Package, MapPin, ArrowRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { useMemo, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import ExpirationWarning from '../components/ExpirationWarning';
 
 
 // 收纳标记类型
@@ -131,6 +132,7 @@ export default function Home() {
             </div>
           </div>
 
+          <ExpirationWarning />
 
           <div className="card p-1 min-h-[400px]">
             {locations.length === 0 ? (

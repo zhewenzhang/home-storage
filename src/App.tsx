@@ -1,18 +1,19 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { useStore } from './store/useStore';
 import type { User } from '@supabase/supabase-js';
 
 import Layout from './components/Layout';
-import Home from './pages/Home';
-import Items from './pages/Items';
-import ItemForm from './pages/ItemForm';
-import Locations from './pages/Locations';
-import FloorPlan from './pages/FloorPlan';
 import AuthPage from './pages/AuthPage';
-import BatchManage from './pages/BatchManage';
-import Settings from './pages/Settings';
+import Home from './pages/Home';
+
+const Items = React.lazy(() => import('./pages/Items'));
+const ItemForm = React.lazy(() => import('./pages/ItemForm'));
+const Locations = React.lazy(() => import('./pages/Locations'));
+const FloorPlan = React.lazy(() => import('./pages/FloorPlan'));
+const BatchManage = React.lazy(() => import('./pages/BatchManage'));
+const Settings = React.lazy(() => import('./pages/Settings'));
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -70,17 +71,23 @@ function App() {
   return (
     <HashRouter>
       <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/items" element={<Items />} />
-          <Route path="/items/new" element={<ItemForm />} />
-          <Route path="/items/:id" element={<ItemForm />} />
-          <Route path="/locations" element={<Locations />} />
-          <Route path="/floorplan" element={<FloorPlan />} />
-          <Route path="/batch" element={<BatchManage />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        <Suspense fallback={
+          <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+            <div className="w-8 h-8 border-4 border-slate-200 border-t-[#3B6D8C] rounded-full animate-spin"></div>
+          </div>
+        }>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/items" element={<Items />} />
+            <Route path="/items/new" element={<ItemForm />} />
+            <Route path="/items/:id" element={<ItemForm />} />
+            <Route path="/locations" element={<Locations />} />
+            <Route path="/floorplan" element={<FloorPlan />} />
+            <Route path="/batch" element={<BatchManage />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </Suspense>
       </Layout>
     </HashRouter>
   );
