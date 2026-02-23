@@ -39,8 +39,12 @@ export default function AIChat() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, streamText, pendingActions]);
+        if (messagesEndRef.current) {
+            const el = messagesEndRef.current;
+            // Only smooth scroll if we are somewhat close to bottom, or instantly jump if far away
+            el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+    }, [messages, streamText, pendingActions, statusText]);
 
     useEffect(() => {
         if (isOpen) setTimeout(() => inputRef.current?.focus(), 200);

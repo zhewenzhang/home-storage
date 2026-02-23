@@ -33,6 +33,7 @@ interface ItemData {
     quantity: number;
     description?: string;
     locationId?: string;
+    expiryDate?: string;
 }
 
 // ====== 繁体→简体 常用字映射 ======
@@ -189,6 +190,11 @@ ${hierarchy}
 
 "家里有什么？"
 []`;
+
+    if (!API_KEY || API_KEY.indexOf('your-ai-api-key') > -1) {
+        console.warn('[AI] API Key 未配置。');
+        return [];
+    }
 
     try {
         const response = await fetch(API_URL, {
@@ -474,6 +480,26 @@ export async function chatWithAI(
     return data.choices?.[0]?.message?.content || '抱歉，未能获取回复。';
 }
 
+// ====== AI 对话助手 ======
+
+export async function getAIReply(
+    userText: string,
+    locations: LocationData[],
+    items: ItemData[],
+    onChunk?: (text: string) => void
+): Promise<string> {
+    if (!API_KEY || API_KEY.indexOf('your-ai-api-key') > -1) {
+        return '🚫 系统检测到您的 AI 大模型功能仍未正确获取授权（API Key 丢失）。\n由于我们刚刚使用了更安全的隐藏环境变量文件配置，**您必须返回终端，重启原来运行的 `npm run dev` 命令框**，Vite 前端服务器才能识别到这次新加在底层的安全密钥。\n请立即重启控制台重试本功能！';
+    }
+
+    const systemPrompt = buildSystemPrompt(locations, items, false, '');
+
+    return chatWithAI([
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userText }
+    ], onChunk);
+}
+
 // ====== 家庭资产 AI 智能体检 ======
 
 export async function generateHouseHealthReport(
@@ -487,17 +513,17 @@ export async function generateHouseHealthReport(
         const children = cabinets.filter(c => c.parentId === r.id);
         const childInfo = children.map(c => {
             const ci = items.filter(i => i.locationId === c.id);
-            return ci.length > 0 ? `${c.name}(${ci.map(i => `${i.name}×${i.quantity}${(i as any).expiryDate ? `[保质期:${(i as any).expiryDate}]` : ''}`).join(',')})` : c.name;
+            return ci.length > 0 ? `${c.name}(${ci.map(i => `${i.name}×${i.quantity}${i.expiryDate ? `[保质期:${i.expiryDate}]` : ''}`).join(',')})` : c.name;
         });
         const ri = items.filter(i => i.locationId === r.id);
-        const rStr = ri.length > 0 ? `直接散落物品: ${ri.map(i => `${i.name}×${i.quantity}${(i as any).expiryDate ? `[保质期:${(i as any).expiryDate}]` : ''}`).join(',')}` : '';
+        const rStr = ri.length > 0 ? `直接散落物品: ${ri.map(i => `${i.name}×${i.quantity}${i.expiryDate ? `[保质期:${i.expiryDate}]` : ''}`).join(',')}` : '';
         return `🏠 ${r.name}:\n  收纳点: ${childInfo.join(', ') || '无'}\n  ${rStr}`;
     }).join('\n\n');
 
     const unassignedItems = items.filter(i => !i.locationId);
     let unassignedStr = '';
     if (unassignedItems.length > 0) {
-        unassignedStr = `\n\n❓ 未分配位置的物品:\n${unassignedItems.map(i => `${i.name}×${i.quantity}${(i as any).expiryDate ? `[保质期:${(i as any).expiryDate}]` : ''}`).join(', ')}`;
+        unassignedStr = `\n\n❓ 未分配位置的物品:\n${unassignedItems.map(i => `${i.name}×${i.quantity}${i.expiryDate ? `[保质期:${i.expiryDate}]` : ''}`).join(', ')}`;
     }
 
     const todayDate = new Date().toISOString().split('T')[0];
@@ -518,6 +544,10 @@ ${hierarchy}${unassignedStr}
 
 ## 🌟 3. 收纳逻辑点评
 - 挑出一两个你觉得收纳位置很有趣、或者放错房间的物品（例如把洗脸巾放在了书房，把扳手放在了卧室）。幽默地吐槽一下，或者给他们合理的重新摆放建议。`;
+
+    if (!API_KEY || API_KEY.indexOf('your-ai-api-key') > -1) {
+        return '🚫 **体检引擎离线**\n\n系统未侦测到有效的 AI 诊断密钥。\n\n由于我们刚刚使用了绝对安全的隐藏式环境变量文件 (`.env.local`)，这导致您当前**正在运行中的前端终端服务器 (npm run dev) 还没有读取并感知到这把新的钥匙**。\n\n💡 **解决办法：**\n请前往您一直运行代码的那个命令行黑色窗口（终端），按下键盘 `Ctrl + C` 退出当前服务，然后再敲一遍 `npm run dev` 即可彻底激活硅基管家的权限！';
+    }
 
     try {
         const response = await fetch(API_URL, {

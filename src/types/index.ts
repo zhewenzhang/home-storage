@@ -21,6 +21,7 @@ export interface Location {
     width: number;
     height: number;
   };
+  ownerId?: string | null;
 }
 
 export interface FloorPlan {

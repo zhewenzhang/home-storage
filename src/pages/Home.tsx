@@ -190,9 +190,13 @@ export default function Home() {
                             )}
                             {/* 墙体 */}
                             <rect x={b.x} y={b.y} width={b.width} height={b.height}
-                              fill="#FFFFFF"
-                              stroke={isSelected || isMatched ? (isMatched ? '#EF4444' : '#2563EB') : '#3A3A3A'}
+                              fill={isSelected ? '#F8FAFC' : '#FFFFFF'}
+                              stroke={isSelected || isMatched ? (isMatched ? '#EF4444' : '#3B6D8C') : '#D1D5DB'}
                               strokeWidth={WALL}
+                              className="transition-all duration-300"
+                              style={{
+                                filter: isSelected ? 'drop-shadow(0 4px 12px rgba(59,109,140,0.15))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))'
+                              }}
                             />
                             {/* 房间名 + 面积 */}
                             <text x={b.x + b.width / 2} y={b.y + b.height / 2 - 6}
@@ -250,8 +254,10 @@ export default function Home() {
                             )}
                             {/* 圆点 */}
                             <circle cx={cx} cy={cy} r={r}
-                              fill={isSelected ? '#3B82F6' : config.color}
+                              fill={isSelected ? '#3B6D8C' : config.color}
                               stroke="white" strokeWidth="2"
+                              className="transition-all duration-300 transform origin-center hover:scale-110"
+                              style={{ filter: isSelected ? 'drop-shadow(0 0 8px rgba(59,109,140,0.5))' : 'none' }}
                             />
                             {/* 图标 */}
                             <text x={cx} y={cy + 5} textAnchor="middle" fontSize="12" style={{ pointerEvents: 'none' }}>
