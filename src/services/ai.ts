@@ -606,9 +606,8 @@ export async function analyzeImageWithAI(imageUrl: string): Promise<AIVisionResu
 2. 如果图片模糊完全无法识别，你可以返回 { "name": "未知物品", "category": "其他", "expiryDate": "" }`;
 
     try {
-        // 由于部分廉价模型不支持 vision，建议将这里的 MODEL 临时硬编码或允许配置为支持图文大模型
-        // 大多 OpenRouter 上的 GPT-4o 或 qwen-vl-plus 支持直接在此接口传入 image_url
-        const visionModel = 'openai/gpt-4o-mini';
+        // 用户指定使用的开源强大视觉思考模型
+        const visionModel = 'qwen/qwen3-vl-30b-a3b-thinking';
 
         const response = await fetch(API_URL, {
             method: 'POST',
