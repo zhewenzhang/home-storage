@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { generateHouseHealthReport } from '../services/ai';
 import ReactMarkdown from 'react-markdown';
+import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 
 export default function Settings() {
     const { locations, items } = useStore();
@@ -19,6 +20,9 @@ export default function Settings() {
     // AI Report State
     const [reportLoading, setReportLoading] = useState(false);
     const [healthReport, setHealthReport] = useState<string | null>(null);
+
+    // Privacy Modal State
+    const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
     useEffect(() => {
         supabase.auth.getUser().then(async ({ data }) => {
@@ -207,7 +211,10 @@ export default function Settings() {
             {/* 关于本产品 */}
             <div className="card p-0 overflow-hidden border border-gray-100/50 shadow-sm mt-4">
                 <div className="divide-y divide-gray-50">
-                    <div className="flex items-center justify-between p-5 hover:bg-gray-50 transition-colors cursor-pointer text-gray-700">
+                    <div
+                        onClick={() => setShowPrivacyPolicy(true)}
+                        className="flex items-center justify-between p-5 hover:bg-gray-50 transition-colors cursor-pointer text-gray-700"
+                    >
                         <span className="text-sm font-bold flex items-center gap-2"><Shield className="w-4 h-4 text-emerald-500" />家庭云端数据隐私协议</span>
                         <ChevronRight className="w-4 h-4 text-gray-300" />
                     </div>
@@ -270,6 +277,9 @@ export default function Settings() {
             </div>
 
             {/*底部留白*/}
+            {showPrivacyPolicy && (
+                <PrivacyPolicyModal onClose={() => setShowPrivacyPolicy(false)} />
+            )}
         </div>
     );
 }
