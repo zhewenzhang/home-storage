@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus, AlertTriangle, User } from 'lucide-react';
+import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus, AlertTriangle, User, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { signOut } from '../services/auth';
 import AIChat from './AIChat';
@@ -132,9 +132,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 placeholder="搜索物品或位置..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field py-2 md:py-3 shadow-sm bg-white text-sm"
+                className="input-field py-2 md:py-3 shadow-sm bg-white text-sm w-full pr-10"
                 style={{ paddingLeft: '2.5rem' }}
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </header>

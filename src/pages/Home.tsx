@@ -74,14 +74,13 @@ export default function Home() {
     return ids;
   }, [searchQuery, filteredItems, locations]);
 
-  const selectedLocation = locations.find(l => l.id === selectedLocationId);
+  const selectedLocation = useMemo(() => locations.find(l => l.id === selectedLocationId), [locations, selectedLocationId]);
 
-  const displayItems = searchQuery
-    ? filteredItems
-    : (selectedLocationId
-      ? items.filter(i => i.locationId === selectedLocationId)
-      : items.slice(-10) // 最近10个
-    );
+  const displayItems = useMemo(() => {
+    if (searchQuery) return filteredItems;
+    if (selectedLocationId) return items.filter(i => i.locationId === selectedLocationId);
+    return items.slice(-15); // 最近15个
+  }, [searchQuery, filteredItems, selectedLocationId, items]);
 
   const sortedDisplayItems = useMemo(() => [...displayItems].reverse(), [displayItems]);
 
@@ -311,7 +310,7 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              sortedDisplayItems.slice(0, 50).map(item => (
+              sortedDisplayItems.slice(0, 15).map(item => (
                 <Link
                   key={item.id}
                   to={`/items/${item.id}`}
