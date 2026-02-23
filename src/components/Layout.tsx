@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus, Settings, AlertTriangle } from 'lucide-react';
+import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus, AlertTriangle, User } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { signOut } from '../services/auth';
 import AIChat from './AIChat';
@@ -86,7 +86,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </nav>
 
-        <div className="p-6 border-t border-gray-50">
+        <div className="p-4 border-t border-gray-50 space-y-1">
+          <NavLink to="/settings" className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${isActive ? 'bg-[#3B6D8C]/10 text-[#2A4D63] font-bold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}`}>
+            <User className="w-4 h-4" />
+            <span>我的</span>
+          </NavLink>
           <button onClick={() => signOut()}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all"
           >
@@ -190,8 +194,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </button>
 
         <NavLink to="/settings" className={({ isActive }) => `flex flex-col items-center p-2 rounded-xl transition-all ${isActive ? 'text-[#3B6D8C]' : 'text-gray-400 hover:text-gray-600'}`}>
-          <Settings className="w-6 h-6 mb-1" />
-          <span className="text-[10px] font-bold">设置</span>
+          <User className="w-6 h-6 mb-1" />
+          <span className="text-[10px] font-bold">我的</span>
         </NavLink>
       </nav>
 
