@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, Trash2, AlertTriangle, Image as ImageIcon, X, Loader2, Camera } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, AlertTriangle, Image as ImageIcon, X, Loader2, Camera, Sparkles } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { DEFAULT_CATEGORIES, Item } from '../types';
+import { DEFAULT_CATEGORIES, Item, Category } from '../types';
 import { uploadImage, deleteImage } from '../services/storage';
+import { analyzeImageWithAI } from '../services/ai';
 
 // 确认对话框组件
 function ConfirmDialog({
@@ -63,6 +64,7 @@ export default function ItemForm() {
   });
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -147,6 +149,29 @@ export default function ItemForm() {
     }
   };
 
+  const handleAIAnalyze = async () => {
+    if (!form.imageUrl) return;
+    setIsAnalyzing(true);
+    try {
+      const result = await analyzeImageWithAI(form.imageUrl);
+      if (result) {
+        setForm(prev => ({
+          ...prev,
+          name: result.name || prev.name,
+          category: (DEFAULT_CATEGORIES.includes(result.category as Category) ? result.category : prev.category) as Category,
+          expiryDate: result.expiryDate || prev.expiryDate,
+        }));
+      } else {
+        alert('AI 识别未返回结果，请确保 API 密钥正确且图片清晰');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('AI 识别请求失败');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
     <div className="animate-enter max-w-2xl mx-auto">
       <ConfirmDialog
@@ -209,10 +234,22 @@ export default function ItemForm() {
                 <button
                   type="button"
                   onClick={handleRemoveImage}
-                  className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 backdrop-blur-sm transition-colors"
+                  className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 backdrop-blur-sm transition-colors z-10"
                 >
                   <X className="w-4 h-4" />
                 </button>
+                {/* AI 识别按钮层 */}
+                <div className="absolute bottom-3 left-0 w-full flex justify-center z-10">
+                  <button
+                    type="button"
+                    onClick={handleAIAnalyze}
+                    disabled={isAnalyzing}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-black/60 backdrop-blur-md rounded-full text-white text-sm font-bold shadow-lg border border-white/20 hover:scale-105 hover:bg-black/70 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                  >
+                    {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin text-purple-400" /> : <Sparkles className="w-4 h-4 text-purple-400" />}
+                    {isAnalyzing ? '正在用 AI 提取信息...' : '✨ 让 AI 来认一下'}
+                  </button>
+                </div>
               </div>
             ) : (
               <label className="flex flex-col items-center justify-center p-8 cursor-pointer">

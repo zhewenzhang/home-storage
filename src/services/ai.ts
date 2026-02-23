@@ -581,3 +581,82 @@ ${hierarchy}${unassignedStr}
         return '抱歉，体检中心系统出错。';
     }
 }
+
+// ====== AI Vision 图像识别自动录入 ======
+
+export interface AIVisionResult {
+    name: string;
+    category: string;
+    expiryDate: string;
+}
+
+export async function analyzeImageWithAI(imageUrl: string): Promise<AIVisionResult | null> {
+    if (!API_KEY || API_KEY.indexOf('your-ai-api-key') > -1) {
+        console.warn('AI API Key not configured');
+        return null;
+    }
+
+    const systemPrompt = `你是一个精准的商品信息提取API。你的任务是分析用户上传的图片，并以严格的JSON格式输出以下字段:
+- "name": 商品或物品的名称（尽量简短、准确，抛弃无用的修饰词）
+- "category": 物品分类（**必须**是此列表中最适合的一个："电子产品", "工具", "衣物", "书籍", "厨房用品", "药品", "纪念品", "其他"）
+- "expiryDate": 保质期或到期日（格式必须为 "YYYY-MM-DD"，如果是零食、药品、化妆品等带有保质期的物品，请仔细寻找。如果确定该物品没有保质期或图上完全找不到，请留空字符串 ""）
+
+重要：
+1. 你的回复必须且只能是一串合法的 JSON！绝对不能包含其他任何说明文字、代码块语法（如 \`\`\`json 等）。
+2. 如果图片模糊完全无法识别，你可以返回 { "name": "未知物品", "category": "其他", "expiryDate": "" }`;
+
+    try {
+        // 由于部分廉价模型不支持 vision，建议将这里的 MODEL 临时硬编码或允许配置为支持图文大模型
+        // 大多 OpenRouter 上的 GPT-4o 或 qwen-vl-plus 支持直接在此接口传入 image_url
+        const visionModel = 'openai/gpt-4o-mini';
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`,
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'HomeBox-Vision',
+            },
+            body: JSON.stringify({
+                model: visionModel,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    {
+                        role: 'user',
+                        content: [
+                            { type: "text", text: "请解析这张图里的物品信息并返回JSON。" },
+                            { type: "image_url", image_url: { url: imageUrl } }
+                        ]
+                    }
+                ],
+                max_tokens: 300,
+                temperature: 0.1, // 低温保证JSON输出的稳定性 
+            }),
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('[AI Vision] API 返回错误状态:', response.status, errText);
+            return null;
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content?.trim();
+
+        if (!content) return null;
+
+        // 尝试解析 JSON, 兼容偶尔 AI 多嘴带了 Markdown 块的情况
+        const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(jsonStr) as AIVisionResult;
+
+        return {
+            name: parsed.name || '未知物品',
+            category: parsed.category || '其他',
+            expiryDate: parsed.expiryDate || '',
+        };
+    } catch (err) {
+        console.error('[AI Vision] 解析图片失败:', err);
+        return null;
+    }
+}
