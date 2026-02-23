@@ -7,6 +7,7 @@ export interface Item {
   locationId: string;
   createdAt: number;
   expiryDate?: string;
+  imageUrl?: string;
 }
 
 export interface Location {
