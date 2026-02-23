@@ -68,6 +68,7 @@ export async function fetchItems(familyId: string): Promise<Item[]> {
         locationId: row.location_id || '',
         createdAt: new Date(row.created_at).getTime(),
         expiryDate: row.expiry_date || undefined,
+        imageUrl: row.image_url || undefined,
     }));
 }
 
@@ -80,6 +81,7 @@ export async function insertItem(item: Omit<Item, 'id' | 'createdAt'>, familyId:
         description: item.description || '',
         location_id: item.locationId || null,
         expiry_date: item.expiryDate || null,
+        image_url: item.imageUrl || null,
     }).select().single();
     if (error) throw error;
     return data.id as string;
@@ -93,6 +95,7 @@ export async function updateItemDB(id: string, updates: Partial<Item>) {
     if (updates.description !== undefined) payload.description = updates.description;
     if (updates.locationId !== undefined) payload.location_id = updates.locationId;
     if (updates.expiryDate !== undefined) payload.expiry_date = updates.expiryDate;
+    if (updates.imageUrl !== undefined) payload.image_url = updates.imageUrl;
     const { error } = await supabase.from('items').update(payload).eq('id', id);
     if (error) throw error;
 }

@@ -316,9 +316,16 @@ export default function Home() {
                   to={`/items/${item.id}`}
                   className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all group"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                    📦
-                  </div>
+                  {item.imageUrl ? (
+                    <div
+                      className="w-12 h-12 rounded-xl border border-gray-200 bg-cover bg-center flex-shrink-0"
+                      style={{ backgroundImage: `url(${item.imageUrl})` }}
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform flex-shrink-0">
+                      📦
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                       <p className="font-bold text-gray-900 truncate group-hover:text-[#3B6D8C] transition-colors text-lg leading-tight">{item.name}</p>

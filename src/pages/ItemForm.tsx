@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, Trash2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, AlertTriangle, Image as ImageIcon, X, Loader2, Camera } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { DEFAULT_CATEGORIES, Item } from '../types';
+import { uploadImage, deleteImage } from '../services/storage';
 
 // 确认对话框组件
 function ConfirmDialog({
@@ -58,7 +59,10 @@ export default function ItemForm() {
     description: '',
     locationId: searchParams.get('locationId') || '',
     expiryDate: '',
+    imageUrl: '',
   });
+
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -71,6 +75,7 @@ export default function ItemForm() {
           description: existing.description,
           locationId: existing.locationId,
           expiryDate: existing.expiryDate || '',
+          imageUrl: existing.imageUrl || '',
         });
       }
     }
@@ -98,6 +103,49 @@ export default function ItemForm() {
   // 按房间分组位置（包括柜子等子级）
   const rooms = locations.filter(l => l.type === 'room');
   const getChildLocations = (roomId: string) => locations.filter(l => l.parentId === roomId && l.type !== 'room');
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type and size (e.g., max 5MB)
+    if (!file.type.startsWith('image/')) {
+      alert('只能上传图片文件');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('图片大小不能超过 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      // If there's an existing image, we don't strictly *need* to delete it immediately 
+      // (Supabase storage can overwrite or we just leave it orphan for now to be safe until final submit), 
+      // but let's just upload the new one.
+      const url = await uploadImage(file);
+      if (url) {
+        setForm(prev => ({ ...prev, imageUrl: url }));
+      } else {
+        alert('图片上传失败，请重试');
+      }
+    } catch (error) {
+      alert('图片上传失败，请重试');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    // Delete from state immediately
+    const oldUrl = form.imageUrl;
+    setForm(prev => ({ ...prev, imageUrl: '' }));
+
+    // Attempt backend delete if it's a real supabase URL
+    if (oldUrl) {
+      deleteImage(oldUrl).catch(console.error);
+    }
+  };
 
   return (
     <div className="animate-enter max-w-2xl mx-auto">
@@ -142,6 +190,56 @@ export default function ItemForm() {
             placeholder="例如：笔记本电脑、冬季被子..."
             required
           />
+        </div>
+
+        {/* 照片集 (Image Upload) */}
+        <div className="card">
+          <label className="block text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
+            <Camera className="w-4 h-4 text-emerald-500" /> 物品照片
+          </label>
+
+          <div className="relative group rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 transition-all hover:border-emerald-300 hover:bg-emerald-50/50">
+            {form.imageUrl ? (
+              <div className="relative aspect-video w-full flex items-center justify-center bg-gray-900">
+                <img
+                  src={form.imageUrl}
+                  alt="Item"
+                  className="object-contain w-full h-full max-h-[300px]"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 backdrop-blur-sm transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center p-8 cursor-pointer">
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-10 h-10 text-emerald-500 animate-spin mb-3" />
+                    <span className="text-sm font-bold text-emerald-600">正在上传至家庭云柜...</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3">
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-600 mb-1">点击拍照或上传图片</span>
+                    <span className="text-xs text-gray-400">支持 JPG, PNG, WEBP (上限 5MB)</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                  disabled={isUploading}
+                />
+              </label>
+            )}
+          </div>
         </div>
 
         {/* 分类 & 数量 */}

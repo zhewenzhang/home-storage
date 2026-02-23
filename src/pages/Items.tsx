@@ -154,15 +154,27 @@ export default function Items() {
               <div className="space-y-2">
                 {items.map(item => (
                   <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50/80 group hover:bg-gray-100 transition-all">
-                    <Link to={`/items/${item.id}`} className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                        <p className="font-bold text-gray-900 truncate">{item.name}</p>
-                        {item.expiryDate && (() => {
-                          const l = getExpiryLabel(item.expiryDate);
-                          return l ? <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${l.color}`}><span className={`w-1.5 h-1.5 rounded-full ${l.dot}`}></span>{l.text}</span> : null;
-                        })()}
+                    <Link to={`/items/${item.id}`} className="flex-1 min-w-0 flex items-center gap-3">
+                      {item.imageUrl ? (
+                        <div
+                          className="w-10 h-10 rounded-xl border border-gray-200 bg-cover bg-center flex-shrink-0"
+                          style={{ backgroundImage: `url(${item.imageUrl})` }}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl flex-shrink-0 text-gray-400">
+                          📦
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                          <p className="font-bold text-gray-900 truncate">{item.name}</p>
+                          {item.expiryDate && (() => {
+                            const l = getExpiryLabel(item.expiryDate);
+                            return l ? <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${l.color}`}><span className={`w-1.5 h-1.5 rounded-full ${l.dot}`}></span>{l.text}</span> : null;
+                          })()}
+                        </div>
+                        <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                       </div>
-                      <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                     </Link>
                     {canEdit() && (
                       <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2 md:mt-0">
@@ -191,15 +203,27 @@ export default function Items() {
               <div className="space-y-2">
                 {unassignedItems.map(item => (
                   <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-gray-50/80 group hover:bg-gray-100 transition-all">
-                    <Link to={`/items/${item.id}`} className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                        <p className="font-bold text-gray-900 truncate">{item.name}</p>
-                        {item.expiryDate && (() => {
-                          const l = getExpiryLabel(item.expiryDate);
-                          return l ? <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${l.color}`}><span className={`w-1.5 h-1.5 rounded-full ${l.dot}`}></span>{l.text}</span> : null;
-                        })()}
+                    <Link to={`/items/${item.id}`} className="flex-1 min-w-0 flex items-center gap-3">
+                      {item.imageUrl ? (
+                        <div
+                          className="w-10 h-10 rounded-xl border border-gray-200 bg-cover bg-center flex-shrink-0"
+                          style={{ backgroundImage: `url(${item.imageUrl})` }}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl flex-shrink-0 text-gray-400">
+                          📦
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                          <p className="font-bold text-gray-900 truncate">{item.name}</p>
+                          {item.expiryDate && (() => {
+                            const l = getExpiryLabel(item.expiryDate);
+                            return l ? <span className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${l.color}`}><span className={`w-1.5 h-1.5 rounded-full ${l.dot}`}></span>{l.text}</span> : null;
+                          })()}
+                        </div>
+                        <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                       </div>
-                      <p className="text-sm text-gray-500">{item.category} · x{item.quantity}</p>
                     </Link>
                     {canEdit() && (
                       <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity mt-2 md:mt-0">
