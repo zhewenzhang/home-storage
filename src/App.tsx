@@ -36,21 +36,20 @@ function App() {
   const { loadFromSupabase, clearLocalData, dataLoaded } = useStore();
 
   useEffect(() => {
-    // 获取初始 session
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
+    // 聚合初始化：一次性拿回 session 并建立监听
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
       setAuthLoading(false);
-    });
+    };
 
-    // 监听认证状态变化
+    initAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const newUser = session?.user ?? null;
-      setUser(newUser);
-
-      if (!newUser) {
-        // 登出 → 清空前端数据
-        clearLocalData();
-      }
+      // 只有在用户状态真正变化时才 set，减少 React 重新渲染
+      setUser(prev => prev?.id === newUser?.id ? prev : newUser);
+      if (!newUser) clearLocalData();
     });
 
     return () => subscription.unsubscribe();

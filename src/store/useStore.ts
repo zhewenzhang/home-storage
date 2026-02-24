@@ -29,6 +29,7 @@ interface AppState {
   searchQuery: string;
   dataLoaded: boolean;
   isRehydrated: boolean;
+  isLoadingData: boolean; // 正在加载锁
 
   // Family / Share Status
   activeFamilyId: string | null;
@@ -87,16 +88,24 @@ export const useStore = create<AppState>()(
       searchQuery: '',
       dataLoaded: false,
       isRehydrated: false,
+      isLoadingData: false,
       activeFamilyId: null,
       joinedFamilies: [],
 
       // 从 Supabase 加载用户所有数据
       loadFromSupabase: async () => {
+        // 关键性能优化：如果已经正在抓取或已经抓完，则拒绝第二次重入请求
+        if (get().isLoadingData || (get().dataLoaded && get().items.length > 0)) {
+          return;
+        }
+
         try {
           const targetId = await getCurrentTargetId(get().activeFamilyId);
           if (!targetId) return;
 
-          // 加载基本数据及加入的其他家庭列表
+          set({ isLoadingData: true });
+
+          // 并行抓取所有核心业务数据
           const [locs, itms, fp, joined] = await Promise.all([
             fetchLocations(targetId),
             fetchItems(targetId),
@@ -105,11 +114,10 @@ export const useStore = create<AppState>()(
           ]);
 
           let currentActive = get().activeFamilyId;
-          // 注意：此处不再依赖外部 localStorage 直接读取，而是使用 state
-          // 这里的逻辑保持兼容：如果是第一次进来（没缓存 id 且有加入的家庭），自动切到第一个
           if (currentActive === null && joined.length > 0 && !localStorage.getItem('homebox_manually_set_myhome')) {
             currentActive = joined[0].ownerId;
-            set({ joinedFamilies: joined, activeFamilyId: currentActive });
+            set({ joinedFamilies: joined, activeFamilyId: currentActive, isLoadingData: false });
+            // 如果切了家庭，重新走一遍
             return get().loadFromSupabase();
           }
 
@@ -119,11 +127,12 @@ export const useStore = create<AppState>()(
             floorPlan: fp || { id: 'default', name: '我的家', width: 800, height: 600 },
             joinedFamilies: joined,
             dataLoaded: true,
+            isLoadingData: false,
           });
-          console.log(`[Store] 从 Supabase 加载并缓存: ${locs.length} 位置, ${itms.length} 物品, targetId=${targetId}`);
+          console.log(`[Store] 性能优化成功：单次加载完成 (${itms.length} 件物品)`);
         } catch (err) {
-          console.error('[Store] Supabase 加载失败:', err);
-          set({ dataLoaded: true });
+          console.error('[Store] 聚合加载失败:', err);
+          set({ isLoadingData: false, dataLoaded: true });
         }
       },
 
