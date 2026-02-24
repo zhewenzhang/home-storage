@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { Item, Location, FloorPlan } from '../types';
 import {
   fetchLocations, insertLocation, updateLocationDB, deleteLocationDB,
@@ -27,6 +28,7 @@ interface AppState {
   selectedLocationId: string | null;
   searchQuery: string;
   dataLoaded: boolean;
+  isRehydrated: boolean;
 
   // Family / Share Status
   activeFamilyId: string | null;
@@ -76,178 +78,185 @@ const getCurrentTargetId = async (activeFamilyId: string | null) => {
 };
 
 export const useStore = create<AppState>()(
-  (set, get) => ({
-    items: [],
-    locations: [],
-    floorPlan: { id: 'default', name: '我的家', width: 800, height: 600 },
-    selectedLocationId: null,
-    searchQuery: '',
-    dataLoaded: false,
-    activeFamilyId: (localStorage.getItem('homebox_active_family') === 'my_home' ? null : localStorage.getItem('homebox_active_family')) || null,
-    joinedFamilies: [],
+  persist(
+    (set, get) => ({
+      items: [],
+      locations: [],
+      floorPlan: { id: 'default', name: '我的家', width: 800, height: 600 },
+      selectedLocationId: null,
+      searchQuery: '',
+      dataLoaded: false,
+      isRehydrated: false,
+      activeFamilyId: null,
+      joinedFamilies: [],
 
-    // 从 Supabase 加载用户所有数据
-    loadFromSupabase: async () => {
-      try {
-        const targetId = await getCurrentTargetId(get().activeFamilyId);
-        if (!targetId) return;
+      // 从 Supabase 加载用户所有数据
+      loadFromSupabase: async () => {
+        try {
+          const targetId = await getCurrentTargetId(get().activeFamilyId);
+          if (!targetId) return;
 
-        // 加载基本数据及加入的其他家庭列表
-        const [locs, itms, fp, joined] = await Promise.all([
-          fetchLocations(targetId),
-          fetchItems(targetId),
-          fetchFloorPlan(targetId),
-          fetchJoinedFamilies(),
-        ]);
-        // 如果当前是自己的家（activeFamilyId 为 null），看看是不是有加入的家且应该默认显示
-        // 根据用户的需求：如果有加入的家庭，默认显示加入的。我们可以在第一次获取完 joinedFamilys 后，
-        // 如果 localStorage 没有主动设置过 my_home，且也没有指定，我们就默认切过去第一个加入的家
-        let currentActive = get().activeFamilyId;
-        const savedPref = localStorage.getItem('homebox_active_family');
+          // 加载基本数据及加入的其他家庭列表
+          const [locs, itms, fp, joined] = await Promise.all([
+            fetchLocations(targetId),
+            fetchItems(targetId),
+            fetchFloorPlan(targetId),
+            fetchJoinedFamilies(),
+          ]);
 
-        if (!savedPref && currentActive === null && joined.length > 0) {
-          currentActive = joined[0].ownerId;
-          localStorage.setItem('homebox_active_family', currentActive);
-          // 这次需要重新抓一次那个家的数据，不用 Promise.all，直接递归一次即可，防止复杂化
-          set({ joinedFamilies: joined, activeFamilyId: currentActive });
-          return get().loadFromSupabase();
+          let currentActive = get().activeFamilyId;
+          // 注意：此处不再依赖外部 localStorage 直接读取，而是使用 state
+          // 这里的逻辑保持兼容：如果是第一次进来（没缓存 id 且有加入的家庭），自动切到第一个
+          if (currentActive === null && joined.length > 0 && !localStorage.getItem('homebox_manually_set_myhome')) {
+            currentActive = joined[0].ownerId;
+            set({ joinedFamilies: joined, activeFamilyId: currentActive });
+            return get().loadFromSupabase();
+          }
+
+          set({
+            locations: locs,
+            items: itms,
+            floorPlan: fp || { id: 'default', name: '我的家', width: 800, height: 600 },
+            joinedFamilies: joined,
+            dataLoaded: true,
+          });
+          console.log(`[Store] 从 Supabase 加载并缓存: ${locs.length} 位置, ${itms.length} 物品, targetId=${targetId}`);
+        } catch (err) {
+          console.error('[Store] Supabase 加载失败:', err);
+          set({ dataLoaded: true });
         }
+      },
 
+      reloadJoinedFamilies: async () => {
+        const joined = await fetchJoinedFamilies();
+        set({ joinedFamilies: joined });
+      },
+
+      clearLocalData: () => {
+        localStorage.removeItem('homebox_manually_set_myhome');
         set({
-          locations: locs,
-          items: itms,
-          floorPlan: fp || { id: 'default', name: '我的家', width: 800, height: 600 },
-          joinedFamilies: joined,
-          dataLoaded: true,
+          items: [], locations: [],
+          floorPlan: { id: 'default', name: '我的家', width: 800, height: 600 },
+          dataLoaded: false,
+          activeFamilyId: null,
+          joinedFamilies: [],
         });
-        console.log(`[Store] 从 Supabase 加载: ${locs.length} 位置, ${itms.length} 物品, targetId=${targetId}`);
-      } catch (err) {
-        console.error('[Store] Supabase 加载失败:', err);
-        set({ dataLoaded: true }); // 标记已尝试加载
-      }
-    },
+      },
 
-    reloadJoinedFamilies: async () => {
-      const joined = await fetchJoinedFamilies();
-      set({ joinedFamilies: joined });
-    },
+      addItem: async (item) => {
+        const tempId = generateId();
+        const newItem = { ...item, id: tempId, createdAt: Date.now() };
+        set((state) => ({ items: [...state.items, newItem] }));
 
-    clearLocalData: () => {
-      localStorage.removeItem('homebox_active_family');
-      set({
-        items: [], locations: [],
-        floorPlan: { id: 'default', name: '我的家', width: 800, height: 600 },
-        dataLoaded: false,
-        activeFamilyId: null,
-        joinedFamilies: [],
-      });
-    },
-
-    // Items — 先更新本地再同步 Supabase
-    addItem: async (item) => {
-      const tempId = generateId();
-      const newItem = { ...item, id: tempId, createdAt: Date.now() };
-      set((state) => ({ items: [...state.items, newItem] }));
-
-      const targetId = await getCurrentTargetId(get().activeFamilyId);
-      // 异步同步到 Supabase
-      insertItem(item, targetId).then(realId => {
-        // 用 Supabase 返回的真实 ID 替换临时 ID
-        set((state) => ({
-          items: state.items.map(i => i.id === tempId ? { ...i, id: realId } : i),
-        }));
-      }).catch(err => console.error('[Store] 物品同步失败:', err));
-    },
-
-    updateItem: (id, updates) => {
-      set((state) => ({
-        items: state.items.map(item => item.id === id ? { ...item, ...updates } : item),
-      }));
-      updateItemDB(id, updates).catch(err => console.error('[Store] 更新物品失败:', err));
-    },
-
-    deleteItem: (id) => {
-      set((state) => ({ items: state.items.filter(item => item.id !== id) }));
-      deleteItemDB(id).catch(err => console.error('[Store] 删除物品失败:', err));
-    },
-
-    processBatch: async (adds, updates, deletes) => {
-      try {
         const targetId = await getCurrentTargetId(get().activeFamilyId);
-        if (adds.length > 0) await batchInsertItemsDB(adds, targetId);
-        if (updates.length > 0) await batchUpdateItemsDB(updates);
-        if (deletes.length > 0) await batchDeleteItemsDB(deletes);
-        // 执行完毕后完整刷新数据
-        await get().loadFromSupabase();
-      } catch (err) {
-        console.error('[Store] 批量操作失败:', err);
-        throw err;
-      }
-    },
+        insertItem(item, targetId).then(realId => {
+          set((state) => ({
+            items: state.items.map(i => i.id === tempId ? { ...i, id: realId } : i),
+          }));
+        }).catch(err => console.error('[Store] 物品同步失败:', err));
+      },
 
-    // Locations
-    addLocation: async (location) => {
-      const tempId = generateId();
-      set((state) => ({
-        locations: [...state.locations, { ...location, id: tempId }],
-      }));
-
-      const targetId = await getCurrentTargetId(get().activeFamilyId);
-      insertLocation(location, targetId).then(realId => {
+      updateItem: (id, updates) => {
         set((state) => ({
-          locations: state.locations.map(l => l.id === tempId ? { ...l, id: realId } : l),
-          // 同步更新引用此位置的 items
-          items: state.items.map(i => i.locationId === tempId ? { ...i, locationId: realId } : i),
+          items: state.items.map(item => item.id === id ? { ...item, ...updates } : item),
         }));
-      }).catch(err => console.error('[Store] 位置同步失败:', err));
-    },
+        updateItemDB(id, updates).catch(err => console.error('[Store] 更新物品失败:', err));
+      },
 
-    updateLocation: (id, updates) => {
-      set((state) => ({
-        locations: state.locations.map(loc => loc.id === id ? { ...loc, ...updates } : loc),
-      }));
-      updateLocationDB(id, updates).catch(err => console.error('[Store] 更新位置失败:', err));
-    },
+      deleteItem: (id) => {
+        set((state) => ({ items: state.items.filter(item => item.id !== id) }));
+        deleteItemDB(id).catch(err => console.error('[Store] 删除物品失败:', err));
+      },
 
-    deleteLocation: (id) => {
-      set((state) => ({
-        locations: state.locations.filter(loc => loc.id !== id),
-        items: state.items.map(item =>
-          item.locationId === id ? { ...item, locationId: '' } : item
-        ),
-      }));
-      deleteLocationDB(id).catch(err => console.error('[Store] 删除位置失败:', err));
-    },
+      processBatch: async (adds, updates, deletes) => {
+        try {
+          const targetId = await getCurrentTargetId(get().activeFamilyId);
+          if (adds.length > 0) await batchInsertItemsDB(adds, targetId);
+          if (updates.length > 0) await batchUpdateItemsDB(updates);
+          if (deletes.length > 0) await batchDeleteItemsDB(deletes);
+          await get().loadFromSupabase();
+        } catch (err) {
+          console.error('[Store] 批量操作失败:', err);
+          throw err;
+        }
+      },
 
-    // Floor Plan
-    setFloorPlan: (floorPlan) => {
-      set({ floorPlan });
-      updateFloorPlanDB(floorPlan).catch(err => console.error('[Store] 平面图同步失败:', err));
-    },
+      addLocation: async (location) => {
+        const tempId = generateId();
+        set((state) => ({
+          locations: [...state.locations, { ...location, id: tempId }],
+        }));
 
-    // UI
-    setSelectedLocationId: (id) => set({ selectedLocationId: id }),
-    setSearchQuery: (query) => set({ searchQuery: query }),
-    setActiveFamilyId: (id) => {
-      if (id === null) {
-        localStorage.setItem('homebox_active_family', 'my_home'); // 特殊标记，用来表示用户主动就是要看自己的家
-      } else {
-        localStorage.setItem('homebox_active_family', id);
-      }
-      set({ activeFamilyId: id, dataLoaded: false });
-      get().loadFromSupabase();
-    },
+        const targetId = await getCurrentTargetId(get().activeFamilyId);
+        insertLocation(location, targetId).then(realId => {
+          set((state) => ({
+            locations: state.locations.map(l => l.id === tempId ? { ...l, id: realId } : l),
+            items: state.items.map(i => i.locationId === tempId ? { ...i, locationId: realId } : i),
+          }));
+        }).catch(err => console.error('[Store] 位置同步失败:', err));
+      },
 
-    // Getters
-    getItemsByLocation: (locationId) =>
-      get().items.filter(item => item.locationId === locationId),
-    getLocationById: (id) =>
-      get().locations.find(loc => loc.id === id),
-    canEdit: () => {
-      const activeFam = get().activeFamilyId;
-      if (!activeFam) return true; // Own family => true
-      const joined = get().joinedFamilies.find(f => f.ownerId === activeFam);
-      return joined?.role === 'admin';
-    },
-  })
+      updateLocation: (id, updates) => {
+        set((state) => ({
+          locations: state.locations.map(loc => loc.id === id ? { ...loc, ...updates } : loc),
+        }));
+        updateLocationDB(id, updates).catch(err => console.error('[Store] 更新位置失败:', err));
+      },
+
+      deleteLocation: (id) => {
+        set((state) => ({
+          locations: state.locations.filter(loc => loc.id !== id),
+          items: state.items.map(item =>
+            item.locationId === id ? { ...item, locationId: '' } : item
+          ),
+        }));
+        deleteLocationDB(id).catch(err => console.error('[Store] 删除位置失败:', err));
+      },
+
+      setFloorPlan: (floorPlan) => {
+        set({ floorPlan });
+        updateFloorPlanDB(floorPlan).catch(err => console.error('[Store] 平面图同步失败:', err));
+      },
+
+      setSelectedLocationId: (id) => set({ selectedLocationId: id }),
+      setSearchQuery: (query) => set({ searchQuery: query }),
+      setActiveFamilyId: (id) => {
+        if (id === null) {
+          localStorage.setItem('homebox_manually_set_myhome', 'true');
+        } else {
+          localStorage.removeItem('homebox_manually_set_myhome');
+        }
+        set({ activeFamilyId: id, dataLoaded: false });
+        get().loadFromSupabase();
+      },
+
+      getItemsByLocation: (locationId) =>
+        get().items.filter(item => item.locationId === locationId),
+      getLocationById: (id) =>
+        get().locations.find(loc => loc.id === id),
+      canEdit: () => {
+        const activeFam = get().activeFamilyId;
+        if (!activeFam) return true;
+        const joined = get().joinedFamilies.find(f => f.ownerId === activeFam);
+        return joined?.role === 'admin';
+      },
+    }),
+    {
+      name: 'homebox-app-state',
+      storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isRehydrated = true;
+        }
+      },
+      // 仅持久化业务数据，不持久化 UI 临时状态（如搜索词、正在加载等）
+      partialize: (state) => ({
+        items: state.items,
+        locations: state.locations,
+        floorPlan: state.floorPlan,
+        activeFamilyId: state.activeFamilyId,
+        joinedFamilies: state.joinedFamilies,
+      }),
+    }
+  )
 );

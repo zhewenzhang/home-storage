@@ -63,18 +63,20 @@ function App() {
     }
   }, [user, dataLoaded, loadFromSupabase]);
 
-  // 加载中
+  // 移除 index.html 中的首开加载动画
+  useEffect(() => {
+    if (user || !authLoading) {
+      const loader = document.getElementById('app-loading');
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 500);
+      }
+    }
+  }, [user, authLoading]);
+
+  // 加载中 - 仅在没有缓存数据时显示重度加载页
   if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, #1a2a3a 0%, #2A4D63 100%)' }}
-      >
-        <div className="text-center">
-          <div className="w-12 h-12 border-3 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-white/60 text-sm">加载中...</p>
-        </div>
-      </div>
-    );
+    return null; // 让 index.html 的加载动画继续显示
   }
 
   // 未登录 → 登录页
