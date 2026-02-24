@@ -62,6 +62,16 @@ export default defineConfig({
   base: '/',
   build: {
     outDir: 'dist',
-    assetsDir: 'assets'
+    assetsDir: 'assets',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-ui': ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'lucide-react'],
+          'vendor-db': ['@supabase/supabase-js', 'zustand'],
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
   }
 })

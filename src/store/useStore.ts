@@ -73,8 +73,8 @@ const generateId = () => Math.random().toString(36).substring(2, 15);
 // 获取要查询和操作的真实目标家庭ID
 const getCurrentTargetId = async (activeFamilyId: string | null) => {
   if (activeFamilyId) return activeFamilyId;
-  const user = (await supabase.auth.getUser()).data.user;
-  return user?.id || '';
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user?.id || '';
 };
 
 export const useStore = create<AppState>()(

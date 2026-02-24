@@ -9,14 +9,15 @@
   <title>HomeBox - 智能家庭储物管理</title>
   <style>
     :root {
-      --brand: #3B6D8C;
-      --bg: #F8F9FA;
+      --br: #63b3ed;
+      --bg: linear-gradient(135deg, #1a2a3a 0%, #2A4D63 100%);
     }
 
     body {
       margin: 0;
-      background: var(--bg);
-      font-family: -apple-system, system-ui, sans-serif;
+      background: #1a2a3a;
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow: hidden;
     }
 
     #app-loading {
@@ -28,86 +29,109 @@
       justify-content: center;
       background: var(--bg);
       z-index: 9999;
+      transition: opacity 0.8s ease;
     }
 
-    .loading-logo {
-      width: 64px;
-      height: 64px;
-      background: var(--brand);
+    .l-c {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: float 3s infinite ease-in-out;
+    }
+
+    .l-b {
+      width: 80px;
+      height: 80px;
+      background: white;
       border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 10px 25px -5px rgba(59, 109, 140, 0.3);
-      margin-bottom: 24px;
-      animation: pulse 2s infinite ease-in-out;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      margin-bottom: 25px;
+      position: relative;
     }
 
-    .loading-logo svg {
-      width: 32px;
-      height: 32px;
+    .l-b::after {
+      content: "📦";
+      font-size: 40px;
+    }
+
+    .l-t {
       color: white;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
 
-    .loading-bar {
+    .l-s {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 12px;
+      margin-top: 10px;
+      letter-spacing: 1px;
+    }
+
+    .l-p {
       width: 140px;
-      height: 4px;
-      background: rgba(0, 0, 0, 0.05);
-      border-radius: 2px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      margin-top: 25px;
       overflow: hidden;
     }
 
-    .loading-bar::after {
-      content: '';
-      display: block;
-      width: 40%;
+    .l-f {
+      width: 100%;
       height: 100%;
-      background: var(--brand);
-      border-radius: 2px;
-      animation: loading 1.5s infinite ease-in-out;
+      background: white;
+      transform-origin: left;
+      animation: loader 2s infinite ease-in-out;
     }
 
-    @keyframes pulse {
+    @keyframes float {
 
       0%,
       100% {
-        transform: scale(1);
-        opacity: 1;
+        transform: translateY(0);
       }
 
       50% {
-        transform: scale(0.95);
-        opacity: 0.9;
+        transform: translateY(-10px);
       }
     }
 
-    @keyframes loading {
+    @keyframes loader {
       0% {
         transform: translateX(-100%);
       }
 
+      50% {
+        transform: translateX(0);
+      }
+
       100% {
-        transform: translateX(250%);
+        transform: translateX(100%);
       }
     }
   </style>
-  <script type="module" crossorigin src="/assets/index-DcsMtYc7.js"></script>
+  <script type="module" crossorigin src="/assets/index-bQPFd7Gf.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/vendor-ui-QCCZGXqC.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-db-BupU66aG.js">
   <link rel="stylesheet" crossorigin href="/assets/index-q-M5DM-U.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body>
   <div id="root">
     <div id="app-loading">
-      <div class="loading-logo">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path
-            d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-          <path d="m3.3 7 8.7 5 8.7-5" />
-          <path d="M12 22V12" />
-        </svg>
+      <div class="l-c">
+        <div class="l-b"></div>
+        <div class="l-t">HOMEBOX</div>
+        <div class="l-s">正在开启您的智能家庭云柜...</div>
+        <div class="l-p">
+          <div class="l-f"></div>
+        </div>
       </div>
-      <div class="loading-bar"></div>
     </div>
   </div>
 </body>
