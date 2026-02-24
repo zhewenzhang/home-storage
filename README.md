@@ -19,15 +19,26 @@
 
 ## 🌟 核心特性概览 (Features)
 
-HomeBox 致力于颠覆传统的列表记忆，为你提供所见即所得的极客级收纳体验：
+HomeBox 致力于提供所见即所得的极客级收纳体验：
 
-- **🗺️ 双向可视化绑定** - 独特的可视化室内 2D 房型图模块，你可以建立属于自己的主卧、客厅结构，并将储物箱 (Location) 以可拖拽模块放置在其所在的地方。“找东西”从翻箱倒柜变成了像玩经营游戏一样简单。
-- **👨‍👩‍👧‍👦 多账号家庭共享区** - 首创多成员授权绑定体系。您可以生成专属的 6 位邀请邀请码，分享给亲人。接入房间后相互可查可改同一套数据库。包含**安全退出、管理员踢人、自定义别名（备注名）**的全栈成员协同管控能力！
-- **💻 极致的批量编辑器模式** - 对于大单量、大扫除的情况，我们完全还原了 Excel 类表格交互体验的心智。一次性选择上百件物品进行：**统一划拨房间归属、无限制行数复制增加、文本 CSV 解析导入**，一切以客户端草稿隔离并可在确认无误后通过事务全量存储入库！
-- **🤖 全局硅基管家 (AI Agent)** - 集成了基于大语言模型的全栈诊断系统。不仅支持自然语言聊天式“帮你录入物品/创建收纳柜”，更加入了 **✨ 家庭资产一键体检**：自动扫描系统内漏填保质期的物品、过分囤积的耗材，并用自然幽默的语句给出行动建议！
-- **⏰ 智能被动临期预警** - 告别手动记账。应用引入了精确的保质期追踪，过期和即将过期（30天内）的物品在全系统的任何角落都具有高亮的标签警报，并在主界面顶部强制横幅弹出拦截提醒。
-- **🛡️ 企业级极速与安全响应** - 使用 `Supabase Auth` + `Postgres RLS (行级安全策略) RPC 驱动` 的云端设计方案。所有的物品增删查改都经过严格的鉴权边界。
-- **📱 响应式的原生体验UI** - React+Tailwind 的极简轻量审美设计重铸界面，暗金色、天霁蓝的现代调色板。兼顾 Desktop 与 Mobile。
+- **🗺️ 可视化房型图** - 建立属于自己的 2D 房型结构，将储物位置（Location）以可拖拽模块放置。找东西不再是翻箱倒柜，而是像地图导航一样直观。
+- **✨ AI 视觉识别 (New!)** - 集成 **Qwen-VL / GPT-4o** 大模型。只需拍摄物品照片，AI 即可自动识别名称、分类并预测过期时间，实现零成本录入。
+- **👨‍👩‍👧‍👦 家庭协同共享** - 支持多成员、多家庭绑定。您可以邀请家人加入，实时同步物资变动，支持别名备注与权限管控。
+- **📱 PWA 原生体验** - 完全适配 **PWA (Progressive Web App)**。支持断网查看、桌面安装，拥有原生应用般的丝滑手感。
+- **💻 极速批量管理** - 专为“大扫除”设计。支持类 Excel 的批量编辑模式，一次性处理上百件物资的归属、保质期与数量。
+- **🤖 AI 家庭体检** - 不仅仅是记录，AI 会定期扫描您的资产，提醒您处理临期食品、消耗品囤积，并给出幽默且实用的收纳建议。
+- **⏰ 智能临期预警** - 精确的保质期追踪。过期或临期物品会在系统各处高亮提醒，并首页横幅拦截，彻底告别过期食品。
+
+<br/>
+
+## 🚀 性能优化的“秘密武器” (Performance)
+
+我们对 HomeBox 进行了手术级的性能调优，只为追求“秒开”的极致体验：
+
+- **📦 极致分包 (Bundle Slimming)**：通过 Vite Manual Chunks 策略，将巨型 JS 包从 **569kB 压缩至 87kB**（减少 85%），核心逻辑瞬间加载。
+- **⚡ 离线持久化 (Instant Persistence)**：利用状态提升与持久化缓存技术，App 启动时**优先恢复本地快照**，无需等待网络请求，实现 UI 瞬间呈现。
+- **💎 沉浸式启动页 (App Shell)**：设计了高颜值的原生内联 Loading 方案，消除了前端框架初始化时的空白闪烁，让加载过程具有“呼吸感”。
+- **🖼️ 静态多级缓存**：Service Worker 自动接管 Supabase 图片与字体请求，实现海量物品照片的离线秒出。
 
 <br/>
 
@@ -35,80 +46,39 @@ HomeBox 致力于颠覆传统的列表记忆，为你提供所见即所得的极
 
 | 领域 | 技术方案 | 描述 |
 | --- | --- | --- |
-| **前端架构** | `Vite` + `React 18` | 确保飞一般的冷启动与极速的客户端刷新率 |
-| **状态管理** | `Zustand` | 轻量化、跨级的无感全局数据切片管控工具 |
-| **样式与组件** | `Tailwind CSS 3` + `Lucide React`|  提供现代、响应式和美观的高分辨率矢量界面支持 |
-| **路由** | `React Router DOM` | 实现无刷新的单页操作切换，支持参数持久化 |
-| **核心底层与库** | `Supabase-js v2` | 提供核心强悍且实时的增量存储与 Serverless API 互通 |
-| **部署托管** | 可部署于任何静态节点 (`Vercel`, `Netlify`) | 一键分发零服务器负担。|
+| **前端架构** | `Vite 6` + `React 18` | 极速的热更新与生产环境构建 |
+| **状态/持久化** | `Zustand` + `Persist` | 响应式状态管理，支持跨会话数据留存 |
+| **后端/安全** | `Supabase` + `RLS` | 行级权限控制，确保每个用户的数据独立且安全 |
+| **AI 能力** | `OpenRouter` / `DeepSeek` | 多模型驱动的可视化与文本智能分析 |
+| **视觉交互** | `Tailwind CSS` + `Framer Motion` | 辅以微妙的微动画，打造高级感界面 |
 
 <br/>
 
-## 🚀 快速启动指南 (Get Started)
-
-### 1. 克隆代码到本地
-```bash
-git clone https://github.com/zhewenzhang/home-storage.git
-cd home-storage
-```
-
-### 2. 初始化与安装依赖包
-```bash
-npm install
-# 建议您运行 npm outdated 验证包无严重不一致后运行
-```
-
-### 3. 环境配置 (.env.local)
-你需要两个外部支持：Supabase 端云服务以及 OpenRouter (或兼容 OpenAI 格式) 的 API Key 才能驱动所有 AI 功能。
-将如下项替换为大家提供的连接并存放在根目录 `.env.local` 文件（已被安全忽略，不会上传云端）。
-```env
-VITE_SUPABASE_URL=https://<your-project>.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUz...<your-api-key>
-
-# 大模型驱动秘钥 (例如 OpenRouter)
-VITE_AI_API_KEY=sk-or-v1-...<your-ai-api-key>
-```
-*💡 备注：您同时需要在 Supabase Console 仪表盘内执行根目录留存的 `supabase-schema.sql` 和 `update-schema.sql` 两个文件以初始化所需要的数据集结构和 RLS 连接验证！*
-
-### 4. 运行
-```bash
-npm run dev
-```
-
-打开 `http://localhost:5173/home-storage/`（或控制台提示端口），然后马上享受绝妙的整理收起管理之旅！🎉
-
-<br/>
-
-## 📁 主要项目结构说明表
+## 📁 主要项目结构
 
 ```text
 home-storage/
 ├── src/
-│   ├── components/      # (前端) 各个页面复用卡片与弹窗：例如 FamilyModal 和 Layout
-│   ├── lib/             # (工具) supabase 实例化的拦截与初始化声明
-│   ├── pages/           # (切片) 主站的五大核心逻辑路由区域
-│   ├── services/        # (后端层) db.ts等封装对 DB 远程存储及所有 Promise
-│   ├── store/           # (内存层) Zustand 控制中心聚合处理数据的实时回显
-│   ├── types/           # 全局 Typescript 类型强规范文件
-│   └── App.tsx / main.tsx
-├── ...配置文件集
-└── update-schema.sql    # 最近增加的 家庭分享功能/RLS SQL 函数安全执行策略 (关键)
+│   ├── components/      # 复用 UI 组件（弹窗、导航、表单）
+│   ├── pages/           # 核心逻辑页面（物品、位置、地图、设置）
+│   ├── services/        # 封装层：DB 查询、AI 接口、图片上传
+│   ├── store/           # Zustand 控制中心（核心持久化逻辑在此）
+│   ├── types/           # 强类型 TypeScript 规范
+│   └── App.tsx          # 聚合入口与 Auth 监听逻辑
+├── supabase-schema.sql  # 数据库结构初始化脚本
+└── vite.config.ts       # PWA、分包策略与构建配置
 ```
 
 <br/>
 
 ## 🤝 参与贡献 (Contributing)
 
-感谢您感兴趣一起帮大伙“找东西”！如果您有更好的点子：
+任何 `Issue`、`Feature Request` 或 `Pull Request` 我们都热烈欢迎！
 
 1. **Fork** 本项目
-2. 切换一个特色分支：`git checkout -b feature/NewAwesomeFeature`
-3. 提交改进：`git commit -m 'Add a cool storage function'`
-4. 上传分支：`git push origin feature/NewAwesomeFeature`
-5. 开启一个崭新的 **Pull Request**
-
-任何 `Issue` 和对于 bug 的捕捉反馈我们都双手欢迎！🔥
+2. `git checkout -b feature/CoolNewFeature`
+3. `git commit -m 'Add some cool features'`
+4. `git push origin feature/CoolNewFeature`
 
 &nbsp;
 <p align="center">基于 ♥︎ 构建。享受生活，让家有迹可循。</p>
-<br/>
