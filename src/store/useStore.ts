@@ -30,13 +30,15 @@ interface AppState {
   dataLoaded: boolean;
   isRehydrated: boolean;
   isLoadingData: boolean; // 正在加载锁
+  displayName: string | null;
+  profileLoading: boolean;
 
   // Family / Share Status
   activeFamilyId: string | null;
   joinedFamilies: JoinedFamily[];
 
   // 从 Supabase 加载数据
-  loadFromSupabase: () => Promise<void>;
+  loadFromSupabase: (userId?: string) => Promise<void>;
   reloadJoinedFamilies: () => Promise<void>;
   clearLocalData: () => void;
 
@@ -89,36 +91,59 @@ export const useStore = create<AppState>()(
       dataLoaded: false,
       isRehydrated: false,
       isLoadingData: false,
+      displayName: null,
+      profileLoading: false,
       activeFamilyId: null,
       joinedFamilies: [],
 
       // 从 Supabase 加载用户所有数据
-      loadFromSupabase: async () => {
+      loadFromSupabase: async (userId?: string) => {
         // 关键性能优化：如果已经正在抓取或已经抓完，则拒绝第二次重入请求
-        if (get().isLoadingData || (get().dataLoaded && get().items.length > 0)) {
-          return;
-        }
+        if (get().isLoadingData) return;
+        if (get().dataLoaded && get().items.length > 0) return;
+
+        set({ isLoadingData: true });
 
         try {
-          const targetId = await getCurrentTargetId(get().activeFamilyId);
-          if (!targetId) return;
+          const targetId = userId || await getCurrentTargetId(get().activeFamilyId);
+          if (!targetId) {
+            set({ isLoadingData: false });
+            return;
+          }
 
-          set({ isLoadingData: true });
-
-          // 并行抓取所有核心业务数据
-          const [locs, itms, fp, joined] = await Promise.all([
+          // 并行抓取所有核心业务数据 + 个人资料
+          const [locs, itms, fp, joined, profileRes] = await Promise.all([
             fetchLocations(targetId),
             fetchItems(targetId),
             fetchFloorPlan(targetId),
             fetchJoinedFamilies(),
+            supabase.from('profiles').select('display_name').eq('id', targetId).single()
           ]);
 
           let currentActive = get().activeFamilyId;
-          if (currentActive === null && joined.length > 0 && !localStorage.getItem('homebox_manually_set_myhome')) {
-            currentActive = joined[0].ownerId;
-            set({ joinedFamilies: joined, activeFamilyId: currentActive, isLoadingData: false });
-            // 如果切了家庭，重新走一遍
-            return get().loadFromSupabase();
+          const hasManualSet = localStorage.getItem('homebox_manually_set_myhome');
+
+          // 只有在从未手动设置过且有加入家庭时，才自动切换
+          if (currentActive === null && joined.length > 0 && !hasManualSet) {
+            const firstFamilyId = joined[0].ownerId;
+            // 注意：这里不直接递归，而是更新 ID 后继续获取该家庭的数据
+            const [newLocs, newItms, newFp] = await Promise.all([
+              fetchLocations(firstFamilyId),
+              fetchItems(firstFamilyId),
+              fetchFloorPlan(firstFamilyId),
+            ]);
+
+            set({
+              locations: newLocs,
+              items: newItms,
+              floorPlan: newFp || { id: 'default', name: '我的家', width: 800, height: 600 },
+              activeFamilyId: firstFamilyId,
+              joinedFamilies: joined,
+              displayName: profileRes.data?.display_name || null,
+              dataLoaded: true,
+              isLoadingData: false,
+            });
+            return;
           }
 
           set({
@@ -126,6 +151,7 @@ export const useStore = create<AppState>()(
             items: itms,
             floorPlan: fp || { id: 'default', name: '我的家', width: 800, height: 600 },
             joinedFamilies: joined,
+            displayName: profileRes.data?.display_name || null,
             dataLoaded: true,
             isLoadingData: false,
           });
@@ -265,6 +291,7 @@ export const useStore = create<AppState>()(
         floorPlan: state.floorPlan,
         activeFamilyId: state.activeFamilyId,
         joinedFamilies: state.joinedFamilies,
+        displayName: state.displayName,
       }),
     }
   )

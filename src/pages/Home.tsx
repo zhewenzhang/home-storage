@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Plus, Package, MapPin, ArrowRight } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { useMemo, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { useMemo } from 'react';
 import ExpirationWarning from '../components/ExpirationWarning';
 
 
@@ -21,33 +20,15 @@ export default function Home() {
     items,
     selectedLocationId,
     setSelectedLocationId,
-    searchQuery
+    searchQuery,
+    displayName
   } = useStore();
 
   const roomLocations = useMemo(() => locations.filter(l => l.type === 'room'), [locations]);
   const cabinetLocations = useMemo(() => locations.filter(l => l.type !== 'room'), [locations]);
 
   // 获取用户名
-  const [userName, setUserName] = useState('');
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      const u = data.user;
-      if (!u) return;
-
-      // 优先从 profiles 表读取
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name')
-        .eq('id', u.id)
-        .single();
-
-      const name = profile?.display_name
-        || u.user_metadata?.display_name
-        || u.email?.split('@')[0]
-        || '';
-      setUserName(name);
-    });
-  }, []);
+  const userName = displayName;
 
   // 搜索过滤
   const filteredItems = useMemo(() => {

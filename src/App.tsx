@@ -58,7 +58,7 @@ function App() {
   // 用户登录后加载数据
   useEffect(() => {
     if (user && !dataLoaded) {
-      loadFromSupabase();
+      loadFromSupabase(user.id);
     }
   }, [user, dataLoaded, loadFromSupabase]);
 
@@ -68,7 +68,7 @@ function App() {
       const loader = document.getElementById('app-loading');
       if (loader) {
         loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 500);
+        setTimeout(() => loader.remove(), 300); // 缩短移除等待
       }
     }
   }, [user, authLoading]);
