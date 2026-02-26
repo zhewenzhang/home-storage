@@ -61,7 +61,7 @@ export default function ItemForm() {
       ? routeState.aiPreFill.category
       : DEFAULT_CATEGORIES[0],
     quantity: 1,
-    description: routeState?.aiPreFill?.name && routeState?.autoScanComplete ? '通过 AI 视觉扫描直接录入' : '',
+    description: routeState?.aiPreFill?.description || (routeState?.aiPreFill?.name && routeState?.autoScanComplete ? '🚀 通过 AI 视觉扫描极速录入' : ''),
     locationId: searchParams.get('locationId') || '',
     expiryDate: routeState?.aiPreFill?.expiryDate || '',
     imageUrl: routeState?.imageUrl || '',

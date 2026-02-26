@@ -588,6 +588,7 @@ export interface AIVisionResult {
     name: string;
     category: string;
     expiryDate: string;
+    description?: string;
 }
 
 export async function analyzeImageWithAI(imageUrl: string): Promise<AIVisionResult | null> {
@@ -599,15 +600,16 @@ export async function analyzeImageWithAI(imageUrl: string): Promise<AIVisionResu
     const systemPrompt = `你是一个精准的商品信息提取API。你的任务是分析用户上传的图片，并以严格的JSON格式输出以下字段:
 - "name": 商品或物品的名称（尽量简短、准确，抛弃无用的修饰词）
 - "category": 物品分类（**必须**是此列表中最适合的一个："电子产品", "工具", "衣物", "书籍", "厨房用品", "药品", "纪念品", "其他"）
-- "expiryDate": 保质期或到期日（格式必须为 "YYYY-MM-DD"，如果是零食、药品、化妆品等带有保质期的物品，请仔细寻找。如果确定该物品没有保质期或图上完全找不到，请留空字符串 ""）
+- "expiryDate": 保质期或到期日（格式必须为 "YYYY-MM-DD"，如果没有则留空 ""）
+- "description": 对物品的简短描述、成色/状态评估，以及一句实用的收纳或消耗建议。不要过度啰嗦，控制在50字以内。
 
 重要：
 1. 你的回复必须且只能是一串合法的 JSON！绝对不能包含其他任何说明文字、代码块语法（如 \`\`\`json 等）。
-2. 如果图片模糊完全无法识别，你可以返回 { "name": "未知物品", "category": "其他", "expiryDate": "" }`;
+2. 如果图片模糊完全无法识别，你可以返回 { "name": "未知物品", "category": "其他", "expiryDate": "", "description": "由于图片模糊无法判断细节" }`;
 
     try {
-        // 用户指定使用的开源强大视觉思考模型
-        const visionModel = 'qwen/qwen3-vl-30b-a3b-thinking';
+        // 使用速度极快、多模态能力强的模型来替代复杂的 thinking 模型，大幅优化请求速度
+        const visionModel = 'google/gemini-2.5-flash';
 
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -653,6 +655,7 @@ export async function analyzeImageWithAI(imageUrl: string): Promise<AIVisionResu
             name: parsed.name || '未知物品',
             category: parsed.category || '其他',
             expiryDate: parsed.expiryDate || '',
+            description: parsed.description || '',
         };
     } catch (err) {
         console.error('[AI Vision] 解析图片失败:', err);

@@ -344,22 +344,31 @@ export default function AIChat() {
 
             {/* AI 视觉进行中的全屏阻断遮罩 */}
             {isVisionScanning && (
-                <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/80 backdrop-blur-md">
-                    <div className="relative w-48 h-48 mb-6 mt-8">
-                        {/* 扫描虚线框 */}
-                        <div className="absolute inset-0 border-2 border-emerald-500/50 rounded-3xl overflow-hidden">
+                <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/85 backdrop-blur-xl">
+                    <div className="relative w-56 h-56 mb-8 mt-4">
+                        {/* 扫描虚线框 外发光 */}
+                        <div className="absolute inset-0 shadow-[0_0_50px_rgba(16,185,129,0.15)] rounded-3xl" />
+                        <div className="absolute inset-0 border-[3px] border-emerald-500/60 rounded-3xl overflow-hidden backdrop-blur-md bg-emerald-900/10">
                             {/* 激光扫描线上下浮动效果 (Vfx) */}
-                            <div className="absolute left-0 w-full h-[3px] bg-emerald-400 shadow-[0_0_15px_2px_rgba(52,211,153,0.8)] animate-cyber-scan" />
+                            <div className="absolute left-0 w-full h-[4px] bg-emerald-400 shadow-[0_0_20px_5px_rgba(52,211,153,0.9)] animate-cyber-scan" />
                             {/* 内部网格背景 */}
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(52,211,153,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(52,211,153,0.1)_1px,transparent_1px)] bg-[size:16px_16px]" />
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(52,211,153,0.15)_1px,transparent_1px),linear-gradient(90deg,rgba(52,211,153,0.15)_1px,transparent_1px)] bg-[size:20px_20px]" />
                         </div>
                         {/* 居中图标 */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <Sparkles className="w-12 h-12 text-emerald-400 animate-pulse" />
+                            <Sparkles className="w-16 h-16 text-emerald-300 animate-pulse drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]" />
                         </div>
                     </div>
-                    <h3 className="text-xl font-bold text-white tracking-widest mb-2 animate-pulse">AI 视觉识别中...</h3>
-                    <p className="text-emerald-400/80 text-sm">正在解构物品属性与特征</p>
+
+                    {/* 打字机特效文本 */}
+                    <div className="flex flex-col items-center animate-enter text-center">
+                        <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-100 tracking-[0.1em] mb-4 animate-pulse">VISION SYSTEM <span className="text-emerald-400">ACTIVATED</span></h3>
+                        <p className="text-emerald-400/90 text-sm mb-2 font-mono flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                            正在解构物品空间维数与微观特征...
+                        </p>
+                        <p className="text-emerald-500/50 text-xs font-mono">▸ MODEL: gemini-2.5-flash / 超维闪速通道在线...</p>
+                    </div>
 
                     <style>{`
                         @keyframes cyber-scan {
@@ -369,7 +378,7 @@ export default function AIChat() {
                             100% { top: 100%; opacity: 0; }
                         }
                         .animate-cyber-scan {
-                            animation: cyber-scan 2s linear infinite;
+                            animation: cyber-scan 1.5s ease-in-out infinite;
                         }
                     `}</style>
                 </div>
@@ -377,14 +386,14 @@ export default function AIChat() {
 
             {/* AI 快捷浮窗容器 */}
             <div className="fixed bottom-28 md:bottom-6 right-4 md:right-6 z-50 flex flex-col gap-3 items-end">
-                {/* 新增的 拍照识物 按钮 */}
+                {/* 新增的 拍照识物 按钮 (尺寸统一调成 w-14 h-14) */}
                 <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-white/20 hover:border-emerald-300"
-                    style={{ background: 'linear-gradient(135deg, #10B981 0%, #047857 100%)', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}
-                    title="📸 拍照自动录入"
+                    className="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-white/20 hover:border-emerald-300"
+                    style={{ background: 'linear-gradient(135deg, #10B981 0%, #047857 100%)', boxShadow: '0 4px 15px rgba(16,185,129,0.4)' }}
+                    title="📸 拍照极速录入"
                 >
-                    <Camera className="w-5 h-5 text-white" />
+                    <Camera className="w-6 h-6 text-white" />
                 </button>
 
                 {/* 原有的大文字聊天球 */}
