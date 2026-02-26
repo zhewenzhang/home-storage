@@ -4,8 +4,10 @@ import { useStore } from '../store/useStore';
 import {
     ChatMessage, AIAction,
     buildSystemPrompt, parseIntentWithAI, localParseIntent, chatWithAI,
-    toSimplified, findBestLocation,
+    toSimplified, findBestLocation, analyzeImageWithAI
 } from '../services/ai';
+import { uploadImage } from '../services/storage';
+import { useNavigate } from 'react-router-dom';
 
 // 操作类型选项
 const ACTION_TYPES = [
@@ -14,6 +16,8 @@ const ACTION_TYPES = [
     { value: 'add_item', label: '📌 放入物品' },
     { value: 'delete_item', label: '🗑️ 删除物品' },
 ] as const;
+
+import { Camera } from 'lucide-react';
 
 const CATEGORIES = ['衣物', '电子产品', '工具', '书籍', '厨房用品', '药品', '纪念品', '其他'];
 
@@ -37,6 +41,11 @@ export default function AIChat() {
     const [pendingUserText, setPendingUserText] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const navigate = useNavigate();
+
+    // 独立拍照上传状态
+    const [isVisionScanning, setIsVisionScanning] = useState(false);
 
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -279,14 +288,113 @@ export default function AIChat() {
         '客厅杂物收纳柜放着湿纸巾和口罩，帮我记录',
     ];
 
+    // 处理拍照捷径
+    const handleCaptureImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            alert('只能上传图片文件');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('图片大小不能超过 5MB');
+            return;
+        }
+
+        setIsVisionScanning(true);
+        try {
+            // 1. 上传图片到 Supabase
+            const url = await uploadImage(file);
+            if (!url) throw new Error('上传失败');
+
+            // 2. 调用 AI 视觉识别
+            const aiResult = await analyzeImageWithAI(url);
+
+            // 3. 携带数据跳转到新建页面
+            navigate('/items/new', {
+                state: {
+                    imageUrl: url,
+                    aiPreFill: aiResult || undefined,
+                    autoScanComplete: true
+                }
+            });
+            setIsOpen(false);
+        } catch (err: any) {
+            console.error(err);
+            alert('识别失败，请重试或手动添加');
+        } finally {
+            setIsVisionScanning(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
     return (
         <>
-            <button onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-28 md:bottom-6 right-4 md:right-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-                style={{ background: 'linear-gradient(135deg, #3B6D8C 0%, #2A4D63 100%)', boxShadow: '0 4px 20px rgba(59,109,140,0.4)' }}
-            >
-                {isOpen ? <X className="w-6 h-6 text-white" /> : <Sparkles className="w-6 h-6 text-white" />}
-            </button>
+            {/* 隐藏的相机输入框 */}
+            <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleCaptureImage}
+            />
+
+            {/* AI 视觉进行中的全屏阻断遮罩 */}
+            {isVisionScanning && (
+                <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/80 backdrop-blur-md">
+                    <div className="relative w-48 h-48 mb-6 mt-8">
+                        {/* 扫描虚线框 */}
+                        <div className="absolute inset-0 border-2 border-emerald-500/50 rounded-3xl overflow-hidden">
+                            {/* 激光扫描线上下浮动效果 (Vfx) */}
+                            <div className="absolute left-0 w-full h-[3px] bg-emerald-400 shadow-[0_0_15px_2px_rgba(52,211,153,0.8)] animate-cyber-scan" />
+                            {/* 内部网格背景 */}
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(52,211,153,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(52,211,153,0.1)_1px,transparent_1px)] bg-[size:16px_16px]" />
+                        </div>
+                        {/* 居中图标 */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <Sparkles className="w-12 h-12 text-emerald-400 animate-pulse" />
+                        </div>
+                    </div>
+                    <h3 className="text-xl font-bold text-white tracking-widest mb-2 animate-pulse">AI 视觉识别中...</h3>
+                    <p className="text-emerald-400/80 text-sm">正在解构物品属性与特征</p>
+
+                    <style>{`
+                        @keyframes cyber-scan {
+                            0% { top: 0; opacity: 0; }
+                            10% { opacity: 1; }
+                            90% { opacity: 1; }
+                            100% { top: 100%; opacity: 0; }
+                        }
+                        .animate-cyber-scan {
+                            animation: cyber-scan 2s linear infinite;
+                        }
+                    `}</style>
+                </div>
+            )}
+
+            {/* AI 快捷浮窗容器 */}
+            <div className="fixed bottom-28 md:bottom-6 right-4 md:right-6 z-50 flex flex-col gap-3 items-end">
+                {/* 新增的 拍照识物 按钮 */}
+                <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 border-2 border-white/20 hover:border-emerald-300"
+                    style={{ background: 'linear-gradient(135deg, #10B981 0%, #047857 100%)', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}
+                    title="📸 拍照自动录入"
+                >
+                    <Camera className="w-5 h-5 text-white" />
+                </button>
+
+                {/* 原有的大文字聊天球 */}
+                <button onClick={() => setIsOpen(!isOpen)}
+                    className="w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                    style={{ background: 'linear-gradient(135deg, #3B6D8C 0%, #2A4D63 100%)', boxShadow: '0 4px 20px rgba(59,109,140,0.4)' }}
+                >
+                    {isOpen ? <X className="w-6 h-6 text-white" /> : <Sparkles className="w-6 h-6 text-white" />}
+                </button>
+            </div>
 
             {isOpen && (
                 <div className="fixed bottom-32 md:bottom-24 right-4 md:right-6 z-50 flex flex-col overflow-hidden"

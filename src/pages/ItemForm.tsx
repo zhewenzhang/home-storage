@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, Save, Trash2, AlertTriangle, Image as ImageIcon, X, Loader2, Camera, Sparkles } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { DEFAULT_CATEGORIES, Item, Category } from '../types';
@@ -48,19 +48,23 @@ export default function ItemForm() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { items, locations, addItem, updateItem, deleteItem } = useStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isEdit = Boolean(id);
+  const routeState = location.state as { imageUrl?: string; aiPreFill?: any; autoScanComplete?: boolean; } | null;
 
   const [form, setForm] = useState<Omit<Item, 'id' | 'createdAt'>>({
-    name: '',
-    category: DEFAULT_CATEGORIES[0],
+    name: routeState?.aiPreFill?.name || '',
+    category: routeState?.aiPreFill?.category && DEFAULT_CATEGORIES.includes(routeState.aiPreFill.category)
+      ? routeState.aiPreFill.category
+      : DEFAULT_CATEGORIES[0],
     quantity: 1,
-    description: '',
+    description: routeState?.aiPreFill?.name && routeState?.autoScanComplete ? '通过 AI 视觉扫描直接录入' : '',
     locationId: searchParams.get('locationId') || '',
-    expiryDate: '',
-    imageUrl: '',
+    expiryDate: routeState?.aiPreFill?.expiryDate || '',
+    imageUrl: routeState?.imageUrl || '',
   });
 
   const [isUploading, setIsUploading] = useState(false);
