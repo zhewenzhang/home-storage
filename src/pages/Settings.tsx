@@ -9,12 +9,12 @@ import ReactMarkdown from 'react-markdown';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 
 export default function Settings() {
-    const { locations, items } = useStore();
+    const { locations, items, displayName } = useStore();
     const [email, setEmail] = useState('');
-    const [name, setName] = useState('');
+    const [userId, setUserId] = useState<string | null>(null);
+    const [name, setName] = useState(displayName || '');
     const [isEditingName, setIsEditingName] = useState(false);
     const [editNameValue, setEditNameValue] = useState('');
-    const [userId, setUserId] = useState<string | null>(null);
     const [isSavingName, setIsSavingName] = useState(false);
 
     // AI Report State
@@ -24,22 +24,28 @@ export default function Settings() {
     // Privacy Modal State
     const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
 
+    // 强制刷新更新版本
+    const handleForceUpdate = () => {
+        if (window.confirm('是否检查并更新到最新版本？应用将重新加载。')) {
+            window.location.reload();
+        }
+    };
+
     useEffect(() => {
-        supabase.auth.getUser().then(async ({ data }) => {
+        supabase.auth.getUser().then(({ data }) => {
             const u = data.user;
             if (!u) return;
             setUserId(u.id);
             setEmail(u.email || '');
-
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('display_name')
-                .eq('id', u.id)
-                .single();
-
-            setName(profile?.display_name || u.user_metadata?.display_name || u.email?.split('@')[0] || '');
+            if (!displayName) {
+                setName(u.user_metadata?.display_name || u.email?.split('@')[0] || '');
+            }
         });
-    }, []);
+    }, [displayName]);
+
+    useEffect(() => {
+        if (displayName) setName(displayName);
+    }, [displayName]);
 
     const handleSaveName = async () => {
         if (!userId || !editNameValue.trim() || editNameValue.trim() === name) {
@@ -220,7 +226,15 @@ export default function Settings() {
                     </div>
                     <div className="flex items-center justify-between p-5 hover:bg-gray-50 transition-colors cursor-pointer text-gray-700">
                         <span className="text-sm font-bold flex items-center gap-2"><HelpCircle className="w-4 h-4 text-orange-400" />使用帮助与产品反馈</span>
-                        <span className="text-xs text-gray-400">v1.2.0</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400">v2.1.0</span>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleForceUpdate(); }}
+                                className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-500 hover:bg-gray-200"
+                            >
+                                检查更新
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
