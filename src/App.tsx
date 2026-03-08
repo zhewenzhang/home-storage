@@ -33,7 +33,25 @@ const Settings = lazyWithRetries(() => import('./pages/Settings'));
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const { loadFromSupabase, clearLocalData, dataLoaded } = useStore();
+  const { loadFromSupabase, clearLocalData, dataLoaded, theme } = useStore();
+
+  // Handle Dark mode class
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.toggle('dark', systemTheme === 'dark');
+
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = (e: MediaQueryListEvent) => {
+        root.classList.toggle('dark', e.matches);
+      };
+      mediaQuery.addEventListener('change', listener);
+      return () => mediaQuery.removeEventListener('change', listener);
+    } else {
+      root.classList.toggle('dark', theme === 'dark');
+    }
+  }, [theme]);
 
   useEffect(() => {
     // 聚合初始化：一次性拿回 session 并建立监听

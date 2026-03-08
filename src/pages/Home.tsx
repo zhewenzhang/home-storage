@@ -69,7 +69,7 @@ export default function Home() {
     <div className="space-y-6 md:space-y-8 animate-enter pb-20">
 
       {/* 电脑端才显示的超级大欢迎卡片 */}
-      <div className="hidden md:flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-2">
+      <div className="hidden md:flex flex-col md:flex-row justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 mb-2 transition-colors">
         <div>
           <h2 className="text-3xl font-bold flex items-center gap-3">
             Hi {userName || 'there'} 👋
@@ -78,11 +78,11 @@ export default function Home() {
         </div>
         <div className="flex gap-4">
           <div className="text-center px-6 border-r border-gray-100">
-            <p className="text-3xl font-extrabold text-[#2A4D63]">{items.length}</p>
+            <p className="text-3xl font-extrabold text-primary-dark dark:text-blue-400">{items.length}</p>
             <p className="text-xs text-gray-400 font-bold tracking-wider mt-1">在库物品</p>
           </div>
           <div className="text-center px-6">
-            <p className="text-3xl font-extrabold text-[#2A4D63]">{locations.length}</p>
+            <p className="text-3xl font-extrabold text-primary-dark dark:text-blue-400">{locations.length}</p>
             <p className="text-xs text-gray-400 font-bold tracking-wider mt-1">存储位置</p>
           </div>
         </div>
@@ -92,8 +92,8 @@ export default function Home() {
         {/* 左侧：平面图 (移动端排第一视点) */}
         <div className="lg:col-span-2 space-y-3 md:space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
-              <MapPin className="w-5 h-5" style={{ color: '#3B6D8C' }} />
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary dark:text-blue-400" />
               {searchQuery ? '搜索定位' : '家庭平面图'}
             </h3>
             <div className="flex gap-2">
@@ -106,7 +106,7 @@ export default function Home() {
                   📍 {locations.length}
                 </div>
               </div>
-              <Link to="/floorplan" className="text-xs md:text-sm font-bold flex items-center gap-1 bg-white px-2 md:px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all text-[#3B6D8C]">
+              <Link to="/floorplan" className="text-xs md:text-sm font-bold flex items-center gap-1 bg-white dark:bg-gray-800 px-2 md:px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-primary dark:text-blue-400">
                 编辑户型 <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
               </Link>
             </div>
@@ -143,7 +143,7 @@ export default function Home() {
                 const viewH = Math.max(300, Math.max(...allB) - Math.min(...allY) + PADDING * 2);
 
                 return (
-                  <div className="w-full h-[450px] flex items-center justify-center overflow-hidden rounded-2xl relative" style={{ backgroundColor: '#F8F6F0' }}>
+                  <div className="w-full h-[450px] flex items-center justify-center overflow-hidden rounded-2xl relative bg-[#F8F6F0] dark:bg-gray-800 transition-colors">
                     <svg width="100%" height="100%" viewBox={`${viewX} ${viewY} ${viewW} ${viewH}`} preserveAspectRatio="xMidYMid meet">
                       {/* === 房间层（建筑图风格） === */}
                       {roomLocations.map(location => {
@@ -255,7 +255,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className="rounded-xl p-4 text-xs flex gap-2" style={{ backgroundColor: 'rgba(59,109,140,0.06)', color: 'rgba(59,109,140,0.8)' }}>
+          <div className="rounded-xl p-4 text-xs flex gap-2 bg-primary/5 dark:bg-blue-900/20 text-primary-dark dark:text-blue-300 transition-colors">
             <span className="font-bold">提示:</span>
             {searchQuery ? '地图上高亮显示的区域包含您搜索的物品，虚线框标记为收纳位置。' : '点击房间/收纳标记可查看其中的物品详情。'}
           </div>
@@ -264,7 +264,7 @@ export default function Home() {
         {/* 右侧：物品列表 (移动端放在地图下方) */}
         <div className="lg:col-span-1 space-y-3 md:space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">
               {searchQuery ? `"${searchQuery}" 的结果` : (selectedLocation ? selectedLocation.name : '最近添加')}
             </h3>
             {selectedLocationId && !searchQuery && (
@@ -295,22 +295,22 @@ export default function Home() {
                 <Link
                   key={item.id}
                   to={`/items/${item.id}`}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-lg hover:-translate-y-0.5 transition-all group"
                 >
                   {item.imageUrl ? (
                     <div
-                      className="w-12 h-12 rounded-xl border border-gray-200 bg-cover bg-center flex-shrink-0"
+                      className="w-12 h-12 rounded-xl border border-gray-200 dark:border-gray-600 bg-cover bg-center flex-shrink-0"
                       style={{ backgroundImage: `url(${item.imageUrl})` }}
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform flex-shrink-0">
                       📦
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
-                      <p className="font-bold text-gray-900 truncate group-hover:text-[#3B6D8C] transition-colors text-lg leading-tight">{item.name}</p>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-lg" style={{ backgroundColor: 'rgba(59,109,140,0.1)', color: '#2A4D63' }}>x{item.quantity}</span>
+                      <p className="font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-primary dark:group-hover:text-blue-400 transition-colors text-lg leading-tight">{item.name}</p>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-primary/10 dark:bg-blue-900/30 text-primary-dark dark:text-blue-300">x{item.quantity}</span>
                     </div>
                     <p className="text-xs text-gray-400 flex items-center gap-2 mt-1">
                       <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">{item.category}</span>
@@ -327,7 +327,7 @@ export default function Home() {
 
             {!searchQuery && !selectedLocationId && items.length > 10 && (
               <div className="text-center pt-4">
-                <Link to="/items" className="text-sm font-bold transition-colors inline-block px-4 py-2 rounded-xl" style={{ color: '#3B6D8C', backgroundColor: 'rgba(59,109,140,0.06)' }}>
+                <Link to="/items" className="text-sm font-bold transition-colors inline-block px-4 py-2 rounded-xl text-primary dark:text-blue-400 bg-primary/5 dark:bg-blue-900/20 hover:bg-primary/10 dark:hover:bg-blue-900/40">
                   查看全部物品 →
                 </Link>
               </div>

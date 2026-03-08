@@ -32,6 +32,7 @@ interface AppState {
   isLoadingData: boolean; // 正在加载锁
   displayName: string | null;
   profileLoading: boolean;
+  theme: 'light' | 'dark' | 'system'; // Dark mode preference
 
   // Family / Share Status
   activeFamilyId: string | null;
@@ -64,6 +65,7 @@ interface AppState {
   setSelectedLocationId: (id: string | null) => void;
   setSearchQuery: (query: string) => void;
   setActiveFamilyId: (id: string | null) => void;
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
 
   // Getters
   getItemsByLocation: (locationId: string) => Item[];
@@ -93,6 +95,7 @@ export const useStore = create<AppState>()(
       isLoadingData: false,
       displayName: null,
       profileLoading: false,
+      theme: 'system',
       activeFamilyId: null,
       joinedFamilies: [],
 
@@ -255,6 +258,7 @@ export const useStore = create<AppState>()(
 
       setSelectedLocationId: (id) => set({ selectedLocationId: id }),
       setSearchQuery: (query) => set({ searchQuery: query }),
+      setTheme: (theme) => set({ theme }),
       setActiveFamilyId: (id) => {
         if (id === null) {
           localStorage.setItem('homebox_manually_set_myhome', 'true');
@@ -292,6 +296,7 @@ export const useStore = create<AppState>()(
         activeFamilyId: state.activeFamilyId,
         joinedFamilies: state.joinedFamilies,
         displayName: state.displayName,
+        theme: state.theme,
       }),
     }
   )
