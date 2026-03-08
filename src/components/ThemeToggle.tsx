@@ -1,4 +1,3 @@
-import React from 'react';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
@@ -21,8 +20,8 @@ export default function ThemeToggle() {
                         key={t.id}
                         onClick={() => setTheme(t.id)}
                         className={`flex-1 flex justify-center items-center py-2 px-3 rounded-lg text-sm font-medium transition-all ${isActive
-                                ? 'bg-white dark:bg-gray-700 text-[#3B6D8C] dark:text-blue-400 shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                            ? 'bg-white dark:bg-gray-700 text-[#3B6D8C] dark:text-blue-400 shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                             }`}
                         title={t.label}
                     >
