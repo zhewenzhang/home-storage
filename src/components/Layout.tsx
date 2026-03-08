@@ -40,9 +40,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface dark:bg-gray-900 transition-colors">
+    <div className="flex h-screen overflow-hidden bg-surface dark:bg-slate-900 transition-colors">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex w-72 flex-col bg-white dark:bg-gray-800 border-r border-gray-100 dark:border-gray-800 z-30 transition-colors">
+      <aside className="hidden md:flex w-72 flex-col bg-white dark:bg-slate-800 border-r border-gray-100 dark:border-slate-800 z-30 transition-colors">
         <div className="p-8 pb-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg bg-primary-dark dark:bg-blue-600">
@@ -103,7 +103,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative">
         {/* Header */}
-        <header className="h-20 px-6 md:px-10 flex items-center justify-between border-b border-gray-100/50 dark:border-gray-800 bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm z-20 transition-colors">
+        <header className="h-20 px-6 md:px-10 flex items-center justify-between border-b border-gray-100/50 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm z-20 transition-colors">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 hidden md:flex items-center gap-3 animate-enter">
             {getPageTitle()}
             {activeFamilyId && (
@@ -132,13 +132,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 placeholder="搜索物品或位置..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-field py-2 md:py-3 shadow-sm bg-white text-sm w-full pr-10"
+                className="input-field py-2 md:py-3 shadow-sm bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-gray-100 text-sm w-full pr-10"
                 style={{ paddingLeft: '2.5rem' }}
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -153,16 +153,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {expiringItemsCount > 0 && location.pathname !== '/items' && (
               <div
                 onClick={() => navigate('/items')}
-                className="mb-6 bg-yellow-50 border border-yellow-200 p-3 md:p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-yellow-100 transition-colors shadow-sm"
+                className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/50 p-3 md:p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition-colors shadow-sm"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-yellow-100 rounded-xl text-yellow-600"><AlertTriangle className="w-5 h-5" /></div>
+                  <div className="p-2 bg-yellow-100 dark:bg-yellow-900/50 rounded-xl text-yellow-600 dark:text-yellow-400"><AlertTriangle className="w-5 h-5" /></div>
                   <div>
-                    <p className="font-bold text-yellow-800 text-sm md:text-base">发现 {expiringItemsCount} 件物品已过期或即将过期！</p>
-                    <p className="text-xs text-yellow-600 mt-0.5">点击前往物品列表排查隐患</p>
+                    <p className="font-bold text-yellow-800 dark:text-yellow-500 text-sm md:text-base">发现 {expiringItemsCount} 件物品已过期或即将过期！</p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">点击前往物品列表排查隐患</p>
                   </div>
                 </div>
-                <div className="text-yellow-600 text-sm font-bold bg-white px-3 py-1.5 rounded-lg border border-yellow-100 hidden sm:block">
+                <div className="text-yellow-600 dark:text-yellow-400 text-sm font-bold bg-white dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-yellow-100 dark:border-yellow-900/50 hidden sm:block">
                   去处理 →
                 </div>
               </div>
@@ -173,7 +173,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-white/40 dark:border-gray-700 rounded-3xl p-2 flex justify-around items-center z-50 shadow-2xl"
+      <nav className="md:hidden fixed bottom-6 left-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-white/40 dark:border-slate-700 rounded-3xl p-2 flex justify-around items-center z-50 shadow-2xl"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}
       >
         <NavLink to="/" className={({ isActive }) => `flex flex-col items-center p-2 rounded-xl transition-all ${isActive ? 'text-primary dark:text-blue-400' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}>
@@ -187,9 +187,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </NavLink>
 
         <NavLink to="/items/new" className="flex flex-col items-center -mt-8 relative group z-10">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-95 border-4 border-[#F8F9FA] dark:border-gray-900 bg-red-500 dark:bg-red-600">
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl transition-transform active:scale-95 border-4 border-[#F8F9FA] dark:border-slate-900 bg-red-500 dark:bg-red-600">
             <Package className="w-7 h-7" />
-            <div className="absolute -top-1 -right-1 w-5 h-5 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-sm">
+            <div className="absolute -top-1 -right-1 w-5 h-5 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm">
               <Plus className="w-4 h-4 text-red-500 dark:text-red-400 font-bold" />
             </div>
           </div>

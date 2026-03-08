@@ -85,30 +85,14 @@ export default function AuthPage() {
                 </div>
 
                 {/* 卡片 */}
-                <div className="rounded-3xl overflow-hidden"
-                    style={{
-                        background: 'rgba(255,255,255,0.95)',
-                        backdropFilter: 'blur(20px)',
-                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)',
-                    }}
-                >
+                <div className="rounded-3xl overflow-hidden bg-white/95 dark:bg-slate-900/95 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] backdrop-blur-xl border border-transparent dark:border-slate-800">
                     {/* Tab 切换 */}
-                    <div className="flex">
+                    <div className="flex border-b border-gray-100 dark:border-slate-800">
                         <button onClick={() => { setIsLogin(true); setError(''); }}
-                            className="flex-1 py-4 text-sm font-bold transition-all"
-                            style={{
-                                color: isLogin ? '#2A4D63' : '#999',
-                                borderBottom: isLogin ? '3px solid #3B6D8C' : '3px solid transparent',
-                                background: isLogin ? 'rgba(59,109,140,0.05)' : 'transparent',
-                            }}
+                            className={`flex-1 py-4 text-sm font-bold transition-all ${isLogin ? 'text-primary dark:text-blue-400 border-b-2 border-primary dark:border-blue-500 bg-primary/5 dark:bg-blue-500/10' : 'text-gray-500 dark:text-gray-400 border-b-2 border-transparent'}`}
                         >登录</button>
                         <button onClick={() => { setIsLogin(false); setError(''); }}
-                            className="flex-1 py-4 text-sm font-bold transition-all"
-                            style={{
-                                color: !isLogin ? '#2A4D63' : '#999',
-                                borderBottom: !isLogin ? '3px solid #3B6D8C' : '3px solid transparent',
-                                background: !isLogin ? 'rgba(59,109,140,0.05)' : 'transparent',
-                            }}
+                            className={`flex-1 py-4 text-sm font-bold transition-all ${!isLogin ? 'text-primary dark:text-blue-400 border-b-2 border-primary dark:border-blue-500 bg-primary/5 dark:bg-blue-500/10' : 'text-gray-500 dark:text-gray-400 border-b-2 border-transparent'}`}
                         >注册</button>
                     </div>
 
@@ -116,38 +100,38 @@ export default function AuthPage() {
                     <form onSubmit={handleSubmit} className="px-8 py-6 space-y-5">
                         {!isLogin && (
                             <div>
-                                <label className="text-xs font-bold text-gray-500 mb-1.5 block">昵称</label>
+                                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 block">昵称</label>
                                 <div className="relative">
-                                    <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                                     <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
                                         placeholder="你的昵称"
-                                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm outline-none focus:border-[#3B6D8C] focus:ring-2 focus:ring-[#3B6D8C]/10 transition-all"
+                                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm outline-none focus:border-primary dark:focus:border-blue-500 focus:ring-2 focus:ring-primary/10 dark:focus:ring-blue-500/10 transition-all"
                                     />
                                 </div>
                             </div>
                         )}
 
                         <div>
-                            <label className="text-xs font-bold text-gray-500 mb-1.5 block">邮箱</label>
+                            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 block">邮箱</label>
                             <div className="relative">
-                                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                                 <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                                     placeholder="your@email.com" required
-                                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm outline-none focus:border-[#3B6D8C] focus:ring-2 focus:ring-[#3B6D8C]/10 transition-all"
+                                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm outline-none focus:border-primary dark:focus:border-blue-500 focus:ring-2 focus:ring-primary/10 dark:focus:ring-blue-500/10 transition-all"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="text-xs font-bold text-gray-500 mb-1.5 block">密码</label>
+                            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 block">密码</label>
                             <div className="relative">
-                                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                                 <input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
                                     placeholder={isLogin ? '输入密码' : '至少 6 位'} required minLength={6}
-                                    className="w-full pl-10 pr-10 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm outline-none focus:border-[#3B6D8C] focus:ring-2 focus:ring-[#3B6D8C]/10 transition-all"
+                                    className="w-full pl-10 pr-10 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-sm outline-none focus:border-primary dark:focus:border-blue-500 focus:ring-2 focus:ring-primary/10 dark:focus:ring-blue-500/10 transition-all"
                                 />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 pointer-events-auto"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -155,9 +139,9 @@ export default function AuthPage() {
                         </div>
 
                         {error && (
-                            <div className="px-4 py-3 rounded-xl text-xs font-bold text-red-600"
-                                style={{ backgroundColor: '#FEE2E2' }}
-                            >{error}</div>
+                            <div className="px-4 py-3 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30">
+                                {error}
+                            </div>
                         )}
 
                         <button type="submit" disabled={loading}
@@ -174,10 +158,10 @@ export default function AuthPage() {
 
                     {/* 底部提示 */}
                     <div className="px-8 pb-6 text-center">
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
                             {isLogin ? '还没有账号？' : '已有账号？'}
-                            <button onClick={() => { setIsLogin(!isLogin); setError(''); }}
-                                className="text-[#3B6D8C] font-bold ml-1 hover:underline"
+                            <button type="button" onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                                className="text-primary dark:text-blue-400 font-bold ml-1 hover:underline"
                             >{isLogin ? '立即注册' : '去登录'}</button>
                         </p>
                     </div>
@@ -187,6 +171,6 @@ export default function AuthPage() {
                     HomeBox · 让每件物品都有家可归
                 </p>
             </div>
-        </div>
+        </div >
     );
 }

@@ -69,21 +69,21 @@ export default function Home() {
     <div className="space-y-6 md:space-y-8 animate-enter pb-20">
 
       {/* 电脑端才显示的超级大欢迎卡片 */}
-      <div className="hidden md:flex flex-col md:flex-row justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 mb-2 transition-colors">
+      <div className="hidden md:flex flex-col md:flex-row justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 mb-2 transition-colors">
         <div>
-          <h2 className="text-3xl font-bold flex items-center gap-3">
+          <h2 className="text-3xl font-bold flex items-center gap-3 dark:text-gray-100">
             Hi {userName || 'there'} 👋
           </h2>
-          <p className="opacity-80 text-sm mt-1 text-gray-500">让每一个物品都有家可归</p>
+          <p className="opacity-80 text-sm mt-1 text-gray-500 dark:text-gray-400">让每一个物品都有家可归</p>
         </div>
         <div className="flex gap-4">
-          <div className="text-center px-6 border-r border-gray-100">
+          <div className="text-center px-6 border-r border-gray-100 dark:border-slate-700">
             <p className="text-3xl font-extrabold text-primary-dark dark:text-blue-400">{items.length}</p>
-            <p className="text-xs text-gray-400 font-bold tracking-wider mt-1">在库物品</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-bold tracking-wider mt-1">在库物品</p>
           </div>
           <div className="text-center px-6">
             <p className="text-3xl font-extrabold text-primary-dark dark:text-blue-400">{locations.length}</p>
-            <p className="text-xs text-gray-400 font-bold tracking-wider mt-1">存储位置</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 font-bold tracking-wider mt-1">存储位置</p>
           </div>
         </div>
       </div>
@@ -99,14 +99,14 @@ export default function Home() {
             <div className="flex gap-2">
               {/* 移动端专属的快捷操作入口 (横滑小胶囊) */}
               <div className="md:hidden flex items-center gap-2 mr-2">
-                <div className="bg-gray-100 px-2 py-1 rounded-md text-xs font-bold text-gray-600">
+                <div className="bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-md text-xs font-bold text-gray-600 dark:text-gray-300">
                   📦 {items.length}
                 </div>
-                <div className="bg-gray-100 px-2 py-1 rounded-md text-xs font-bold text-gray-600">
+                <div className="bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-md text-xs font-bold text-gray-600 dark:text-gray-300">
                   📍 {locations.length}
                 </div>
               </div>
-              <Link to="/floorplan" className="text-xs md:text-sm font-bold flex items-center gap-1 bg-white dark:bg-gray-800 px-2 md:px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-primary dark:text-blue-400">
+              <Link to="/floorplan" className="text-xs md:text-sm font-bold flex items-center gap-1 bg-white dark:bg-slate-800 px-2 md:px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-all text-primary dark:text-blue-400">
                 编辑户型 <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
               </Link>
             </div>
@@ -117,12 +117,12 @@ export default function Home() {
           <div className="card p-1 min-h-[400px]">
             {locations.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-10 space-y-4 min-h-[400px]">
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center">
-                  <MapPin className="w-10 h-10 text-gray-300" />
+                <div className="w-20 h-20 bg-gray-50 dark:bg-slate-900/50 border border-transparent dark:border-slate-700 rounded-full flex items-center justify-center">
+                  <MapPin className="w-10 h-10 text-gray-300 dark:text-gray-500" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg text-gray-600">还没有绘图</h4>
-                  <p className="text-gray-400 text-sm max-w-xs mx-auto">绘制家庭平面图，开始可视化管理您的物品位置</p>
+                  <h4 className="font-bold text-lg text-gray-600 dark:text-gray-300">还没有绘图</h4>
+                  <p className="text-gray-400 dark:text-gray-500 text-sm max-w-xs mx-auto">绘制家庭平面图，开始可视化管理您的物品位置</p>
                 </div>
                 <Link to="/floorplan" className="btn-primary">开始绘制</Link>
               </div>
@@ -143,7 +143,7 @@ export default function Home() {
                 const viewH = Math.max(300, Math.max(...allB) - Math.min(...allY) + PADDING * 2);
 
                 return (
-                  <div className="w-full h-[450px] flex items-center justify-center overflow-hidden rounded-2xl relative bg-[#F8F6F0] dark:bg-gray-800 transition-colors">
+                  <div className="w-full h-[450px] flex items-center justify-center overflow-hidden rounded-2xl relative bg-[#F8F6F0] dark:bg-slate-900/50 border border-transparent dark:border-slate-800 transition-colors">
                     <svg width="100%" height="100%" viewBox={`${viewX} ${viewY} ${viewW} ${viewH}`} preserveAspectRatio="xMidYMid meet">
                       {/* === 房间层（建筑图风格） === */}
                       {roomLocations.map(location => {
@@ -166,43 +166,45 @@ export default function Home() {
                             {/* 搜索/选中高亮 */}
                             {(isSelected || isMatched) && (
                               <rect x={b.x - 6} y={b.y - 6} width={b.width + 12} height={b.height + 12}
-                                fill="none" stroke={isMatched ? '#EF4444' : '#2563EB'}
-                                strokeWidth="3" opacity="0.5" className="animate-pulse"
+                                strokeWidth="3" opacity="0.5"
+                                className={`animate-pulse fill-transparent ${isMatched ? 'stroke-red-500/50' : 'stroke-blue-600/50'}`}
                               />
                             )}
                             {/* 墙体 */}
                             <rect x={b.x} y={b.y} width={b.width} height={b.height}
-                              fill={isSelected ? '#F8FAFC' : '#FFFFFF'}
-                              stroke={isSelected || isMatched ? (isMatched ? '#EF4444' : '#3B6D8C') : '#D1D5DB'}
                               strokeWidth={WALL}
-                              className="transition-all duration-300"
+                              className={`transition-all duration-300 ${isSelected ? 'fill-slate-50 dark:fill-slate-800' : 'fill-white dark:fill-slate-900'} ${isSelected || isMatched ? (isMatched ? 'stroke-red-500' : 'stroke-primary dark:stroke-blue-500') : 'stroke-gray-300 dark:stroke-slate-700'}`}
                               style={{
                                 filter: isSelected ? 'drop-shadow(0 4px 12px rgba(59,109,140,0.15))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.05))'
                               }}
                             />
                             {/* 房间名 + 面积 */}
                             <text x={b.x + b.width / 2} y={b.y + b.height / 2 - 6}
-                              textAnchor="middle" fontSize="13" fontWeight="700" fill="#3A3A3A"
+                              textAnchor="middle" fontSize="13" fontWeight="700"
+                              className="fill-[#3A3A3A] dark:fill-gray-200"
                               style={{ pointerEvents: 'none' }}
                             >
                               {location.name}
                             </text>
                             <text x={b.x + b.width / 2} y={b.y + b.height / 2 + 12}
-                              textAnchor="middle" fontSize="11" fontWeight="600" fill="#999"
+                              textAnchor="middle" fontSize="11" fontWeight="600"
+                              className="fill-[#999] dark:fill-gray-400"
                               style={{ pointerEvents: 'none' }}
                             >
                               {area}m²
                             </text>
                             {/* 尺寸标注 — 顶部 */}
                             <text x={b.x + b.width / 2} y={b.y - 8}
-                              textAnchor="middle" fontSize="9" fill="#888" fontFamily="monospace"
+                              textAnchor="middle" fontSize="9" fontFamily="monospace"
+                              className="fill-[#888] dark:fill-gray-500"
                               style={{ pointerEvents: 'none' }}
                             >
                               {wM}m
                             </text>
                             {/* 尺寸标注 — 左侧 */}
                             <text x={b.x - 8} y={b.y + b.height / 2}
-                              textAnchor="middle" fontSize="9" fill="#888" fontFamily="monospace"
+                              textAnchor="middle" fontSize="9" fontFamily="monospace"
+                              className="fill-[#888] dark:fill-gray-500"
                               transform={`rotate(-90 ${b.x - 8} ${b.y + b.height / 2})`}
                               style={{ pointerEvents: 'none' }}
                             >
@@ -237,8 +239,8 @@ export default function Home() {
                             {/* 圆点 */}
                             <circle cx={cx} cy={cy} r={r}
                               fill={isSelected ? '#3B6D8C' : config.color}
-                              stroke="white" strokeWidth="2"
-                              className="transition-all duration-300 transform origin-center hover:scale-110"
+                              strokeWidth="2"
+                              className="transition-all duration-300 transform origin-center hover:scale-110 stroke-white dark:stroke-slate-800"
                               style={{ filter: isSelected ? 'drop-shadow(0 0 8px rgba(59,109,140,0.5))' : 'none' }}
                             />
                             {/* 图标 */}
@@ -255,7 +257,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className="rounded-xl p-4 text-xs flex gap-2 bg-primary/5 dark:bg-blue-900/20 text-primary-dark dark:text-blue-300 transition-colors">
+          <div className="rounded-xl p-4 text-xs flex gap-2 bg-primary/5 dark:bg-blue-900/20 text-primary-dark dark:text-blue-300 border border-transparent dark:border-blue-900/30 transition-colors">
             <span className="font-bold">提示:</span>
             {searchQuery ? '地图上高亮显示的区域包含您搜索的物品，虚线框标记为收纳位置。' : '点击房间/收纳标记可查看其中的物品详情。'}
           </div>
@@ -277,12 +279,12 @@ export default function Home() {
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
             {sortedDisplayItems.length === 0 ? (
               <div className="text-center py-20 space-y-4 flex flex-col items-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Package className="w-8 h-8 text-gray-300" />
+                <div className="w-16 h-16 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center border border-transparent dark:border-slate-700">
+                  <Package className="w-8 h-8 text-gray-300 dark:text-gray-500" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-500">{searchQuery ? '未找到相关物品' : '暂无物品'}</h4>
-                  <p className="text-sm text-gray-400">{searchQuery ? '换个关键词试试？' : '点击左侧房间或添加物品'}</p>
+                  <h4 className="font-bold text-gray-500 dark:text-gray-400">{searchQuery ? '未找到相关物品' : '暂无物品'}</h4>
+                  <p className="text-sm text-gray-400 dark:text-gray-500">{searchQuery ? '换个关键词试试？' : '点击左侧房间或添加物品'}</p>
                 </div>
                 {!searchQuery && selectedLocationId && (
                   <Link to={`/items/new?locationId=${selectedLocationId}`} className="btn-primary text-sm py-2 px-4 mt-2">
@@ -295,15 +297,15 @@ export default function Home() {
                 <Link
                   key={item.id}
                   to={`/items/${item.id}`}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-lg hover:-translate-y-0.5 transition-all group"
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 hover:shadow-lg dark:hover:shadow-slate-900/50 hover:-translate-y-0.5 transition-all group"
                 >
                   {item.imageUrl ? (
                     <div
-                      className="w-12 h-12 rounded-xl border border-gray-200 dark:border-gray-600 bg-cover bg-center flex-shrink-0"
+                      className="w-12 h-12 rounded-xl border border-gray-200 dark:border-slate-600 bg-cover bg-center flex-shrink-0"
                       style={{ backgroundImage: `url(${item.imageUrl})` }}
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform flex-shrink-0">
                       📦
                     </div>
                   )}
@@ -313,8 +315,8 @@ export default function Home() {
                       <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-primary/10 dark:bg-blue-900/30 text-primary-dark dark:text-blue-300">x{item.quantity}</span>
                     </div>
                     <p className="text-xs text-gray-400 flex items-center gap-2 mt-1">
-                      <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">{item.category}</span>
-                      <span className="text-gray-300">|</span>
+                      <span className="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400">{item.category}</span>
+                      <span className="text-gray-300 dark:text-slate-600">|</span>
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {locations.find(l => l.id === item.locationId)?.name || '未分配'}

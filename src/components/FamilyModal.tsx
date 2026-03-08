@@ -113,84 +113,83 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 10 }}
                         transition={{ duration: 0.3, type: "spring", bounce: 0.25 }}
-                        className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] my-4 mx-4"
-                        onClick={e => e.stopPropagation()}
+                        className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh] my-4 mx-4 border border-transparent dark:border-slate-700"
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="p-5 border-b flex justify-between items-center bg-gray-50">
-                            <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: '#2A4D63' }}>
+                        <div className="p-5 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-800">
+                            <h2 className="text-xl font-bold flex items-center gap-2 text-[#2A4D63] dark:text-blue-400">
                                 <Users className="w-6 h-6" />
                                 家庭共享与空间切换
                             </h2>
-                            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                                <X className="w-5 h-5 text-gray-500" />
+                            <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full transition-colors">
+                                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                             </button>
                         </div>
 
                         <div className="p-6 overflow-y-auto space-y-8 flex-1">
                             {/* 我的邀请码 */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">我的家庭邀请码</h3>
-                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-between">
+                                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">我的家庭邀请码</h3>
+                                <div className="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-gray-100 dark:border-slate-700 flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs text-gray-400 mb-1">将此代码分享给家人，他们即可查看和编辑您的物品</p>
-                                        <div className="text-2xl font-mono font-bold tracking-widest text-gray-800">
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">将此代码分享给家人，他们即可查看和编辑您的物品</p>
+                                        <div className="text-2xl font-mono font-bold tracking-widest text-gray-800 dark:text-gray-100">
                                             {inviteCode || '加载中...'}
                                         </div>
                                     </div>
                                     <button
                                         onClick={handleCopy}
                                         disabled={!inviteCode}
-                                        className="p-3 bg-white shadow-sm border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors"
+                                        className="p-3 bg-white dark:bg-slate-800 shadow-sm border border-gray-100 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
                                     >
-                                        {copied ? <Check className="w-5 h-5 text-green-500" /> : <ClipboardCopy className="w-5 h-5 text-gray-500" />}
+                                        {copied ? <Check className="w-5 h-5 text-green-500 dark:text-green-400" /> : <ClipboardCopy className="w-5 h-5 text-gray-500 dark:text-gray-400" />}
                                     </button>
                                 </div>
                             </div>
 
                             {/* 加入他人家庭 */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">加入其他家庭</h3>
+                                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">加入其他家庭</h3>
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
                                         placeholder="输入邀请码 (如: HF-1A2B3D)"
                                         value={joinCodeInput}
                                         onChange={(e) => setJoinCodeInput(e.target.value.toUpperCase())}
-                                        className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] outline-none font-mono"
+                                        className="flex-1 px-4 py-3 bg-transparent border border-gray-200 dark:border-slate-700 rounded-xl focus:border-primary dark:focus:border-blue-500 focus:ring-1 focus:ring-primary/50 dark:focus:ring-blue-500/50 outline-none font-mono dark:text-gray-100"
                                     />
                                     <button
                                         onClick={handleJoin}
                                         disabled={isLoading || !joinCodeInput.trim()}
-                                        className="px-5 py-3 text-white rounded-xl font-medium shadow-md transition-all disabled:opacity-50 flex items-center gap-2"
-                                        style={{ backgroundColor: '#2A4D63' }}
+                                        className="px-5 py-3 text-white rounded-xl font-medium shadow-md transition-all disabled:opacity-50 flex items-center gap-2 bg-primary dark:bg-blue-600 hover:bg-primary-dark dark:hover:bg-blue-700"
                                     >
                                         <UserPlus className="w-4 h-4" />
                                         加入
                                     </button>
                                 </div>
-                                {joinError && <p className="text-red-500 text-sm">{joinError}</p>}
+                                {joinError && <p className="text-red-500 dark:text-red-400 text-sm">{joinError}</p>}
                             </div>
 
                             {/* 数据空间切换 */}
                             <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">当前数据空间</h3>
+                                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">当前数据空间</h3>
                                 <div className="space-y-2">
                                     {/* 我自己的空间 */}
                                     <div
                                         onClick={() => setActiveFamilyId(null)}
-                                        className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center justify-between group ${activeFamilyId === null ? 'border-[#3B6D8C] bg-[#3B6D8C]/5' : 'border-transparent hover:bg-gray-50'}`}
+                                        className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center justify-between group ${activeFamilyId === null ? 'border-primary dark:border-blue-500 bg-primary/5 dark:bg-blue-900/20' : 'border-transparent hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className={`p-2 rounded-lg ${activeFamilyId === null ? 'bg-[#3B6D8C] text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                            <div className={`p-2 rounded-lg ${activeFamilyId === null ? 'bg-primary dark:bg-blue-600 text-white' : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400'}`}>
                                                 <HomeIcon className="w-5 h-5" />
                                             </div>
                                             <div>
-                                                <p className={`font-semibold ${activeFamilyId === null ? 'text-[#3B6D8C]' : 'text-gray-700'}`}>我的家 (默认)</p>
-                                                <p className="text-xs text-gray-400">管理我自己的物品和平面图</p>
+                                                <p className={`font-semibold ${activeFamilyId === null ? 'text-primary dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}`}>我的家 (默认)</p>
+                                                <p className="text-xs text-gray-400 dark:text-gray-500">管理我自己的物品和平面图</p>
                                             </div>
                                         </div>
-                                        {activeFamilyId === null && <Check className="w-5 h-5 text-[#3B6D8C]" />}
+                                        {activeFamilyId === null && <Check className="w-5 h-5 text-primary dark:text-blue-500" />}
                                     </div>
 
                                     {/* 加入的家庭空间 */}
@@ -198,10 +197,10 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                         <div
                                             key={family.ownerId}
                                             onClick={() => setActiveFamilyId(family.ownerId)}
-                                            className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center justify-between group ${activeFamilyId === family.ownerId ? 'border-[#3B6D8C] bg-[#3B6D8C]/5' : 'border-transparent hover:bg-gray-50'}`}
+                                            className={`p-4 rounded-xl cursor-pointer border-2 transition-all flex items-center justify-between group ${activeFamilyId === family.ownerId ? 'border-primary dark:border-blue-500 bg-primary/5 dark:bg-blue-900/20' : 'border-transparent hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`p-2 rounded-lg ${activeFamilyId === family.ownerId ? 'bg-[#3B6D8C] text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                                <div className={`p-2 rounded-lg ${activeFamilyId === family.ownerId ? 'bg-primary dark:bg-blue-600 text-white' : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400'}`}>
                                                     <Users className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex flex-col gap-0.5" style={{ maxWidth: '180px' }}>
@@ -211,7 +210,7 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                                                 type="text"
                                                                 value={aliasEditValue}
                                                                 onChange={e => setAliasEditValue(e.target.value)}
-                                                                className="w-full px-2 py-0.5 text-sm border border-[#3B6D8C] rounded outline-none"
+                                                                className="w-full px-2 py-0.5 text-sm border border-primary dark:border-blue-500 bg-transparent rounded outline-none dark:text-gray-100"
                                                                 placeholder="备注名称..."
                                                                 autoFocus
                                                                 onKeyDown={e => {
@@ -219,13 +218,13 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                                                     if (e.key === 'Escape') setEditingAliasOwnerId(null);
                                                                 }}
                                                             />
-                                                            <button onClick={() => handleSaveAlias(family.ownerId)} className="text-[#3B6D8C] bg-[#3B6D8C]/10 p-1 rounded hover:bg-[#3B6D8C]/20 transition-colors">
+                                                            <button onClick={() => handleSaveAlias(family.ownerId)} className="text-primary dark:text-blue-400 bg-primary/10 dark:bg-blue-900/30 p-1 rounded hover:bg-primary/20 dark:hover:bg-blue-900/50 transition-colors">
                                                                 <Check className="w-4 h-4" />
                                                             </button>
                                                         </div>
                                                     ) : (
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`font-semibold truncate ${activeFamilyId === family.ownerId ? 'text-[#3B6D8C]' : 'text-gray-700'}`}>
+                                                            <span className={`font-semibold truncate ${activeFamilyId === family.ownerId ? 'text-primary dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'}`}>
                                                                 {family.displayName} 的家
                                                             </span>
                                                             <button
@@ -234,7 +233,7 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                                                     setAliasEditValue(family.aliasName || family.originalName || '');
                                                                     setEditingAliasOwnerId(family.ownerId);
                                                                 }}
-                                                                className="text-gray-400 hover:text-[#3B6D8C] transition-colors p-1"
+                                                                className="text-gray-400 hover:text-primary dark:hover:text-blue-400 transition-colors p-1"
                                                                 title="修改备注名"
                                                             >
                                                                 <Edit3 className="w-3.5 h-3.5" />
@@ -246,17 +245,17 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-1.5 mt-0.5">
                                                             {family.role === 'admin' ?
-                                                                <span className="flex items-center gap-1 text-[10px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded shadow-sm border border-green-100 font-medium">
+                                                                <span className="flex items-center gap-1 text-[10px] bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-1.5 py-0.5 rounded shadow-sm border border-green-100 dark:border-green-800/50 font-medium">
                                                                     <Shield className="w-3 h-3" /> 可编辑
                                                                 </span> :
-                                                                <span className="flex items-center gap-1 text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded shadow-sm border border-gray-200 font-medium">
+                                                                <span className="flex items-center gap-1 text-[10px] bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded shadow-sm border border-gray-200 dark:border-slate-600 font-medium">
                                                                     <Eye className="w-3 h-3" /> 仅观看
                                                                 </span>
                                                             }
-                                                            <span className="text-xs text-gray-400">共享的家庭数据空间</span>
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500">共享的家庭数据空间</span>
                                                         </div>
                                                         {family.aliasName && (
-                                                            <span className="text-[10px] text-gray-300">原名: {family.originalName}</span>
+                                                            <span className="text-[10px] text-gray-300 dark:text-gray-600">原名: {family.originalName}</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -264,12 +263,12 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleLeave(family.ownerId); }}
-                                                    className="p-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg flex-shrink-0"
+                                                    className="p-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg flex-shrink-0"
                                                     title="退出家庭"
                                                 >
                                                     <LogOut className="w-4 h-4" />
                                                 </button>
-                                                {activeFamilyId === family.ownerId && <Check className="w-5 h-5 text-[#3B6D8C] flex-shrink-0" />}
+                                                {activeFamilyId === family.ownerId && <Check className="w-5 h-5 text-primary dark:text-blue-500 flex-shrink-0" />}
                                             </div>
                                         </div>
                                     ))}
@@ -280,33 +279,33 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                 </div>
                             </div>
                             {/* 我的家庭成员（谁加入了我的空间） */}
-                            <div className="space-y-4 pt-4 border-t border-gray-100">
-                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">谁加入了我的家庭？</h3>
+                            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+                                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">谁加入了我的家庭？</h3>
                                 <div className="space-y-2">
                                     {joinedUsers.length > 0 ? (
                                         joinedUsers.map(u => (
-                                            <div key={u.memberId} className="flex items-center justify-between p-3 rounded-lg border border-gray-50 bg-gray-50 hover:bg-white hover:border-gray-200 transition-colors group">
+                                            <div key={u.memberId} className="flex items-center justify-between p-3 rounded-lg border border-gray-50 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 hover:border-gray-200 dark:hover:border-slate-600 transition-colors group">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#3B6D8C] to-blue-400 flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white">
+                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-blue-400 flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white dark:ring-slate-800">
                                                         {u.displayName.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-medium text-gray-800">{u.displayName}</p>
-                                                        <p className="text-[10px] text-gray-400">于 {new Date(u.joinedAt).toLocaleDateString()} 加入</p>
+                                                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{u.displayName}</p>
+                                                        <p className="text-[10px] text-gray-400 dark:text-gray-500">于 {new Date(u.joinedAt).toLocaleDateString()} 加入</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <select
                                                         value={u.role}
                                                         onChange={(e) => handleRoleChange(u.memberId, e.target.value as 'viewer' | 'admin')}
-                                                        className="text-xs bg-gray-100 border-none rounded py-1 pl-2 pr-6 outline-none cursor-pointer focus:ring-1 focus:ring-[#3B6D8C] font-medium text-gray-600"
+                                                        className="text-xs bg-gray-100 dark:bg-slate-700 border-none rounded py-1 pl-2 pr-6 outline-none cursor-pointer focus:ring-1 focus:ring-primary font-medium text-gray-600 dark:text-gray-300"
                                                     >
                                                         <option value="viewer">👀 仅观看</option>
                                                         <option value="admin">✏️ 可编辑</option>
                                                     </select>
                                                     <button
                                                         onClick={() => handleKick(u.memberId, u.displayName)}
-                                                        className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded bg-red-50 opacity-0 group-hover:opacity-100 transition-all font-medium"
+                                                        className="text-xs text-red-400 hover:text-red-600 dark:hover:text-red-300 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 opacity-0 group-hover:opacity-100 transition-all font-medium"
                                                         title="移出家庭"
                                                     >
                                                         <LogOut className="w-3.5 h-3.5" />
@@ -315,9 +314,9 @@ export default function FamilyModal({ isOpen, onClose }: { isOpen: boolean, onCl
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="text-center p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                            <p className="text-sm text-gray-400">目前还没有人加入您的家庭空间</p>
-                                            <p className="text-xs text-gray-300 mt-1">您可以将上面的邀请码发送给家人</p>
+                                        <div className="text-center p-4 bg-gray-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-gray-200 dark:border-slate-700">
+                                            <p className="text-sm text-gray-400 dark:text-gray-500">目前还没有人加入您的家庭空间</p>
+                                            <p className="text-xs text-gray-300 dark:text-gray-600 mt-1">您可以将上面的邀请码发送给家人</p>
                                         </div>
                                     )}
                                 </div>

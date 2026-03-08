@@ -7,26 +7,26 @@ interface PrivacyPolicyModalProps {
 export default function PrivacyPolicyModal({ onClose }: PrivacyPolicyModalProps) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-enter">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-emerald-50/50 sticky top-0 z-10">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative border border-transparent dark:border-slate-700">
+                <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between bg-emerald-50/50 dark:bg-emerald-900/30 sticky top-0 z-10">
                     <div className="flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-emerald-600" />
-                        <h3 className="text-lg font-bold text-gray-900">家庭云端数据隐私协议</h3>
+                        <Shield className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">家庭云端数据隐私协议</h3>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500">
+                    <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full transition-colors text-gray-500 dark:text-gray-400">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <div className="p-6 md:p-8 overflow-y-auto flex-1 prose prose-sm md:prose-base prose-emerald max-w-none text-gray-600">
-                    <p className="font-bold text-gray-800 text-lg mb-6 leading-relaxed">
+                <div className="p-6 md:p-8 overflow-y-auto flex-1 prose prose-sm md:prose-base prose-emerald dark:prose-invert max-w-none text-gray-600 dark:text-gray-300">
+                    <p className="font-bold text-gray-800 dark:text-gray-200 text-lg mb-6 leading-relaxed">
                         极客法则第一条：我的家，我做主。<br />
                         HomeBox 是一款彻头彻尾的「自托管 (Self-Hosted)」工具，您的数据主权神圣不可侵犯。
                     </p>
 
                     <div className="space-y-6">
-                        <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                            <h4 className="flex items-center gap-2 font-bold text-gray-900 mt-0 mb-3 text-base">
+                        <div className="bg-gray-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700">
+                            <h4 className="flex items-center gap-2 font-bold text-gray-900 dark:text-gray-100 mt-0 mb-3 text-base">
                                 <Server className="w-5 h-5 text-blue-500" />
                                 1. 数据的终极归属
                             </h4>
@@ -36,8 +36,8 @@ export default function PrivacyPolicyModal({ onClose }: PrivacyPolicyModalProps)
                             </p>
                         </div>
 
-                        <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                            <h4 className="flex items-center gap-2 font-bold text-gray-900 mt-0 mb-3 text-base">
+                        <div className="bg-gray-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700">
+                            <h4 className="flex items-center gap-2 font-bold text-gray-900 dark:text-gray-100 mt-0 mb-3 text-base">
                                 <Globe className="w-5 h-5 text-orange-500" />
                                 2. 零流量窃听与纯净沙盒
                             </h4>
@@ -46,8 +46,8 @@ export default function PrivacyPolicyModal({ onClose }: PrivacyPolicyModalProps)
                             </p>
                         </div>
 
-                        <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                            <h4 className="flex items-center gap-2 font-bold text-gray-900 mt-0 mb-3 text-base">
+                        <div className="bg-gray-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700">
+                            <h4 className="flex items-center gap-2 font-bold text-gray-900 dark:text-gray-100 mt-0 mb-3 text-base">
                                 <BrainCircuit className="w-5 h-5 text-purple-500" />
                                 3. AI 与大语言模型披露
                             </h4>
@@ -57,8 +57,8 @@ export default function PrivacyPolicyModal({ onClose }: PrivacyPolicyModalProps)
                             </p>
                         </div>
 
-                        <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                            <h4 className="flex items-center gap-2 font-bold text-gray-900 mt-0 mb-3 text-base">
+                        <div className="bg-gray-50 dark:bg-slate-900/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700">
+                            <h4 className="flex items-center gap-2 font-bold text-gray-900 dark:text-gray-100 mt-0 mb-3 text-base">
                                 <Lock className="w-5 h-5 text-red-500" />
                                 4. 明文存储须知
                             </h4>
@@ -68,12 +68,12 @@ export default function PrivacyPolicyModal({ onClose }: PrivacyPolicyModalProps)
                         </div>
                     </div>
 
-                    <p className="text-xs text-gray-400 mt-8 text-center uppercase tracking-widest font-bold">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-8 text-center uppercase tracking-widest font-bold">
                         Transparent · Privacy-First · Self-Hosted
                     </p>
                 </div>
 
-                <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end sticky bottom-0 z-10">
+                <div className="px-6 py-4 bg-gray-50 dark:bg-slate-900 border-t border-gray-100 dark:border-slate-700 flex justify-end sticky bottom-0 z-10">
                     <button
                         onClick={onClose}
                         className="btn-primary px-8 py-2.5 rounded-xl font-bold"

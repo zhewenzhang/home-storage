@@ -406,33 +406,31 @@ export default function AIChat() {
             </div>
 
             {isOpen && (
-                <div className="fixed bottom-32 md:bottom-24 right-4 md:right-6 z-50 flex flex-col overflow-hidden"
+                <div className="fixed bottom-32 md:bottom-24 right-4 md:right-6 z-50 flex flex-col overflow-hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-white/60 dark:border-slate-700/50 shadow-2xl"
                     style={{
                         width: '420px', maxWidth: 'calc(100vw - 32px)',
                         height: '580px', maxHeight: 'calc(100vh - 140px)',
-                        borderRadius: '1.5rem', background: 'rgba(255,255,255,0.95)',
-                        backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.6)',
-                        boxShadow: '0 20px 60px -10px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)',
+                        borderRadius: '1.5rem',
                         animation: 'chatEnter 0.3s ease-out forwards',
                     }}
                 >
                     {/* Header */}
                     <div className="flex items-center gap-3 px-5 py-4" style={{ background: 'linear-gradient(135deg, #3B6D8C 0%, #2A4D63 100%)' }}>
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-white/20">
                             <Sparkles className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1">
                             <h3 className="font-bold text-white text-sm">AI 收纳助手</h3>
-                            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>{items.length} 物品 · {locations.length} 空间</p>
+                            <p className="text-xs text-white/70">{items.length} 物品 · {locations.length} 空间</p>
                         </div>
                         {messages.length > 0 && (
                             <button onClick={() => { setMessages([]); setStreamText(''); setPendingActions(null); }}
-                                className="p-2 rounded-xl" style={{ color: 'rgba(255,255,255,0.7)' }}
+                                className="p-2 rounded-xl text-white/70 hover:bg-white/10 transition-colors"
                                 title="清空对话"
                             ><Trash2 className="w-4 h-4" /></button>
                         )}
                         <button onClick={() => setIsOpen(false)}
-                            className="p-2 rounded-xl" style={{ color: 'rgba(255,255,255,0.7)' }}
+                            className="p-2 rounded-xl text-white/70 hover:bg-white/10 transition-colors"
                             title="关闭聊天"
                         ><X className="w-5 h-5" /></button>
                     </div>
@@ -441,10 +439,10 @@ export default function AIChat() {
                     <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
                         {messages.length === 0 && !isLoading && !pendingActions && (
                             <div className="space-y-4">
-                                <div className="p-4 rounded-2xl" style={{ backgroundColor: '#F0F7FB' }}>
-                                    <p className="text-sm font-bold text-gray-700 mb-1">👋 你好！我是 AI 收纳助手</p>
-                                    <p className="text-xs text-gray-500">支持<b>繁体/简体</b>，操作前会先确认 ⚡</p>
-                                    <ul className="text-xs text-gray-500 mt-1 space-y-0.5 list-disc pl-4">
+                                <div className="p-4 rounded-2xl bg-blue-50 dark:bg-slate-800 border border-transparent dark:border-slate-700">
+                                    <p className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">👋 你好！我是 AI 收纳助手</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">支持<b>繁体/简体</b>，操作前会先确认 ⚡</p>
+                                    <ul className="text-xs text-gray-500 dark:text-gray-400 mt-1 space-y-0.5 list-disc pl-4">
                                         <li>「在客厅加个鞋柜」→ 添加收纳</li>
                                         <li>「口罩放到了杂物柜里」→ 记录物品</li>
                                         <li>「在书房加置物柜，把网线放进去」→ 复合操作</li>
@@ -454,7 +452,7 @@ export default function AIChat() {
                                 <div className="grid grid-cols-2 gap-2">
                                     {QUICK.map((q, i) => (
                                         <button key={i} onClick={() => setInput(q)}
-                                            className="p-3 text-xs font-bold text-left rounded-xl border border-gray-100 text-gray-600 hover:border-[#3B6D8C] hover:text-[#3B6D8C] hover:bg-[#F0F7FB] transition-all"
+                                            className="p-3 text-xs font-bold text-left rounded-xl border border-gray-100 dark:border-slate-700 text-gray-600 dark:text-gray-300 hover:border-[#3B6D8C] dark:hover:border-blue-400 hover:text-[#3B6D8C] dark:hover:text-blue-400 hover:bg-[#F0F7FB] dark:hover:bg-slate-800 transition-all"
                                         >{q}</button>
                                     ))}
                                 </div>
@@ -464,19 +462,21 @@ export default function AIChat() {
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className="max-w-[85%]">
-                                    <div className="px-4 py-3 rounded-2xl text-sm leading-relaxed"
+                                    <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user' ? 'text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-100'}`}
                                         style={msg.role === 'user' ? {
                                             background: 'linear-gradient(135deg, #3B6D8C 0%, #2A4D63 100%)',
-                                            color: 'white', borderBottomRightRadius: '6px',
-                                        } : { backgroundColor: '#F5F5F5', color: '#333', borderBottomLeftRadius: '6px' }}
+                                            borderBottomRightRadius: '6px',
+                                        } : { borderBottomLeftRadius: '6px' }}
                                     ><p className="whitespace-pre-wrap">{msg.content}</p></div>
                                     {msg.actions && msg.actions.length > 0 && (
                                         <div className="mt-2 space-y-1">
-                                            {msg.actions.map((a, j) => (
-                                                <div key={j} className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold"
-                                                    style={{ backgroundColor: a.action === 'delete_item' ? '#FFF3E0' : '#E8F5E9', color: a.action === 'delete_item' ? '#E65100' : '#2E7D32' }}
-                                                ><CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" /><span>{actionLabel(a)}</span></div>
-                                            ))}
+                                            {msg.actions.map((a, j) => {
+                                                const isDel = a.action === 'delete_item';
+                                                return (
+                                                    <div key={j} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold ${isDel ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'}`}
+                                                    ><CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" /><span>{actionLabel(a)}</span></div>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
@@ -487,34 +487,34 @@ export default function AIChat() {
                         {pendingActions && !isLoading && (
                             <div className="flex justify-start">
                                 <div className="w-full">
-                                    <div className="rounded-2xl overflow-hidden border-2 border-blue-200" style={{ background: '#F7FBFF' }}>
-                                        <div className="px-4 py-2.5 flex items-center gap-2" style={{ backgroundColor: '#E3F2FD' }}>
-                                            <AlertTriangle className="w-4 h-4 text-blue-600" />
-                                            <span className="text-xs font-bold text-blue-800">操作预览（可编辑）</span>
+                                    <div className="rounded-2xl overflow-hidden border-2 border-blue-200 dark:border-blue-900/50 bg-[#F7FBFF] dark:bg-slate-800/80">
+                                        <div className="px-4 py-2.5 flex items-center gap-2 bg-[#E3F2FD] dark:bg-blue-900/40">
+                                            <AlertTriangle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                            <span className="text-xs font-bold text-blue-800 dark:text-blue-300">操作预览（可编辑）</span>
                                         </div>
 
                                         <div className="px-3 py-2 space-y-3 max-h-[240px] overflow-y-auto">
                                             {pendingActions.map((a, i) => (
-                                                <div key={i} className="p-2.5 rounded-xl bg-white border border-gray-100 space-y-2">
+                                                <div key={i} className="p-2.5 rounded-xl bg-white dark:bg-slate-700 border border-gray-100 dark:border-slate-600 space-y-2">
                                                     {/* 行1: 操作类型 + 删除按钮 */}
                                                     <div className="flex items-center gap-2">
                                                         <div className="relative flex-1">
                                                             <select value={a.action} onChange={e => updateAction(i, { action: e.target.value as any })}
-                                                                className="w-full appearance-none pl-2 pr-6 py-1 text-xs font-bold rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-blue-400"
+                                                                className="w-full appearance-none pl-2 pr-6 py-1 text-xs font-bold rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 outline-none focus:border-blue-400 dark:text-gray-100"
                                                             >
                                                                 {ACTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                                                             </select>
                                                             <ChevronDown className="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                                         </div>
                                                         <button onClick={() => removeAction(i)}
-                                                            className="p-1 rounded text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all"
+                                                            className="p-1 rounded text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all"
                                                         ><X className="w-3.5 h-3.5" /></button>
                                                     </div>
 
                                                     {/* 行2: 名称 */}
                                                     <input value={a.name} onChange={e => updateAction(i, { name: e.target.value })}
                                                         placeholder="名称..."
-                                                        className="w-full px-2 py-1 text-xs rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-blue-400"
+                                                        className="w-full px-2 py-1 text-xs rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 outline-none focus:border-blue-400 dark:text-gray-200"
                                                     />
 
                                                     {/* 行3: 位置/类别 */}
@@ -522,7 +522,7 @@ export default function AIChat() {
                                                         <div className="flex gap-2">
                                                             <div className="relative flex-1">
                                                                 <select value={a.locationName || ''} onChange={e => updateAction(i, { locationName: e.target.value })}
-                                                                    className="w-full appearance-none pl-2 pr-6 py-1 text-xs rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-blue-400"
+                                                                    className="w-full appearance-none pl-2 pr-6 py-1 text-xs rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 outline-none focus:border-blue-400 dark:text-gray-200"
                                                                 >
                                                                     <option value="">选择位置...</option>
                                                                     {getLocationOptions().map(opt => <option key={opt.name} value={opt.name}>{opt.isRoom ? '🏠 [位置] ' : '📦 [收纳] '}{opt.name}</option>)}
@@ -532,7 +532,7 @@ export default function AIChat() {
                                                             {a.action === 'add_item' && (
                                                                 <div className="relative" style={{ width: '80px' }}>
                                                                     <select value={a.category || '其他'} onChange={e => updateAction(i, { category: e.target.value })}
-                                                                        className="w-full appearance-none pl-2 pr-5 py-1 text-xs rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-blue-400"
+                                                                        className="w-full appearance-none pl-2 pr-5 py-1 text-xs rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 outline-none focus:border-blue-400 dark:text-gray-200"
                                                                     >
                                                                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                                                     </select>
@@ -544,7 +544,7 @@ export default function AIChat() {
                                                     {a.action === 'add_cabinet' && (
                                                         <div className="relative">
                                                             <select value={a.parentRoom || ''} onChange={e => updateAction(i, { parentRoom: e.target.value || undefined })}
-                                                                className="w-full appearance-none pl-2 pr-6 py-1 text-xs rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-blue-400"
+                                                                className="w-full appearance-none pl-2 pr-6 py-1 text-xs rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 outline-none focus:border-blue-400 dark:text-gray-200"
                                                             >
                                                                 <option value="">选择房间...</option>
                                                                 {getRoomOptions().map(n => <option key={n} value={n}>{n}</option>)}
@@ -559,7 +559,7 @@ export default function AIChat() {
                                                             <span className="text-xs text-gray-400">数量:</span>
                                                             <input type="number" min={1} value={a.quantity || 1}
                                                                 onChange={e => updateAction(i, { quantity: parseInt(e.target.value) || 1 })}
-                                                                className="w-16 px-2 py-1 text-xs rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-blue-400"
+                                                                className="w-16 px-2 py-1 text-xs rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-600 outline-none focus:border-blue-400 dark:text-gray-200"
                                                             />
                                                         </div>
                                                     )}
@@ -567,19 +567,18 @@ export default function AIChat() {
                                             ))}
                                         </div>
 
-                                        <div className="px-3 py-2 border-t border-blue-100">
+                                        <div className="px-3 py-2 border-t border-blue-100 dark:border-blue-900/50">
                                             <button onClick={addNewAction}
-                                                className="w-full py-1.5 rounded-lg text-xs text-blue-600 font-bold hover:bg-blue-50 transition-all flex items-center justify-center gap-1"
+                                                className="w-full py-1.5 rounded-lg text-xs text-blue-600 dark:text-blue-400 font-bold hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all flex items-center justify-center gap-1"
                                             ><Plus className="w-3 h-3" /> 添加操作</button>
                                         </div>
 
-                                        <div className="px-3 py-2.5 flex gap-2 border-t border-blue-100">
+                                        <div className="px-3 py-2.5 flex gap-2 border-t border-blue-100 dark:border-blue-900/50">
                                             <button onClick={handleConfirm}
-                                                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95"
-                                                style={{ backgroundColor: '#3B6D8C' }}
+                                                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-white transition-all hover:opacity-90 active:scale-95 bg-primary dark:bg-blue-600"
                                             >✅ 确认执行</button>
                                             <button onClick={handleCancel}
-                                                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-all active:scale-95"
+                                                className="flex-1 py-2.5 rounded-xl text-xs font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-all active:scale-95"
                                             >❌ 取消</button>
                                         </div>
                                     </div>
@@ -589,13 +588,13 @@ export default function AIChat() {
 
                         {isLoading && (
                             <div className="flex justify-start">
-                                <div className="max-w-[85%] px-4 py-3 rounded-2xl text-sm"
-                                    style={{ backgroundColor: '#F5F5F5', color: '#333', borderBottomLeftRadius: '6px' }}
+                                <div className="max-w-[85%] px-4 py-3 rounded-2xl text-sm bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-100"
+                                    style={{ borderBottomLeftRadius: '6px' }}
                                 >
                                     {streamText ? (
                                         <p className="whitespace-pre-wrap">{streamText}<span className="animate-pulse">▍</span></p>
                                     ) : (
-                                        <div className="flex items-center gap-2 text-gray-400">
+                                        <div className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
                                             <Loader2 className="w-4 h-4 animate-spin" /><span className="text-xs">{statusText || '思考中...'}</span>
                                         </div>
                                     )}
@@ -606,17 +605,16 @@ export default function AIChat() {
                     </div>
 
                     {/* Input */}
-                    <div className="px-4 py-3 border-t border-gray-100" style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
+                    <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
                         <div className="flex items-center gap-2">
                             <input ref={inputRef} type="text" value={input}
                                 onChange={(e) => setInput(e.target.value)} onKeyDown={handleKeyDown}
                                 placeholder="在书房加个置物柜，把网线放进去..."
                                 disabled={isLoading || !!pendingActions}
-                                className="flex-1 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-sm outline-none focus:border-[#3B6D8C] focus:ring-2 focus:ring-[#3B6D8C]/10 transition-all disabled:opacity-50"
+                                className="flex-1 px-4 py-3 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-sm dark:text-gray-100 outline-none focus:border-primary dark:focus:border-blue-500 focus:ring-2 focus:ring-primary/10 transition-all disabled:opacity-50"
                             />
                             <button onClick={handleSend} disabled={!input.trim() || isLoading || !!pendingActions}
-                                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all flex-shrink-0 disabled:opacity-30"
-                                style={{ backgroundColor: '#3B6D8C' }}
+                                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all flex-shrink-0 disabled:opacity-30 bg-primary dark:bg-blue-600 hover:bg-primary-dark dark:hover:bg-blue-700"
                             ><Send className="w-4 h-4 text-white" /></button>
                         </div>
                     </div>

@@ -213,7 +213,7 @@ export default function FloorPlan() {
 
           <button
             onClick={() => setTool('select')}
-            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'select' ? 'bg-[#3B6D8C] text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'select' ? 'bg-primary dark:bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
               }`}
           >
             <Move className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">选择/移动</span><span className="inline sm:hidden">选择</span>
@@ -223,22 +223,22 @@ export default function FloorPlan() {
           <div className="relative">
             <button
               onClick={() => { setShowRoomPicker(!showRoomPicker); setShowCabinetPicker(false); }}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'add-room' ? 'bg-[#3B6D8C] text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'add-room' ? 'bg-primary dark:bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
                 }`}
             >
               <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 房间 <ChevronDown className="w-3 h-3" />
             </button>
             {showRoomPicker && (
-              <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-3 z-50 w-56 animate-enter">
+              <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-3 z-50 w-56 animate-enter">
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(ROOM_TYPES).map(([key, config]) => (
                     <button
                       key={key}
                       onClick={() => addNewRoom(key)}
-                      className="p-3 rounded-xl bg-gray-50 hover:bg-[#EAF4F8] transition-all text-center group"
+                      className="p-3 rounded-xl bg-gray-50 dark:bg-slate-900/50 hover:bg-[#EAF4F8] dark:hover:bg-blue-900/30 transition-all text-center group border border-transparent dark:border-slate-700"
                     >
                       <span className="text-xl block group-hover:scale-110 transition-transform">{config.icon}</span>
-                      <p className="font-bold text-xs mt-1 text-gray-600">{config.name}</p>
+                      <p className="font-bold text-xs mt-1 text-gray-600 dark:text-gray-300">{config.name}</p>
                     </button>
                   ))}
                 </div>
@@ -250,23 +250,23 @@ export default function FloorPlan() {
           <div className="relative">
             <button
               onClick={() => { setShowCabinetPicker(!showCabinetPicker); setShowRoomPicker(false); }}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'add-cabinet' ? 'bg-[#8B6D4B] text-white shadow-lg' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'add-cabinet' ? 'bg-[#8B6D4B] dark:bg-amber-600 text-white shadow-lg' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/50'
                 }`}
             >
               <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 收纳 <ChevronDown className="w-3 h-3" />
             </button>
             {showCabinetPicker && (
-              <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 p-3 z-50 w-64 animate-enter">
-                <p className="text-xs text-gray-400 mb-2 px-1">选择类型，标记将添加到{selectedLoc?.type === 'room' ? `"${selectedLoc.name}"` : '画布'}中</p>
+              <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-3 z-50 w-64 animate-enter">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-2 px-1">选择类型，标记将添加到{selectedLoc?.type === 'room' ? `"${selectedLoc.name}"` : '画布'}中</p>
                 <div className="grid grid-cols-3 gap-2">
                   {Object.entries(CABINET_TYPES).map(([key, config]) => (
                     <button
                       key={key}
                       onClick={() => addNewCabinet(key)}
-                      className="p-3 rounded-xl bg-gray-50 hover:bg-amber-50 transition-all text-center group"
+                      className="p-3 rounded-xl bg-gray-50 dark:bg-slate-900/50 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all text-center group border border-transparent dark:border-slate-700"
                     >
                       <span className="text-xl block group-hover:scale-110 transition-transform">{config.icon}</span>
-                      <p className="font-bold text-xs mt-1 text-gray-600">{config.name}</p>
+                      <p className="font-bold text-xs mt-1 text-gray-600 dark:text-gray-300">{config.name}</p>
                     </button>
                   ))}
                 </div>
@@ -278,10 +278,10 @@ export default function FloorPlan() {
           <button
             onClick={handleDelete}
             disabled={!selectedId}
-            className="ml-auto p-2 sm:p-2.5 rounded-xl bg-red-50 hover:bg-red-100 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            className="ml-auto p-2 sm:p-2.5 rounded-xl bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             title="删除选中"
           >
-            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />
+            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 dark:text-red-400" />
           </button>
         </div>
       </div>
@@ -295,11 +295,10 @@ export default function FloorPlan() {
         <div className="overflow-auto rounded-2xl relative w-full touch-pan-x touch-pan-y" style={{ height: '500px' }}>
           <div
             ref={containerRef}
-            className="absolute top-0 left-0"
+            className="absolute top-0 left-0 bg-[#ECECEC] dark:bg-slate-900"
             style={{
               width: '1200px', // 设定一个固定的超大逻辑宽带保证移动端拖拽不撞墙
               height: '1000px', // 设定超大高度
-              backgroundColor: '#ECECEC',
               backgroundImage: `
                 linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)
@@ -340,11 +339,11 @@ export default function FloorPlan() {
               return (
                 <div
                   key={location.id}
-                  className="absolute"
+                  className={`absolute bg-white dark:bg-slate-800 ${isSelected ? 'border-blue-600 dark:border-blue-500' : 'border-[#3A3A3A] dark:border-slate-600'}`}
                   style={{
                     left: b.x, top: b.y, width: b.width, height: b.height,
-                    backgroundColor: '#FFFFFF',
-                    border: `${WALL}px solid ${isSelected ? '#2563EB' : '#3A3A3A'}`,
+                    borderWidth: `${WALL}px`,
+                    borderStyle: 'solid',
                     boxShadow: isSelected ? '0 0 0 3px rgba(37,99,235,0.25)' : 'none',
                     transition: isDragging ? 'none' : 'box-shadow 0.15s, border-color 0.15s',
                     zIndex: isSelected ? 20 : 10,
@@ -352,10 +351,10 @@ export default function FloorPlan() {
                 >
                   {/* 中心标签：名称 + 面积 */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
-                    <span className="text-sm font-bold text-gray-800 tracking-wide">
+                    <span className="text-sm font-bold text-gray-800 dark:text-gray-200 tracking-wide">
                       {location.name}
                     </span>
-                    <span className="text-xs font-bold mt-1" style={{ color: '#888' }}>
+                    <span className="text-xs font-bold mt-1 text-gray-400 dark:text-gray-500">
                       {area}m²
                     </span>
                   </div>
@@ -364,13 +363,13 @@ export default function FloorPlan() {
                   <div className="absolute pointer-events-none select-none"
                     style={{ left: '50%', top: -22, transform: 'translateX(-50%)' }}
                   >
-                    <span className="text-[10px] text-gray-500 font-mono bg-[#F5F5F0] px-1.5 py-0.5 rounded">{wM}m</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono bg-[#F5F5F0] dark:bg-slate-700 px-1.5 py-0.5 rounded">{wM}m</span>
                   </div>
                   {/* 尺寸标注 — 左侧(高) */}
                   <div className="absolute pointer-events-none select-none"
                     style={{ left: -8, top: '50%', transform: 'translateY(-50%) translateX(-100%) rotate(-90deg)' }}
                   >
-                    <span className="text-[10px] text-gray-500 font-mono bg-[#F5F5F0] px-1.5 py-0.5 rounded">{hM}m</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono bg-[#F5F5F0] dark:bg-slate-700 px-1.5 py-0.5 rounded">{hM}m</span>
                   </div>
 
                   {/* Resize 手柄 */}
@@ -475,59 +474,59 @@ export default function FloorPlan() {
                   type="text"
                   value={selectedLoc.name}
                   onChange={(e) => updateLocation(selectedLoc.id, { name: e.target.value })}
-                  className="font-bold text-gray-900 bg-transparent border-b-2 border-transparent hover:border-gray-200 focus:border-[#3B6D8C] outline-none w-full transition-colors py-0.5 text-lg"
+                  className="font-bold text-gray-900 dark:text-gray-100 bg-transparent border-b-2 border-transparent hover:border-gray-200 dark:hover:border-slate-700 focus:border-primary dark:focus:border-blue-500 outline-none w-full transition-colors py-0.5 text-lg"
                   placeholder="输入名称..."
                 />
-                <p className="text-sm text-gray-500 mt-0.5">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                   {selectedLoc.type === 'room' ? '房间' : '收纳点'} · {selectedItemCount} 件物品
                   {selectedLoc.parentId && ` · 位于 ${locations.find(l => l.id === selectedLoc.parentId)?.name || '未知'}`}
                 </p>
               </div>
-              <button onClick={handleDelete} className="p-2 rounded-xl hover:bg-red-50 flex-shrink-0">
-                <Trash2 className="w-4 h-4 text-red-400" />
+              <button onClick={handleDelete} className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30 flex-shrink-0">
+                <Trash2 className="w-4 h-4 text-red-400 dark:text-red-500" />
               </button>
             </div>
 
             {/* 房间尺寸设置 */}
             {selectedLoc.type === 'room' && (
-              <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-4">
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 flex flex-wrap items-center gap-4">
                 <span className="text-sm font-bold text-gray-400 whitespace-nowrap">尺寸</span>
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-gray-500">宽</label>
+                  <label className="text-xs text-gray-500 dark:text-gray-400">宽</label>
                   <input
                     type="number"
                     step="0.1"
                     min="0.5"
                     value={widthM}
                     onChange={(e) => setDimension('width', parseFloat(e.target.value) || 0.5)}
-                    className="w-16 px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-center font-bold text-sm focus:border-[#3B6D8C] focus:ring-2 focus:ring-[#3B6D8C]/10 outline-none transition-all"
+                    className="w-16 px-2 py-1.5 rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 text-center font-bold text-sm focus:border-primary dark:focus:border-blue-500 focus:ring-2 focus:ring-primary/10 outline-none transition-all dark:text-gray-100"
                   />
-                  <span className="text-xs text-gray-400">m</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">m</span>
                 </div>
-                <span className="text-gray-300">×</span>
+                <span className="text-gray-300 dark:text-gray-600">×</span>
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-gray-500">高</label>
+                  <label className="text-xs text-gray-500 dark:text-gray-400">高</label>
                   <input
                     type="number"
                     step="0.1"
                     min="0.5"
                     value={heightM}
                     onChange={(e) => setDimension('height', parseFloat(e.target.value) || 0.5)}
-                    className="w-16 px-2 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-center font-bold text-sm focus:border-[#3B6D8C] focus:ring-2 focus:ring-[#3B6D8C]/10 outline-none transition-all"
+                    className="w-16 px-2 py-1.5 rounded-lg bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 text-center font-bold text-sm focus:border-primary dark:focus:border-blue-500 focus:ring-2 focus:ring-primary/10 outline-none transition-all dark:text-gray-100"
                   />
-                  <span className="text-xs text-gray-400">m</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">m</span>
                 </div>
               </div>
             )}
 
             {/* 收纳点：所属房间选择 */}
             {selectedLoc.type !== 'room' && (
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4">
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 flex items-center gap-4">
                 <span className="text-sm font-bold text-gray-400 whitespace-nowrap">所属房间</span>
                 <select
                   value={selectedLoc.parentId || ''}
                   onChange={(e) => updateLocation(selectedLoc.id, { parentId: e.target.value || null })}
-                  className="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-sm font-bold text-gray-700 focus:border-[#3B6D8C] focus:ring-2 focus:ring-[#3B6D8C]/10 outline-none transition-all"
+                  className="flex-1 px-3 py-2 rounded-xl bg-gray-50 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700 text-sm font-bold text-gray-700 dark:text-gray-200 focus:border-primary dark:focus:border-blue-500 focus:ring-2 focus:ring-primary/10 outline-none transition-all"
                 >
                   <option value="">未指定</option>
                   {roomLocations.map(room => (

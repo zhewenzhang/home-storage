@@ -17,24 +17,23 @@ function ConfirmDialog({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onCancel}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
-        className="relative bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full animate-enter"
+        className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 max-w-sm w-full animate-enter border border-transparent dark:border-slate-700"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-6 h-6 text-red-500" />
+          <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+            <AlertTriangle className="w-6 h-6 text-red-500 dark:text-red-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-            <p className="text-sm text-gray-500 mt-0.5">{message}</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{message}</p>
           </div>
         </div>
         <div className="flex gap-3 mt-6">
           <button onClick={onCancel} className="btn-secondary flex-1">取消</button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-6 py-3 rounded-2xl font-bold text-white transition-all"
-            style={{ backgroundColor: '#EF4444' }}
+            className="flex-1 px-6 py-3 rounded-2xl font-bold text-white transition-all bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 shadow-sm border-none"
           >
             确认删除
           </button>
@@ -190,19 +189,19 @@ export default function ItemForm() {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-2xl bg-white border border-gray-100 flex items-center justify-center hover:shadow-md transition-all"
+          className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 flex items-center justify-center hover:shadow-md hover:bg-gray-50 dark:hover:bg-slate-700 transition-all pointer-events-auto shadow-sm"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+          <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
-        <h1 className="text-2xl font-bold flex-1">
+        <h1 className="text-2xl font-bold flex-1 dark:text-gray-100">
           {isEdit ? '编辑物品' : '添加新物品'}
         </h1>
         {isEdit && (
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center hover:bg-red-100 transition-all"
+            className="w-10 h-10 rounded-2xl bg-red-50 dark:bg-red-900/30 flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/50 transition-all pointer-events-auto"
           >
-            <Trash2 className="w-5 h-5 text-red-500" />
+            <Trash2 className="w-5 h-5 text-red-500 dark:text-red-400" />
           </button>
         )}
       </div>
@@ -210,7 +209,7 @@ export default function ItemForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 物品名称 */}
         <div className="card">
-          <label className="block text-sm font-bold text-gray-600 mb-3">物品名称 *</label>
+          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">物品名称 *</label>
           <input
             type="text"
             value={form.name}
@@ -223,11 +222,11 @@ export default function ItemForm() {
 
         {/* 照片集 (Image Upload) */}
         <div className="card">
-          <label className="block text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
+          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3 flex items-center gap-2">
             <Camera className="w-4 h-4 text-emerald-500" /> 物品照片
           </label>
 
-          <div className="relative group rounded-2xl overflow-hidden bg-gray-50 border-2 border-dashed border-gray-200 transition-all hover:border-emerald-300 hover:bg-emerald-50/50">
+          <div className="relative group rounded-2xl overflow-hidden bg-gray-50 dark:bg-slate-900/50 border-2 border-dashed border-gray-200 dark:border-slate-700 transition-all hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20">
             {form.imageUrl ? (
               <div className="relative aspect-video w-full flex items-center justify-center bg-gray-900">
                 <img
@@ -260,15 +259,15 @@ export default function ItemForm() {
                 {isUploading ? (
                   <>
                     <Loader2 className="w-10 h-10 text-emerald-500 animate-spin mb-3" />
-                    <span className="text-sm font-bold text-emerald-600">正在上传至家庭云柜...</span>
+                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">正在上传至家庭云柜...</span>
                   </>
                 ) : (
                   <>
-                    <div className="w-14 h-14 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3">
-                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl shadow-sm flex items-center justify-center mb-3 border border-transparent dark:border-slate-700">
+                      <ImageIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <span className="text-sm font-bold text-gray-600 mb-1">点击拍照或上传图片</span>
-                    <span className="text-xs text-gray-400">支持 JPG, PNG, WEBP (上限 5MB)</span>
+                    <span className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-1">点击拍照或上传图片</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">支持 JPG, PNG, WEBP (上限 5MB)</span>
                   </>
                 )}
                 <input
@@ -288,16 +287,16 @@ export default function ItemForm() {
         <div className="card">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-bold text-gray-600 mb-3">分类</label>
+              <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">分类</label>
               <div className="flex flex-wrap gap-2">
                 {DEFAULT_CATEGORIES.map(cat => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => setForm({ ...form, category: cat })}
-                    className={`px - 4 py - 2 rounded - xl text - sm font - bold transition - all border ${form.category === cat
-                      ? 'bg-[#3B6D8C] text-white border-[#3B6D8C] shadow-md'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#6B9AC4]'
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${form.category === cat
+                      ? 'bg-primary dark:bg-blue-600 text-white border-transparent shadow-md'
+                      : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-600 hover:border-primary dark:hover:border-blue-400'
                       } `}
                   >
                     {cat}
@@ -306,12 +305,12 @@ export default function ItemForm() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-600 mb-3">数量</label>
+              <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">数量</label>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, quantity: Math.max(1, form.quantity - 1) })}
-                  className="w-12 h-12 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-lg transition-all active:scale-90"
+                  className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-lg transition-all active:scale-90 text-gray-800 dark:text-gray-100"
                 >
                   −
                 </button>
@@ -325,7 +324,7 @@ export default function ItemForm() {
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, quantity: form.quantity + 1 })}
-                  className="w-12 h-12 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-lg transition-all active:scale-90"
+                  className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-lg transition-all active:scale-90 text-gray-800 dark:text-gray-100"
                 >
                   +
                 </button>
@@ -336,14 +335,14 @@ export default function ItemForm() {
 
         {/* 存放位置 — 按层级显示 */}
         <div className="card">
-          <label className="block text-sm font-bold text-gray-600 mb-3">存放位置</label>
+          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">存放位置</label>
           {locations.length === 0 ? (
-            <div className="text-center py-6 bg-gray-50 rounded-2xl">
-              <p className="text-gray-500 text-sm mb-2">还没有添加位置</p>
+            <div className="text-center py-6 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-transparent dark:border-slate-700">
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">还没有添加位置</p>
               <button
                 type="button"
                 onClick={() => navigate('/floorplan')}
-                className="text-sm font-bold text-[#3B6D8C] hover:underline"
+                className="text-sm font-bold text-primary dark:text-blue-400 hover:underline"
               >
                 去平面图添加 →
               </button>
@@ -378,8 +377,8 @@ export default function ItemForm() {
 
         {/* 📅 保质期设置 */}
         <div className="card">
-          <label className="block text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
-            📅 保质期 <span className="text-xs text-gray-400 font-normal">(选填)</span>
+          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3 flex items-center gap-2">
+            📅 保质期 <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">(选填)</span>
           </label>
           <div className="space-y-4">
             <input
@@ -409,7 +408,7 @@ export default function ItemForm() {
                     d.setMonth(d.getMonth() + btn.months);
                     setForm({ ...form, expiryDate: d.toISOString().split('T')[0] });
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${btn.months === 0 ? 'bg-gray-100 text-gray-500 hover:bg-gray-200' : 'bg-orange-50 text-orange-600 border border-orange-200 hover:bg-orange-100'}`}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${btn.months === 0 ? 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-600' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/50 hover:bg-orange-100 dark:hover:bg-orange-900/50'}`}
                 >
                   {btn.label}
                 </button>
@@ -420,7 +419,7 @@ export default function ItemForm() {
 
         {/* 备注 */}
         <div className="card">
-          <label className="block text-sm font-bold text-gray-600 mb-3">备注</label>
+          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">备注</label>
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}

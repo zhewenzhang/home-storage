@@ -236,11 +236,11 @@ export default function BatchManage() {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#2A4D63' }}>
+                    <h1 className="text-2xl font-bold flex items-center gap-2 text-primary-dark dark:text-blue-400">
                         <Database className="w-6 h-6" />
                         批量数据管理
                     </h1>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         你可以在这里像使用表格一样快速修改、新增、删除物品或进行批量归类，最后统一存档保存。
                     </p>
                 </div>
@@ -249,8 +249,7 @@ export default function BatchManage() {
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="px-6 py-2.5 text-white rounded-xl text-sm font-medium shadow-md hover:bg-[#1E3A4C] hover:-translate-y-0.5 transition-all flex items-center gap-2"
-                        style={{ backgroundColor: '#2A4D63' }}
+                        className="px-6 py-2.5 text-white rounded-xl text-sm font-medium shadow-md transition-all flex items-center gap-2 bg-primary hover:bg-primary-dark dark:bg-blue-600 dark:hover:bg-blue-700"
                     >
                         <Save className="w-4 h-4" />
                         {isSaving ? '存档中...' : '保存修改'}
@@ -259,7 +258,7 @@ export default function BatchManage() {
             </div>
 
             {/* 操作栏 */}
-            <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap items-center justify-between gap-4">
+            <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
                     <input
                         type="file"
@@ -270,39 +269,39 @@ export default function BatchManage() {
                     />
                     <button
                         onClick={handleAddRow}
-                        className="btn-outline px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 rounded-lg border border-gray-200 transition-colors"
+                        className="btn-outline px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-slate-600 transition-colors"
                     >
                         <Plus className="w-4 h-4" /> 新增行
                     </button>
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="btn-outline px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 rounded-lg border border-gray-200 transition-colors"
+                        className="btn-outline px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-slate-600 transition-colors"
                     >
                         <Upload className="w-4 h-4" /> CSV导入
                     </button>
                 </div>
 
                 {selectedKeys.size > 0 && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 rounded-lg border border-blue-100/50 animate-enter">
-                        <span className="text-sm text-blue-800 font-medium px-2">已选 {selectedKeys.size} 项</span>
-                        <div className="w-px h-4 bg-blue-200"></div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50/50 dark:bg-blue-900/30 rounded-lg border border-blue-100/50 dark:border-blue-900/50 animate-enter">
+                        <span className="text-sm text-blue-800 dark:text-blue-300 font-medium px-2">已选 {selectedKeys.size} 项</span>
+                        <div className="w-px h-4 bg-blue-200 dark:bg-blue-800"></div>
                         <button
                             onClick={() => setIsEditModalOpen(true)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-md transition-colors"
                             title="批量设置类别和位置"
                         >
                             <Settings2 className="w-4 h-4" />
                         </button>
                         <button
                             onClick={handleDuplicateSelected}
-                            className="p-1.5 text-green-600 hover:bg-green-100 rounded-md transition-colors font-semibold text-xs flex items-center gap-1"
+                            className="p-1.5 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-md transition-colors font-semibold text-xs flex items-center gap-1"
                             title="复制选中的数据"
                         >
                             复制
                         </button>
                         <button
                             onClick={handleBatchDelete}
-                            className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors"
+                            className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md transition-colors"
                             title="批量删除"
                         >
                             <Trash2 className="w-4 h-4" />
@@ -311,18 +310,18 @@ export default function BatchManage() {
                 )}
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
                 <div className="overflow-x-auto pb-4 custom-scrollbar">
                     {/* PC 端表格 / 移动端卡片列表 */}
                     <div className="min-w-full inline-block align-middle">
                         <div className="hidden md:block">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-100 text-sm font-semibold text-gray-500">
+                                    <tr className="bg-gray-50 dark:bg-slate-900/80 border-b border-gray-100 dark:border-slate-700 text-sm font-semibold text-gray-500 dark:text-gray-400">
                                         <th className="p-4 w-12 text-center">
                                             <input
                                                 type="checkbox"
-                                                className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C] cursor-pointer"
+                                                className="w-4 h-4 rounded text-primary dark:text-blue-500 focus:ring-primary dark:focus:ring-blue-500 cursor-pointer"
                                                 checked={visibleDrafts.length > 0 && selectedKeys.size === visibleDrafts.length}
                                                 onChange={toggleSelectAll}
                                             />
@@ -338,16 +337,16 @@ export default function BatchManage() {
                                 <tbody>
                                     {visibleDrafts.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="p-8 text-center text-gray-400">
+                                            <td colSpan={7} className="p-8 text-center text-gray-400 dark:text-gray-500">
                                                 暂无数据，点击上方“新增空行”开始填写。
                                             </td>
                                         </tr>
                                     ) : visibleDrafts.map(draft => (
-                                        <tr key={draft.key} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${selectedKeys.has(draft.key) ? 'bg-[#3B6D8C]/5' : ''}`}>
+                                        <tr key={draft.key} className={`border-b border-gray-50 dark:border-slate-700/50 hover:bg-gray-50/50 dark:hover:bg-slate-900/50 transition-colors ${selectedKeys.has(draft.key) ? 'bg-primary/5 dark:bg-blue-900/20' : ''}`}>
                                             <td className="p-3 text-center">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C] cursor-pointer"
+                                                    className="w-4 h-4 rounded text-primary dark:text-blue-500 focus:ring-primary dark:focus:ring-blue-500 cursor-pointer"
                                                     checked={selectedKeys.has(draft.key)}
                                                     onChange={() => toggleSelect(draft.key)}
                                                 />
@@ -357,14 +356,14 @@ export default function BatchManage() {
                                                     value={draft.name}
                                                     onChange={e => updateDraft(draft.key, { name: e.target.value })}
                                                     placeholder="物品名称"
-                                                    className="w-full bg-transparent border-0 focus:ring-2 focus:ring-[#3B6D8C]/30 rounded-md px-2 py-1.5 outline-none font-bold text-gray-800"
+                                                    className="w-full bg-transparent border-0 focus:ring-2 focus:ring-primary/30 dark:focus:ring-blue-500/30 rounded-md px-2 py-1.5 outline-none font-bold text-gray-800 dark:text-gray-100 placeholder:text-gray-300 dark:placeholder:text-gray-600"
                                                 />
                                             </td>
                                             <td className="p-2">
                                                 <select
                                                     value={draft.category}
                                                     onChange={e => updateDraft(draft.key, { category: e.target.value })}
-                                                    className="w-full bg-gray-50/50 border border-gray-100 hover:border-gray-200 focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-600 transition-colors cursor-pointer"
+                                                    className="w-full bg-gray-50/50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700/50 hover:border-gray-200 dark:hover:border-slate-600 focus:border-primary dark:focus:border-blue-500 focus:ring-1 focus:ring-primary dark:focus:ring-blue-500 rounded-lg px-2 py-1.5 outline-none text-sm text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
                                                 >
                                                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                                 </select>
@@ -373,7 +372,7 @@ export default function BatchManage() {
                                                 <select
                                                     value={draft.locationId}
                                                     onChange={e => updateDraft(draft.key, { locationId: e.target.value })}
-                                                    className="w-full bg-gray-50/50 border border-gray-100 hover:border-gray-200 focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-600 transition-colors cursor-pointer"
+                                                    className="w-full bg-gray-50/50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700/50 hover:border-gray-200 dark:hover:border-slate-600 focus:border-primary dark:focus:border-blue-500 focus:ring-1 focus:ring-primary dark:focus:ring-blue-500 rounded-lg px-2 py-1.5 outline-none text-sm text-gray-600 dark:text-gray-300 transition-colors cursor-pointer"
                                                     title="如需精细分配可在此选择。或者通过上方批量归类指定。"
                                                 >
                                                     <option value="">-- 未分配 --</option>
@@ -401,7 +400,7 @@ export default function BatchManage() {
                                                     min="1"
                                                     value={draft.quantity}
                                                     onChange={e => updateDraft(draft.key, { quantity: parseInt(e.target.value) || 1 })}
-                                                    className="w-16 bg-transparent border border-gray-100 hover:border-gray-200 focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-800 font-medium text-center transition-colors"
+                                                    className="w-16 bg-transparent border border-gray-100 dark:border-slate-700/50 hover:border-gray-200 dark:hover:border-slate-600 focus:border-primary dark:focus:border-blue-500 focus:ring-1 focus:ring-primary dark:focus:ring-blue-500 rounded-lg px-2 py-1.5 outline-none text-sm text-gray-800 dark:text-gray-100 font-medium text-center transition-colors"
                                                 />
                                             </td>
                                             <td className="p-2">
@@ -409,13 +408,13 @@ export default function BatchManage() {
                                                     value={draft.description}
                                                     onChange={e => updateDraft(draft.key, { description: e.target.value })}
                                                     placeholder="追加备注 (可选)"
-                                                    className="w-full bg-transparent border border-transparent hover:border-gray-200 focus:bg-white focus:border-[#3B6D8C] focus:ring-1 focus:ring-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-500 transition-all placeholder:text-gray-300"
+                                                    className="w-full bg-transparent border border-transparent hover:border-gray-200 dark:hover:border-slate-600 focus:bg-white dark:focus:bg-slate-800 focus:border-primary dark:focus:border-blue-500 focus:ring-1 focus:ring-primary dark:focus:ring-blue-500 rounded-lg px-2 py-1.5 outline-none text-sm text-gray-500 dark:text-gray-400 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600"
                                                 />
                                             </td>
                                             <td className="p-2 text-center">
-                                                {draft.status === 'unchanged' && <span className="text-gray-300 text-xs">—</span>}
-                                                {draft.status === 'added' && <span className="inline-block px-2 py-1 bg-green-50 border border-green-100 text-green-700 rounded-md text-xs font-semibold">新增待存</span>}
-                                                {draft.status === 'updated' && <span className="inline-block px-2 py-1 bg-blue-50 border border-blue-100 text-[#3B6D8C] rounded-md text-xs font-semibold">已修改</span>}
+                                                {draft.status === 'unchanged' && <span className="text-gray-300 dark:text-gray-600 text-xs">—</span>}
+                                                {draft.status === 'added' && <span className="inline-block px-2 py-1 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800/50 text-green-700 dark:text-green-400 rounded-md text-xs font-semibold">新增待存</span>}
+                                                {draft.status === 'updated' && <span className="inline-block px-2 py-1 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 text-primary dark:text-blue-400 rounded-md text-xs font-semibold">已修改</span>}
                                             </td>
                                         </tr>
                                     ))}
@@ -424,13 +423,13 @@ export default function BatchManage() {
                         </div>
 
                         {/* 移动端卡片视图 */}
-                        <div className="md:hidden flex flex-col divide-y divide-gray-100">
+                        <div className="md:hidden flex flex-col divide-y divide-gray-100 dark:divide-slate-700">
                             {/* 移动端全选控制条 */}
-                            <div className="p-3 bg-gray-50 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
-                                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 cursor-pointer">
+                            <div className="p-3 bg-gray-50 dark:bg-slate-900/80 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100 dark:border-slate-700">
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C]"
+                                        className="w-4 h-4 rounded text-primary dark:text-blue-500 focus:ring-primary dark:focus:ring-blue-500"
                                         checked={visibleDrafts.length > 0 && selectedKeys.size === visibleDrafts.length}
                                         onChange={toggleSelectAll}
                                     />
@@ -439,14 +438,14 @@ export default function BatchManage() {
                             </div>
 
                             {visibleDrafts.length === 0 ? (
-                                <div className="p-8 text-center text-gray-400 text-sm">暂无数据，点击上方添加。</div>
+                                <div className="p-8 text-center text-gray-400 dark:text-gray-500 text-sm">暂无数据，点击上方添加。</div>
                             ) : (
                                 visibleDrafts.map(draft => (
-                                    <div key={draft.key} className={`p-4 flex gap-3 transition-colors ${selectedKeys.has(draft.key) ? 'bg-[#3B6D8C]/5' : ''}`}>
+                                    <div key={draft.key} className={`p-4 flex gap-3 transition-colors ${selectedKeys.has(draft.key) ? 'bg-primary/5 dark:bg-blue-900/20' : ''}`}>
                                         <div className="pt-1 select-none">
                                             <input
                                                 type="checkbox"
-                                                className="w-4 h-4 rounded text-[#3B6D8C] focus:ring-[#3B6D8C]"
+                                                className="w-4 h-4 rounded text-primary dark:text-blue-500 focus:ring-primary dark:focus:ring-blue-500"
                                                 checked={selectedKeys.has(draft.key)}
                                                 onChange={() => toggleSelect(draft.key)}
                                             />
@@ -458,47 +457,47 @@ export default function BatchManage() {
                                                     value={draft.name}
                                                     onChange={e => updateDraft(draft.key, { name: e.target.value })}
                                                     placeholder="物品名称..."
-                                                    className="flex-1 bg-transparent border-0 border-b border-gray-200 focus:border-[#3B6D8C] px-0 py-1 outline-none font-bold text-gray-800 text-base"
+                                                    className="flex-1 bg-transparent border-0 border-b border-gray-200 dark:border-slate-700 focus:border-primary dark:focus:border-blue-500 px-0 py-1 outline-none font-bold text-gray-800 dark:text-gray-100 text-base placeholder:text-gray-300 dark:placeholder:text-gray-600"
                                                 />
                                                 <div className="flex-shrink-0 pt-1">
-                                                    {draft.status === 'added' && <span className="inline-block px-1.5 py-0.5 bg-green-50 border border-green-100 text-green-700 rounded text-[10px] font-semibold">新增</span>}
-                                                    {draft.status === 'updated' && <span className="inline-block px-1.5 py-0.5 bg-blue-50 border border-blue-100 text-[#3B6D8C] rounded text-[10px] font-semibold">修改</span>}
+                                                    {draft.status === 'added' && <span className="inline-block px-1.5 py-0.5 bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-800/50 text-green-700 dark:text-green-400 rounded text-[10px] font-semibold">新增</span>}
+                                                    {draft.status === 'updated' && <span className="inline-block px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 text-primary dark:text-blue-400 rounded text-[10px] font-semibold">修改</span>}
                                                 </div>
                                             </div>
 
                                             {/* Middle row: Category & Quanity */}
                                             <div className="flex gap-2">
                                                 <div className="flex-1">
-                                                    <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1 tracking-wider">分类</label>
+                                                    <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold block mb-1 tracking-wider">分类</label>
                                                     <select
                                                         value={draft.category}
                                                         onChange={e => updateDraft(draft.key, { category: e.target.value })}
-                                                        className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-gray-700 font-medium"
+                                                        className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-primary dark:focus:border-blue-500 rounded-lg px-2 py-1.5 outline-none text-sm text-gray-700 dark:text-gray-200 font-medium"
                                                     >
                                                         {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                                     </select>
                                                 </div>
                                                 <div className="w-20 flex-shrink-0">
-                                                    <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1 tracking-wider">数量</label>
+                                                    <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold block mb-1 tracking-wider">数量</label>
                                                     <input
                                                         type="number"
                                                         min="1"
                                                         value={draft.quantity}
                                                         onChange={e => updateDraft(draft.key, { quantity: parseInt(e.target.value) || 1 })}
-                                                        className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-center text-gray-800 font-bold"
+                                                        className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-primary dark:focus:border-blue-500 rounded-lg px-2 py-1.5 outline-none text-sm text-center text-gray-800 dark:text-gray-100 font-bold"
                                                     />
                                                 </div>
                                             </div>
 
                                             {/* Location row */}
                                             <div>
-                                                <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1 tracking-wider flex items-center gap-1">
+                                                <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold block mb-1 tracking-wider flex items-center gap-1">
                                                     <MapPin className="w-3 h-3" /> 存储位置
                                                 </label>
                                                 <select
                                                     value={draft.locationId}
                                                     onChange={e => updateDraft(draft.key, { locationId: e.target.value })}
-                                                    className="w-full bg-gray-50 border border-gray-100 focus:bg-white focus:border-[#3B6D8C] rounded-lg px-2 py-1.5 outline-none text-sm text-[#3B6D8C] font-medium"
+                                                    className="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 focus:border-primary dark:focus:border-blue-500 rounded-lg px-2 py-1.5 outline-none text-sm text-primary dark:text-blue-400 font-medium"
                                                 >
                                                     <option value="">-- 未分配 --</option>
                                                     {rootRooms.map(room => (
@@ -524,7 +523,7 @@ export default function BatchManage() {
                                                 value={draft.description}
                                                 onChange={e => updateDraft(draft.key, { description: e.target.value })}
                                                 placeholder="添加备注..."
-                                                className="w-full bg-transparent border-0 border-b border-transparent focus:border-gray-200 px-0 py-1.5 outline-none text-xs text-gray-400 placeholder:text-gray-300 transition-colors"
+                                                className="w-full bg-transparent border-0 border-b border-transparent focus:border-gray-200 dark:focus:border-slate-700 px-0 py-1.5 outline-none text-xs text-gray-400 dark:text-gray-300 placeholder:text-gray-300 dark:placeholder:text-gray-600 transition-colors"
                                             />
                                         </div>
                                     </div>
@@ -537,21 +536,21 @@ export default function BatchManage() {
 
             {/* 批量修改弹窗 */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-enter">
-                    <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col">
-                        <div className="p-5 border-b flex justify-between items-center bg-gray-50">
-                            <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: '#2A4D63' }}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-enter p-4">
+                    <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-2xl shadow-xl overflow-hidden flex flex-col border border-transparent dark:border-slate-700">
+                        <div className="p-5 border-b dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900">
+                            <h2 className="text-lg font-bold flex items-center gap-2 text-primary-dark dark:text-blue-400">
                                 批量归类 ({selectedKeys.size}项)
                             </h2>
-                            <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-gray-200 rounded-full transition-colors">
-                                <X className="w-4 h-4 text-gray-500" />
+                            <button onClick={() => setIsEditModalOpen(false)} className="p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-full transition-colors">
+                                <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                             </button>
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">重置分类为</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">重置分类为</label>
                                 <select
-                                    className="input-field py-2 w-full text-sm"
+                                    className="input-field py-2 w-full text-sm dark:bg-slate-900 dark:border-slate-700 dark:text-gray-200"
                                     value={batchCategory}
                                     onChange={e => setBatchCategory(e.target.value)}
                                 >
@@ -560,9 +559,9 @@ export default function BatchManage() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">移动至指定房间</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">移动至指定房间</label>
                                 <select
-                                    className="input-field py-2 w-full text-sm"
+                                    className="input-field py-2 w-full text-sm dark:bg-slate-900 dark:border-slate-700 dark:text-gray-200"
                                     value={batchRoomId}
                                     onChange={e => { setBatchRoomId(e.target.value); setBatchLocationId(''); }}
                                 >
@@ -572,12 +571,11 @@ export default function BatchManage() {
                                 </select>
                             </div>
 
-                            {/* 当选中某个房间时，才显示该房间的子集（收纳）。或者如果没有选中房间，允许留空。 */}
                             {batchRoomId && batchRoomId !== 'none' && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">存入房间内具体收纳</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">存入房间内具体收纳</label>
                                     <select
-                                        className="input-field py-2 w-full text-sm"
+                                        className="input-field py-2 w-full text-sm dark:bg-slate-900 dark:border-slate-700 dark:text-gray-200"
                                         value={batchLocationId}
                                         onChange={e => setBatchLocationId(e.target.value)}
                                     >
@@ -587,17 +585,16 @@ export default function BatchManage() {
                                 </div>
                             )}
                         </div>
-                        <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+                        <div className="p-4 border-t dark:border-slate-700 bg-gray-50 dark:bg-slate-900 flex justify-end gap-3">
                             <button
                                 onClick={() => setIsEditModalOpen(false)}
-                                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-200 rounded-xl transition-colors"
+                                className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-xl transition-colors"
                             >
                                 取消
                             </button>
                             <button
                                 onClick={applyBatchEdit}
-                                className="px-4 py-2 text-sm text-white rounded-xl transition-all shadow-md"
-                                style={{ backgroundColor: '#2A4D63' }}
+                                className="px-4 py-2 text-sm text-white rounded-xl transition-all shadow-md bg-primary hover:bg-primary-dark dark:bg-blue-600 dark:hover:bg-blue-700"
                             >
                                 确认应用
                             </button>
