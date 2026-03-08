@@ -226,7 +226,7 @@ export default function Settings() {
                     <div className="flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer text-gray-700 dark:text-gray-300">
                         <span className="text-sm font-bold flex items-center gap-2"><HelpCircle className="w-4 h-4 text-orange-400" />使用帮助与产品反馈</span>
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-400">v2.1.0</span>
+                            <span className="text-xs text-gray-400">v2.2.0</span>
                             <button
                                 onClick={(e) => { e.stopPropagation(); handleForceUpdate(); }}
                                 className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
