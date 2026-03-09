@@ -55,13 +55,24 @@ HomeBox 致力于提供所见即所得的极客级收纳体验：
 
 ## 🛠️ 技术栈 (Tech Stack)
 
-| 领域 | 技术方案 | 描述 |
+| 领域 | 技术方案 | 架构优势 |
 | --- | --- | --- |
-| **前端架构** | `Vite 6` + `React 18` | 极速的热更新与生产环境构建 |
-| **状态/持久化** | `Zustand` + `Persist` | 响应式状态管理，支持跨会话数据留存 |
-| **后端/安全** | `Supabase` + `RLS` | 行级权限控制，确保每个用户的数据独立且安全 |
-| **AI 能力** | `OpenRouter` / `DeepSeek` | 多模型驱动的可视化与文本智能分析 |
-| **视觉交互** | `Tailwind CSS` + `Framer Motion` | 辅以微妙的微动画，打造高级感界面 |
+| **前端架构** | `Vite 6` + `React 18` | 抛弃笨重的 Webpack，实现毫秒级冷启动与 HMR 热更新 |
+| **状态缓冲** | `Zustand` + `Persist` | 极简的状态容器，配合本地存储实现“快照优先展示”的零等待体验 |
+| **后端大脑** | `Supabase` + `RLS` | Serverless 架构，开箱即用的 PostgreSQL 搭配行级安全控制机制 |
+| **AI 引擎** | `Qwen-VL` / `GPT-4o` | 强大的多模态视觉大模型，实现复杂物品图片的语义化解读 |
+| **视觉基建** | `Tailwind CSS` + `Lucide React` | 告别臃肿的重型组件库，通过 CSS Variables 实现零性能损耗的动态主题切换 |
+
+<br/>
+
+## 🗺️ 未来架构演进计划 (Roadmap)
+
+HomeBox 是一个面向长期维护的 **Vibe Coding** 项目。随着功能与数据量的增加，我们制定了以下架构防护与重构计划：
+
+- [ ] **精细化组件拆分 (Componentization)**: 将超大型视图（如 `FloorPlan.tsx`）深度拆解微小可复用组件（如 `<RoomNode />`），保持单文件 200 行以内的极致可读性。
+- [ ] **表单性能重构 (React Hook Form + Zod)**: 引入 `react-hook-form` 搭配数据校验 `zod`，替换原生的状态受控组件，避免复杂表单带来的 React UI 渲染锁死。
+- [ ] **万级数据列表渲染 (Virtualization)**: 引入 `@tanstack/react-virtual` 虚拟长列表技术。确保当用户记录超过 3000 件物品时，浏览滑动依旧丝滑如初。
+- [ ] **远端状态隔离 (TanStack Query)**: 将纯前端 UI 状态（继续由 Zustand 管理）与 Supabase 服务器状态剥离，通过 React Query 自动接管网络超时、乐观更新与缓存失效策略。
 
 <br/>
 
