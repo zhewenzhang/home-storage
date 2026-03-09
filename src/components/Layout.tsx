@@ -54,6 +54,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          {/* 桌面端常驻的大号添加物品按钮 */}
+          <Link
+            to="/items/new"
+            className="btn-primary justify-center mb-6 py-3"
+          >
+            <Plus className="w-5 h-5" />
+            <span>添加物品</span>
+          </Link>
+
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -69,15 +78,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )}
             </NavLink>
           ))}
-
-          {/* 桌面端常驻的大号添加物品按钮 */}
-          <Link
-            to="/items/new"
-            className="btn-primary justify-center mt-6 py-3"
-          >
-            <Plus className="w-5 h-5" />
-            <span>录入新物品</span>
-          </Link>
 
           <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
             <button

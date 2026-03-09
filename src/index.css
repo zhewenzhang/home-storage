@@ -4,6 +4,66 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Default Theme: Deep Slate Blue */
+  --color-primary: 59 109 140;
+  /* #3B6D8C */
+  --color-primary-light: 107 154 196;
+  /* #6B9AC4 */
+  --color-primary-dark: 42 77 99;
+  /* #2A4D63 */
+  --color-primary-bg: 234 244 248;
+  /* #EAF4F8 */
+}
+
+/* theme: emerald */
+html[data-theme-color="emerald"] {
+  --color-primary: 16 185 129;
+  /* #10B981 */
+  --color-primary-light: 52 211 153;
+  /* #34D399 */
+  --color-primary-dark: 4 120 87;
+  /* #047857 */
+  --color-primary-bg: 236 253 245;
+  /* #ECFDF5 */
+}
+
+/* theme: violet */
+html[data-theme-color="violet"] {
+  --color-primary: 139 92 246;
+  /* #8B5CF6 */
+  --color-primary-light: 167 139 250;
+  /* #A78BFA */
+  --color-primary-dark: 91 33 182;
+  /* #5B21B6 */
+  --color-primary-bg: 245 243 255;
+  /* #F5F3FF */
+}
+
+/* theme: rose */
+html[data-theme-color="rose"] {
+  --color-primary: 244 63 94;
+  /* #F43F5E */
+  --color-primary-light: 251 113 133;
+  /* #FB7185 */
+  --color-primary-dark: 190 18 60;
+  /* #BE123C */
+  --color-primary-bg: 255 241 242;
+  /* #FFF1F2 */
+}
+
+/* theme: amber */
+html[data-theme-color="amber"] {
+  --color-primary: 245 158 11;
+  /* #F59E0B */
+  --color-primary-light: 251 191 36;
+  /* #FBBF24 */
+  --color-primary-dark: 180 83 9;
+  /* #B45309 */
+  --color-primary-bg: 255 251 235;
+  /* #FFFBEB */
+}
+
 /* ========== 全局基础样式 ========== */
 body {
   font-family: 'Nunito', 'Inter', system-ui, sans-serif;
@@ -28,13 +88,13 @@ html.dark body {
 }
 
 ::selection {
-  background-color: rgba(107, 154, 196, 0.3);
-  color: #2A4D63;
+  background-color: rgba(var(--color-primary-light), 0.3);
+  color: rgb(var(--color-primary-dark));
 }
 
 html.dark ::selection {
-  background-color: rgba(107, 154, 196, 0.4);
-  color: #EAF4F8;
+  background-color: rgba(var(--color-primary-light), 0.4);
+  color: rgb(var(--color-primary-bg));
 }
 
 /* ========== 卡片 ========== */
@@ -57,34 +117,34 @@ html.dark .card {
 .card:hover {
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
   transform: translateY(-4px);
-  border-color: rgba(107, 154, 196, 0.3);
+  border-color: rgba(var(--color-primary-light), 0.3);
 }
 
 html.dark .card:hover {
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
-  border-color: rgba(107, 154, 196, 0.4);
+  border-color: rgba(var(--color-primary-light), 0.4);
 }
 
 .card-highlight {
-  background: linear-gradient(135deg, #2A4D63 0%, #3B6D8C 100%);
+  background: linear-gradient(135deg, rgb(var(--color-primary-dark)) 0%, rgb(var(--color-primary)) 100%);
   color: white;
-  box-shadow: 0 0 15px rgba(59, 109, 140, 0.3);
+  box-shadow: 0 0 15px rgba(var(--color-primary), 0.3);
   transition: all 0.3s ease;
 }
 
 .card-highlight:hover {
-  box-shadow: 0 0 25px rgba(59, 109, 140, 0.5);
+  box-shadow: 0 0 25px rgba(var(--color-primary), 0.5);
   transform: scale(1.02);
 }
 
 /* ========== 按钮 ========== */
 .btn-primary {
-  background-color: #3B6D8C;
+  background-color: rgb(var(--color-primary));
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 1rem;
   font-weight: 700;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px -2px rgba(var(--color-primary), 0.2);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -99,12 +159,12 @@ html.dark .btn-primary {
 }
 
 .btn-primary:hover {
-  background-color: #2A4D63;
-  box-shadow: 0 0 15px rgba(59, 109, 140, 0.3);
+  background-color: rgb(var(--color-primary-dark));
+  box-shadow: 0 0 15px rgba(var(--color-primary), 0.3);
 }
 
 html.dark .btn-primary:hover {
-  background-color: #4A8CAF;
+  background-color: rgb(var(--color-primary-light));
 }
 
 .btn-primary:active {
@@ -136,13 +196,13 @@ html.dark .btn-secondary {
 
 .btn-secondary:hover {
   background-color: #f9fafb;
-  color: #3B6D8C;
+  color: rgb(var(--color-primary));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 html.dark .btn-secondary:hover {
   background-color: #334155;
-  color: #6B9AC4;
+  color: rgb(var(--color-primary-light));
 }
 
 .btn-secondary:active {
@@ -181,14 +241,14 @@ html.dark .input-field::placeholder {
 
 .input-field:focus {
   background: white;
-  border-color: #6B9AC4;
-  box-shadow: 0 0 0 4px rgba(107, 154, 196, 0.1);
+  border-color: rgb(var(--color-primary-light));
+  box-shadow: 0 0 0 4px rgba(var(--color-primary-light), 0.1);
 }
 
 html.dark .input-field:focus {
   background: #1E293B;
-  border-color: #6B9AC4;
-  box-shadow: 0 0 0 4px rgba(107, 154, 196, 0.2);
+  border-color: rgb(var(--color-primary-light));
+  box-shadow: 0 0 0 4px rgba(var(--color-primary-light), 0.2);
 }
 
 /* ========== 导航项 ========== */
@@ -215,14 +275,14 @@ html.dark .nav-item:hover {
 }
 
 .nav-item.active {
-  background-color: #EAF4F8;
-  color: #3B6D8C;
+  background-color: rgb(var(--color-primary-bg));
+  color: rgb(var(--color-primary));
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
 }
 
 html.dark .nav-item.active {
-  background-color: rgba(59, 109, 140, 0.2);
-  color: #6B9AC4;
+  background-color: rgba(var(--color-primary), 0.2);
+  color: rgb(var(--color-primary-light));
 }
 
 /* ========== 动画 ========== */

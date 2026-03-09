@@ -216,7 +216,7 @@ export default function FloorPlan() {
               <span className="text-sm font-bold text-gray-500 mr-2 flex-1">当前为只读模式，防止误操作。</span>
               <button
                 onClick={() => setIsEditMode(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow hover:shadow-lg"
+                className="btn-primary"
               >
                 <Edit3 className="w-4 h-4" /> 编辑布局
               </button>
@@ -307,9 +307,9 @@ export default function FloorPlan() {
                   setSelectedId(null);
                   setSelectedLocationId(null);
                 }}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-xl font-bold text-sm transition-all shadow hover:shadow-lg ml-auto"
+                className="btn-primary ml-auto"
               >
-                <Save className="w-4 h-4" /> 保存并锁定
+                <Save className="w-4 h-4" /> 保存修改
               </button>
             </>
           )}

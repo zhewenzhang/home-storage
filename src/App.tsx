@@ -33,7 +33,7 @@ const Settings = lazyWithRetries(() => import('./pages/Settings'));
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const { loadFromSupabase, clearLocalData, dataLoaded, theme } = useStore();
+  const { loadFromSupabase, clearLocalData, dataLoaded, theme, themeColor } = useStore();
 
   // Handle Dark mode class
   useEffect(() => {
@@ -52,6 +52,11 @@ function App() {
       root.classList.toggle('dark', theme === 'dark');
     }
   }, [theme]);
+
+  // Apply Brand Color Theme
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme-color', themeColor);
+  }, [themeColor]);
 
   useEffect(() => {
     // 聚合初始化：一次性拿回 session 并建立监听

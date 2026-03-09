@@ -10,7 +10,7 @@ import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function Settings() {
-    const { locations, items, displayName } = useStore();
+    const { locations, items, displayName, themeColor, setThemeColor } = useStore();
     const [email, setEmail] = useState('');
     const [userId, setUserId] = useState<string | null>(null);
     const [name, setName] = useState(displayName || '');
@@ -193,6 +193,37 @@ export default function Settings() {
                                 </div>
                             </div>
                             <ThemeToggle />
+                        </div>
+
+                        <div className="p-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 dark:text-orange-400">
+                                    <Sparkles className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-sm text-gray-800 dark:text-gray-100">主题强调色</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">选择您喜欢的品牌色调</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 flex-wrap">
+                                {/* Color Swatches */}
+                                {[
+                                    { id: 'blue', color: '#3B6D8C' },
+                                    { id: 'emerald', color: '#10B981' },
+                                    { id: 'violet', color: '#8B5CF6' },
+                                    { id: 'rose', color: '#F43F5E' },
+                                    { id: 'amber', color: '#F59E0B' },
+                                ].map(({ id, color }) => (
+                                    <button
+                                        key={id}
+                                        onClick={() => setThemeColor(id as any)}
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${themeColor === id ? 'ring-2 ring-offset-2 ring-primary dark:ring-offset-gray-800 scale-110' : 'hover:scale-105 opacity-80 hover:opacity-100'}`}
+                                        style={{ backgroundColor: color }}
+                                    >
+                                        {themeColor === id && <Check className="w-5 h-5 text-white" />}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         <div className="flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group cursor-not-allowed opacity-60">

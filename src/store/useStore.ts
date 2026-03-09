@@ -33,6 +33,7 @@ interface AppState {
   displayName: string | null;
   profileLoading: boolean;
   theme: 'light' | 'dark' | 'system'; // Dark mode preference
+  themeColor: 'blue' | 'emerald' | 'violet' | 'rose' | 'amber'; // Brand color preference
 
   // Family / Share Status
   activeFamilyId: string | null;
@@ -66,6 +67,7 @@ interface AppState {
   setSearchQuery: (query: string) => void;
   setActiveFamilyId: (id: string | null) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  setThemeColor: (color: 'blue' | 'emerald' | 'violet' | 'rose' | 'amber') => void;
 
   // Getters
   getItemsByLocation: (locationId: string) => Item[];
@@ -96,6 +98,7 @@ export const useStore = create<AppState>()(
       displayName: null,
       profileLoading: false,
       theme: 'system',
+      themeColor: 'blue',
       activeFamilyId: null,
       joinedFamilies: [],
 
@@ -259,6 +262,7 @@ export const useStore = create<AppState>()(
       setSelectedLocationId: (id) => set({ selectedLocationId: id }),
       setSearchQuery: (query) => set({ searchQuery: query }),
       setTheme: (theme) => set({ theme }),
+      setThemeColor: (color) => set({ themeColor: color }),
       setActiveFamilyId: (id) => {
         if (id === null) {
           localStorage.setItem('homebox_manually_set_myhome', 'true');
@@ -297,6 +301,7 @@ export const useStore = create<AppState>()(
         joinedFamilies: state.joinedFamilies,
         displayName: state.displayName,
         theme: state.theme,
+        themeColor: state.themeColor,
       }),
     }
   )

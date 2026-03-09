@@ -9,10 +9,10 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#3B6D8C', // Deep Slate Blue
-          light: '#6B9AC4',
-          dark: '#2A4D63',
-          bg: '#EAF4F8',
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          light: 'rgb(var(--color-primary-light) / <alpha-value>)',
+          dark: 'rgb(var(--color-primary-dark) / <alpha-value>)',
+          bg: 'rgb(var(--color-primary-bg) / <alpha-value>)',
         },
         secondary: {
           DEFAULT: '#8FBC8F', // Sage Green for accents
