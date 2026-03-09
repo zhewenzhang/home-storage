@@ -90,9 +90,9 @@ export default function Home() {
 
           <Link
             to="/items/new"
-            className="flex items-center gap-2 px-6 py-3 ml-2 bg-primary hover:bg-primary-dark dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+            className="btn-primary ml-2 px-6 py-3 whitespace-nowrap"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-5 h-5 flex-shrink-0" />
             <span>添加物品</span>
           </Link>
         </div>

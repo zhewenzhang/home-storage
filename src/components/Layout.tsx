@@ -73,7 +73,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* 桌面端常驻的大号添加物品按钮 */}
           <Link
             to="/items/new"
-            className="flex items-center justify-center gap-2 mt-6 px-4 py-3 bg-primary hover:bg-primary-dark dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95"
+            className="btn-primary justify-center mt-6 py-3"
           >
             <Plus className="w-5 h-5" />
             <span>录入新物品</span>
