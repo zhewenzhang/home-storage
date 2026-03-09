@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
-import { Plus, Move, Trash2, GripHorizontal, LayoutGrid, ChevronDown } from 'lucide-react';
+import { Plus, Move, Trash2, GripHorizontal, LayoutGrid, ChevronDown, Edit3, Save } from 'lucide-react';
 import { useStore } from '../store/useStore';
 
 type Tool = 'select' | 'add-room' | 'add-cabinet';
@@ -32,6 +32,7 @@ export default function FloorPlan() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [tool, setTool] = useState<Tool>('select');
+  const [isEditMode, setIsEditMode] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -96,6 +97,7 @@ export default function FloorPlan() {
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
+    if (!isEditMode) return;
     const { x: mouseX, y: mouseY } = getMousePos(e);
 
     // 先检查收纳标记(在上层)，再检查房间
@@ -209,80 +211,108 @@ export default function FloorPlan() {
       {/* 工具栏 */}
       <div className="card relative z-20">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-bold text-gray-500 mr-1 hidden sm:inline">工具</span>
+          {!isEditMode ? (
+            <>
+              <span className="text-sm font-bold text-gray-500 mr-2 flex-1">当前为只读模式，防止误操作。</span>
+              <button
+                onClick={() => setIsEditMode(true)}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow hover:shadow-lg"
+              >
+                <Edit3 className="w-4 h-4" /> 编辑布局
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="text-sm font-bold text-gray-500 mr-1 hidden sm:inline">工具</span>
 
-          <button
-            onClick={() => setTool('select')}
-            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'select' ? 'bg-primary dark:bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
-              }`}
-          >
-            <Move className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">选择/移动</span><span className="inline sm:hidden">选择</span>
-          </button>
+              <button
+                onClick={() => setTool('select')}
+                className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'select' ? 'bg-primary dark:bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                  }`}
+              >
+                <Move className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">选择/移动</span><span className="inline sm:hidden">选择</span>
+              </button>
 
-          {/* 添加房间 */}
-          <div className="relative">
-            <button
-              onClick={() => { setShowRoomPicker(!showRoomPicker); setShowCabinetPicker(false); }}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'add-room' ? 'bg-primary dark:bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
-                }`}
-            >
-              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 房间 <ChevronDown className="w-3 h-3" />
-            </button>
-            {showRoomPicker && (
-              <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-3 z-50 w-56 animate-enter">
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(ROOM_TYPES).map(([key, config]) => (
-                    <button
-                      key={key}
-                      onClick={() => addNewRoom(key)}
-                      className="p-3 rounded-xl bg-gray-50 dark:bg-slate-900/50 hover:bg-[#EAF4F8] dark:hover:bg-blue-900/30 transition-all text-center group border border-transparent dark:border-slate-700"
-                    >
-                      <span className="text-xl block group-hover:scale-110 transition-transform">{config.icon}</span>
-                      <p className="font-bold text-xs mt-1 text-gray-600 dark:text-gray-300">{config.name}</p>
-                    </button>
-                  ))}
-                </div>
+              {/* 添加房间 */}
+              <div className="relative">
+                <button
+                  onClick={() => { setShowRoomPicker(!showRoomPicker); setShowCabinetPicker(false); }}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'add-room' ? 'bg-primary dark:bg-blue-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                    }`}
+                >
+                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 房间 <ChevronDown className="w-3 h-3" />
+                </button>
+                {showRoomPicker && (
+                  <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-3 z-50 w-56 animate-enter">
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(ROOM_TYPES).map(([key, config]) => (
+                        <button
+                          key={key}
+                          onClick={() => addNewRoom(key)}
+                          className="p-3 rounded-xl bg-gray-50 dark:bg-slate-900/50 hover:bg-[#EAF4F8] dark:hover:bg-blue-900/30 transition-all text-center group border border-transparent dark:border-slate-700"
+                        >
+                          <span className="text-xl block group-hover:scale-110 transition-transform">{config.icon}</span>
+                          <p className="font-bold text-xs mt-1 text-gray-600 dark:text-gray-300">{config.name}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* 添加收纳 */}
-          <div className="relative">
-            <button
-              onClick={() => { setShowCabinetPicker(!showCabinetPicker); setShowRoomPicker(false); }}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'add-cabinet' ? 'bg-[#8B6D4B] dark:bg-amber-600 text-white shadow-lg' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/50'
-                }`}
-            >
-              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 收纳 <ChevronDown className="w-3 h-3" />
-            </button>
-            {showCabinetPicker && (
-              <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-3 z-50 w-64 animate-enter">
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-2 px-1">选择类型，标记将添加到{selectedLoc?.type === 'room' ? `"${selectedLoc.name}"` : '画布'}中</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {Object.entries(CABINET_TYPES).map(([key, config]) => (
-                    <button
-                      key={key}
-                      onClick={() => addNewCabinet(key)}
-                      className="p-3 rounded-xl bg-gray-50 dark:bg-slate-900/50 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all text-center group border border-transparent dark:border-slate-700"
-                    >
-                      <span className="text-xl block group-hover:scale-110 transition-transform">{config.icon}</span>
-                      <p className="font-bold text-xs mt-1 text-gray-600 dark:text-gray-300">{config.name}</p>
-                    </button>
-                  ))}
-                </div>
+              {/* 添加收纳 */}
+              <div className="relative">
+                <button
+                  onClick={() => { setShowCabinetPicker(!showCabinetPicker); setShowRoomPicker(false); }}
+                  className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm transition-all ${tool === 'add-cabinet' ? 'bg-[#8B6D4B] dark:bg-amber-600 text-white shadow-lg' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-900/50'
+                    }`}
+                >
+                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 收纳 <ChevronDown className="w-3 h-3" />
+                </button>
+                {showCabinetPicker && (
+                  <div className="absolute top-full left-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 p-3 z-50 w-64 animate-enter">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-2 px-1">选择类型，标记将添加到{selectedLoc?.type === 'room' ? `"${selectedLoc.name}"` : '画布'}中</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {Object.entries(CABINET_TYPES).map(([key, config]) => (
+                        <button
+                          key={key}
+                          onClick={() => addNewCabinet(key)}
+                          className="p-3 rounded-xl bg-gray-50 dark:bg-slate-900/50 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all text-center group border border-transparent dark:border-slate-700"
+                        >
+                          <span className="text-xl block group-hover:scale-110 transition-transform">{config.icon}</span>
+                          <p className="font-bold text-xs mt-1 text-gray-600 dark:text-gray-300">{config.name}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* 删除按钮 */}
-          <button
-            onClick={handleDelete}
-            disabled={!selectedId}
-            className="ml-auto p-2 sm:p-2.5 rounded-xl bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-            title="删除选中"
-          >
-            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 dark:text-red-400" />
-          </button>
+              {/* 删除按钮 */}
+              <button
+                onClick={handleDelete}
+                disabled={!selectedId}
+                className="p-2 sm:p-2.5 rounded-xl bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                title="删除选中"
+              >
+                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500 dark:text-red-400" />
+              </button>
+
+              <div className="flex-1" />
+
+              {/* 保存并退出编辑 */}
+              <button
+                onClick={() => {
+                  setIsEditMode(false);
+                  setSelectedId(null);
+                  setSelectedLocationId(null);
+                }}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-xl font-bold text-sm transition-all shadow hover:shadow-lg ml-auto"
+              >
+                <Save className="w-4 h-4" /> 保存并锁定
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -304,7 +334,8 @@ export default function FloorPlan() {
                 linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)
               `,
               backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
-              cursor: tool === 'select' ? 'default' : 'crosshair',
+              cursor: !isEditMode ? 'default' : (tool === 'select' ? 'default' : 'crosshair'),
+              pointerEvents: isEditMode ? 'auto' : 'none',
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -373,7 +404,7 @@ export default function FloorPlan() {
                   </div>
 
                   {/* Resize 手柄 */}
-                  {isSelected && (
+                  {isSelected && isEditMode && (
                     <>
                       <div className="absolute -right-3 -bottom-3 w-6 h-6 bg-blue-600 rounded-full cursor-se-resize flex items-center justify-center shadow-lg hover:bg-blue-700 z-30"
                         onMouseDown={(e) => handleResizeStart(e, 'se')}
@@ -444,7 +475,7 @@ export default function FloorPlan() {
       </div>
 
       {/* 选中信息面板 — 可编辑名称 + 尺寸 */}
-      {selectedLoc && (() => {
+      {selectedLoc && isEditMode && (() => {
         // 米与像素换算：meters = pixels / GRID_SIZE * 0.3
         const SCALE = 0.3 / GRID_SIZE; // 1px = 0.015m
         const widthM = +(selectedLoc.bounds.width * SCALE).toFixed(1);
