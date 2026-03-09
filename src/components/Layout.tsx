@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Package, MapPin, LayoutGrid, Search, LogOut, Users, Database, Plus, AlertTriangle, User, X } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { signOut } from '../services/auth';
@@ -69,6 +69,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )}
             </NavLink>
           ))}
+
+          {/* 桌面端常驻的大号添加物品按钮 */}
+          <Link
+            to="/items/new"
+            className="flex items-center justify-center gap-2 mt-6 px-4 py-3 bg-primary hover:bg-primary-dark dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-lg active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            <span>录入新物品</span>
+          </Link>
 
           <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
             <button

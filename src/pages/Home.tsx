@@ -76,15 +76,25 @@ export default function Home() {
           </h2>
           <p className="opacity-80 text-sm mt-1 text-gray-500 dark:text-gray-400">让每一个物品都有家可归</p>
         </div>
-        <div className="flex gap-4">
-          <div className="text-center px-6 border-r border-gray-100 dark:border-slate-700">
-            <p className="text-3xl font-extrabold text-primary-dark dark:text-blue-400">{items.length}</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 font-bold tracking-wider mt-1">在库物品</p>
+        <div className="flex gap-6 items-center mt-4 md:mt-0">
+          <div className="flex gap-4">
+            <div className="text-center px-4 md:px-6 border-r border-gray-100 dark:border-slate-700">
+              <p className="text-3xl font-extrabold text-primary-dark dark:text-blue-400">{items.length}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 font-bold tracking-wider mt-1">在库物品</p>
+            </div>
+            <div className="text-center px-4 md:px-6">
+              <p className="text-3xl font-extrabold text-primary-dark dark:text-blue-400">{locations.length}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 font-bold tracking-wider mt-1">存储位置</p>
+            </div>
           </div>
-          <div className="text-center px-6">
-            <p className="text-3xl font-extrabold text-primary-dark dark:text-blue-400">{locations.length}</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 font-bold tracking-wider mt-1">存储位置</p>
-          </div>
+
+          <Link
+            to="/items/new"
+            className="flex items-center gap-2 px-6 py-3 ml-2 bg-primary hover:bg-primary-dark dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-95 whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5" />
+            <span>添加物品</span>
+          </Link>
         </div>
       </div>
 
@@ -266,14 +276,22 @@ export default function Home() {
         {/* 右侧：物品列表 (移动端放在地图下方) */}
         <div className="lg:col-span-1 space-y-3 md:space-y-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 truncate pr-2">
               {searchQuery ? `"${searchQuery}" 的结果` : (selectedLocation ? selectedLocation.name : '最近添加')}
             </h3>
-            {selectedLocationId && !searchQuery && (
-              <button onClick={() => setSelectedLocationId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors bg-gray-100 px-2 py-1 rounded-md">
-                显示全部
-              </button>
-            )}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {selectedLocationId && !searchQuery && (
+                <button onClick={() => setSelectedLocationId(null)} className="text-xs text-gray-500 hover:text-gray-700 transition-colors bg-gray-100 dark:bg-slate-800 dark:text-gray-400 dark:hover:text-gray-200 px-2 py-1 rounded-md">
+                  全部
+                </button>
+              )}
+              <Link
+                to={selectedLocationId ? `/items/new?locationId=${selectedLocationId}` : `/items/new`}
+                className="flex items-center gap-1 text-xs md:text-sm font-bold bg-primary/10 hover:bg-primary/20 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-primary-dark dark:text-blue-400 px-2 md:px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <Plus className="w-3 h-3 md:w-4 md:h-4" /> 新增
+              </Link>
+            </div>
           </div>
 
           <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
