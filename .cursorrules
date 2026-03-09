@@ -1,0 +1,61 @@
+# HomeBox 智能管家 - Vibe Coding & AI 协作开发规范
+
+作为 AI 辅助开发（Vibe Coding）的长期项目，为了保持界面的高度一致性、代码的健壮性和长期的可维护性，所有介入此项目的 AI 代理（Agent / Assistant）及开发者在修改代码前，**必须**严格遵守以下规则：
+
+## 🎨 1. UI / UX 视觉与样式规范
+本系统具有非常强的“现代、柔和、拟物加扁平”结合的设计语言。
+
+### 1.1 核心全局组件类（严禁复造轮子）
+在开发新的按钮、卡片、输入框时，**绝不要**使用基础的 Tailwind 粗糙拼凑。请直接使用已定义在 `src/index.css` 中的全局类：
+- **卡片/面板**: 使用 `.card`（自带毛玻璃背景、边框、优雅阴影）。重点强调的卡片使用 `.card-highlight`。
+- **按钮**: 
+  - 主操作：使用 `.btn-primary`（自带主色调、悬浮状态、点击缩小效果、柔和阴影）。
+  - 次要操作：使用 `.btn-secondary`。
+- **输入框**: 使用 `.input-field`。
+- **侧边栏导航项**: 使用 `.nav-item`。
+
+### 1.2 颜色与主题 (Dark Mode & Theme Colors)
+- 全站必须 **100% 兼容暗黑模式**。所有背景色、文字色、边框的编写，必须成对出现，例如：`bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100`。
+- **绝对禁止硬编码 `#3B6D8C` 等主色调十六进制**。必须使用 Tailwind 配置中的主色系：`bg-primary`, `text-primary-dark`, `bg-primary/10`, 等等。
+- 底层主色调通过 CSS Variables (`--color-primary` 等) 控制，支撑“5套品牌色秒切”功能。
+
+### 1.3 交互细节与微动效
+- 圆角：全站以大圆角为主。组件通常使用 `rounded-xl` 或 `rounded-2xl`，按钮使用 `rounded-xl` 或 `rounded-full`。
+- 动效：新组件载入请附带 `.animate-enter` 类。元素悬浮请尽量加上 `transition-all`。
+- 图标库：全站统一使用 `lucide-react`。
+
+## 🏗️ 2. 技术栈与架构约束
+
+### 2.1 框架基础
+- **React 18 + Vite**：严禁引入陈旧的兼容性写法（如 Class Component），全面使用 React Hooks。
+- **TypeScript**：所有状态和组件 Props **必须**定义清晰的 Interface/Type（优先写在 `src/types/index.ts` 或组件顶部）。不要使用 `any` 除非别无他法。
+
+### 2.2 状态管理 (Zustand)
+- 全局状态唯一收敛于 `src/store/useStore.ts`。
+- **规则**：所有涉及后端数据库（Supabase）的增删改查动作，**必须通过调用 Store 中的 Action 来触发**，严禁在组件内部直接调用 Supabase 修改数据，以保证本地持久化 UI 状态与云端严格同步。
+
+### 2.3 数据库与请求 (Supabase)
+- 数据库操作的具体实现逻辑收敛于 `src/services/db.ts` 或对口领域文件。
+- 获取当前操作的用户 ID 时，必须调用 store 中的 `getCurrentTargetId(activeFamilyId)` 判断当前是否处于家庭共享状态。
+
+## 📱 3. 响应式与跨平台 (PWA)
+- **移动端优先**：修改任何布局时，先确保在小屏幕（`< 768px`）下不遮挡、不越界。使用 `md:`, `lg:` 等断点来适配桌面端。
+- 考虑到应用以 PWA 形式运行在手机浏览器中，底部需要留出导航栏安全区（如 `pb-20` 或 `pb-32`），防止挡住原生手势横条。
+
+## 🛡️ 4. AI 编码执行准则 (Vibe Coding Rules)
+
+当通过 AI 下达修改指令时，AI 代理请按以下标准流程执行：
+
+1. **先查阅再修改**：在新建样式或组件前，先全局检索是否已有同类实现。必须先阅读 `index.css` 和 `tailwind.config.js` 掌握调色板。
+2. **三思而行（避免破坏性覆盖）**：每次只针对需求相关的代码进行局部修改，切勿抹除已有的特定业务逻辑（例如保质期检验、特定的防撞墙拖拽限制等）。
+3. **完成自检**：
+   - 检查暗黑模式是否遗漏 `dark:` 类？
+   - 检查按钮是否遗漏了 `.btn-primary`？
+   - 检查控制台有没有留下多余的 `console.log` 测试代码？
+4. **Git 规范提交流程**：
+   每次修改完成后，请严格按照 Conventional Commits 规范写入 Git 记录并自动推送，格式如下：
+   `fix(ui): 修复按钮颜色不统一问题` 或 `feat(items): 增加拖拽多选能力`
+   并且在阶段性大更新后，执行 `npm run deploy` 再次部署。
+
+---
+📝 **给 AI 的附言**：每次会话开始时，请静默加载并遵守此份规则，你的代码输出质量将成为本系统演进的决定性因素。
