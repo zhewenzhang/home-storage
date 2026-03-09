@@ -73,7 +73,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
             <button
               onClick={() => setIsFamilyModalOpen(true)}
-              className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${activeFamilyId ? 'bg-primary/10 dark:bg-blue-900/30 text-primary-dark dark:text-blue-200' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
+              className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${activeFamilyId ? 'bg-primary/10 dark:bg-blue-900/30 text-primary-dark dark:text-blue-200' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
             >
               <div className="flex items-center gap-3">
                 <Users className="w-5 h-5" />
@@ -86,13 +86,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </nav>
 
-        <div className="p-4 border-t border-gray-50 space-y-1">
-          <NavLink to="/settings" className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${isActive ? 'bg-primary/10 dark:bg-blue-900/30 text-primary-dark dark:text-blue-200 font-bold' : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
+        <div className="p-4 border-t border-gray-50 dark:border-slate-800 space-y-1">
+          <NavLink to="/settings" className={({ isActive }) => `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all ${isActive ? 'bg-primary/10 dark:bg-blue-900/30 text-primary-dark dark:text-blue-200 font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}>
             <User className="w-4 h-4" />
             <span>我的</span>
           </NavLink>
           <button onClick={() => signOut()}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all"
           >
             <LogOut className="w-4 h-4" />
             <span>退出登录</span>
