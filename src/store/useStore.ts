@@ -109,7 +109,7 @@ export const useStore = create<AppState>()(
       theme: 'system',
       themeColor: 'blue',
       appPin: null,
-      isAppLocked: true, // Default true, so refreshing page requires unlock if pin exists
+      isAppLocked: false, // start unlocked; gets locked on rehydrate if pin exists
       activeFamilyId: null,
       joinedFamilies: [],
 
@@ -304,6 +304,10 @@ export const useStore = create<AppState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.isRehydrated = true;
+          // If the user had a PIN set, lock the app on restore
+          if (state.appPin) {
+            state.isAppLocked = true;
+          }
         }
       },
       // 仅持久化业务数据，不持久化 UI 临时状态（如搜索词、正在加载等）
