@@ -28,8 +28,8 @@ export default defineConfig({
         // Immediately activate new SW without waiting for old tabs to close
         skipWaiting: true,
         clientsClaim: true,
-        // Only pre-cache CSS and image assets; NOT JS or HTML (handled by NetworkFirst)
-        globPatterns: ['**/*.{css,ico,png,svg,webp,woff2}'],
+        // Precache HTML (needed for SPA routing) + CSS + static assets, but NOT JS (handled by NetworkFirst below)
+        globPatterns: ['**/*.{html,css,ico,png,svg,webp,woff2}'],
         runtimeCaching: [
           {
             // JS chunks: always try network first, fall back to cache only if offline
