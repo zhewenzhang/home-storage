@@ -25,8 +25,34 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        // Immediately activate new SW without waiting for old tabs to close
+        skipWaiting: true,
+        clientsClaim: true,
+        // Only pre-cache CSS and image assets; NOT JS or HTML (handled by NetworkFirst)
+        globPatterns: ['**/*.{css,ico,png,svg,webp,woff2}'],
         runtimeCaching: [
+          {
+            // JS chunks: always try network first, fall back to cache only if offline
+            urlPattern: /\/assets\/.*\.js$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'js-chunks-cache',
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 // 1 day only
+              },
+              networkTimeoutSeconds: 5,
+            }
+          },
+          {
+            // index.html: always try network first
+            urlPattern: /\/index\.html$/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'html-cache',
+              networkTimeoutSeconds: 5,
+            }
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
