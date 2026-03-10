@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LogOut, User, MapPin, Database, ChevronRight, Moon, Bell, HelpCircle, Shield, Edit3, Check, X, Sparkles, AlertCircle, RefreshCw } from 'lucide-react';
+import { LogOut, User, MapPin, Database, ChevronRight, Moon, Bell, HelpCircle, Shield, Edit3, Check, X, Sparkles, AlertCircle, RefreshCw, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { signOut } from '../services/auth';
 import { Link } from 'react-router-dom';
@@ -8,15 +8,63 @@ import { generateHouseHealthReport } from '../services/ai';
 import ReactMarkdown from 'react-markdown';
 import PrivacyPolicyModal from '../components/PrivacyPolicyModal';
 import ThemeToggle from '../components/ThemeToggle';
+import PinPad from '../components/PinPad';
 
 export default function Settings() {
-    const { locations, items, displayName, themeColor, setThemeColor } = useStore();
+    const { locations, items, displayName, themeColor, setThemeColor, appPin, setAppPin } = useStore();
     const [email, setEmail] = useState('');
     const [userId, setUserId] = useState<string | null>(null);
     const [name, setName] = useState(displayName || '');
     const [isEditingName, setIsEditingName] = useState(false);
     const [editNameValue, setEditNameValue] = useState('');
     const [isSavingName, setIsSavingName] = useState(false);
+
+    // App Lock State
+    const [showPinModal, setShowPinModal] = useState(false);
+    const [pinSetupStep, setPinSetupStep] = useState<'verify' | 'new' | 'confirm'>('verify');
+    const [tempPin, setTempPin] = useState('');
+    const [enteredPin, setEnteredPin] = useState('');
+    const [pinError, setPinError] = useState(false);
+
+    useEffect(() => {
+        if (showPinModal) {
+            setEnteredPin('');
+            setTempPin('');
+            setPinError(false);
+            setPinSetupStep(appPin ? 'verify' : 'new');
+        }
+    }, [showPinModal, appPin]);
+
+    useEffect(() => {
+        if (enteredPin.length === 4) {
+            if (pinSetupStep === 'verify') {
+                if (enteredPin === appPin) {
+                    setAppPin(null);
+                    setShowPinModal(false);
+                } else {
+                    setPinError(true);
+                    setTimeout(() => { setEnteredPin(''); setPinError(false); }, 500);
+                }
+            } else if (pinSetupStep === 'new') {
+                setTempPin(enteredPin);
+                setPinSetupStep('confirm');
+                setEnteredPin('');
+            } else if (pinSetupStep === 'confirm') {
+                if (enteredPin === tempPin) {
+                    setAppPin(enteredPin);
+                    setShowPinModal(false);
+                } else {
+                    setPinError(true);
+                    setTimeout(() => {
+                        setPinSetupStep('new');
+                        setTempPin('');
+                        setEnteredPin('');
+                        setPinError(false);
+                    }, 500);
+                }
+            }
+        }
+    }, [enteredPin, pinSetupStep, appPin, tempPin, setAppPin]);
 
     // AI Report State
     const [reportLoading, setReportLoading] = useState(false);
@@ -244,6 +292,29 @@ export default function Settings() {
                 </div>
             </div>
 
+            {/* 安全与保护 */}
+            <div className="card p-0 overflow-hidden border border-gray-100/50 dark:border-gray-800 shadow-sm mt-4 animate-enter" style={{ animationDelay: '0.1s' }}>
+                <div className="px-5 py-4 bg-gray-50/50 dark:bg-gray-800/80 border-b border-gray-100 dark:border-gray-800">
+                    <h2 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">安全与保护</h2>
+                </div>
+                <div className="divide-y divide-gray-50 dark:divide-gray-800">
+                    <div className="flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group cursor-pointer" onClick={() => setShowPinModal(true)}>
+                        <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl ${appPin ? 'bg-primary/10 text-primary' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'} flex items-center justify-center transition-colors`}>
+                                <Lock className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="font-bold text-sm text-gray-800 dark:text-gray-100">应用防窥锁 (App Lock)</p>
+                                <p className="text-xs text-gray-400 mt-0.5">{appPin ? '已开启，切出后台 30 秒即自动锁定' : '未开启，开启可防止他人随手查阅'}</p>
+                            </div>
+                        </div>
+                        <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${appPin ? 'bg-primary dark:bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${appPin ? 'translate-x-6' : 'translate-x-1'}`} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* 关于本产品 */}
             <div className="card p-0 overflow-hidden border border-gray-100/50 dark:border-gray-800 shadow-sm mt-4">
                 <div className="divide-y divide-gray-50 dark:divide-gray-800">
@@ -323,6 +394,29 @@ export default function Settings() {
             {/*底部留白*/}
             {showPrivacyPolicy && (
                 <PrivacyPolicyModal onClose={() => setShowPrivacyPolicy(false)} />
+            )}
+
+            {/* App Lock Validation / Setup Modal */}
+            {showPinModal && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-enter relative">
+                        <button onClick={() => setShowPinModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                            <X className="w-5 h-5" />
+                        </button>
+                        <div className="text-center mb-8 mt-2">
+                            <div className="w-12 h-12 bg-primary/10 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Shield className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                {pinSetupStep === 'verify' ? '验证当前密码以关闭' : pinSetupStep === 'new' ? '设置 4 位防窥密码' : '请再次确认防窥密码'}
+                            </h3>
+                            {pinError && <p className="text-red-500 text-sm mt-2 font-bold">{pinSetupStep === 'confirm' ? '两次密码不一致，请重新输入' : '密码不正确'}</p>}
+                            {!pinError && <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">{pinSetupStep === 'confirm' ? '确保密码输入无误' : '开启后切换出应用将自动锁定'}</p>}
+                        </div>
+
+                        <PinPad pin={enteredPin} setPin={setEnteredPin} error={pinError} maxLength={4} />
+                    </div>
+                </div>
             )}
         </div>
     );

@@ -35,6 +35,10 @@ interface AppState {
   theme: 'light' | 'dark' | 'system'; // Dark mode preference
   themeColor: 'blue' | 'emerald' | 'violet' | 'rose' | 'amber'; // Brand color preference
 
+  // App Lock
+  appPin: string | null;
+  isAppLocked: boolean;
+
   // Family / Share Status
   activeFamilyId: string | null;
   joinedFamilies: JoinedFamily[];
@@ -69,6 +73,11 @@ interface AppState {
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setThemeColor: (color: 'blue' | 'emerald' | 'violet' | 'rose' | 'amber') => void;
 
+  // App Lock Actions
+  setAppPin: (pin: string | null) => void;
+  unlockApp: () => void;
+  lockApp: () => void;
+
   // Getters
   getItemsByLocation: (locationId: string) => Item[];
   getLocationById: (id: string) => Location | undefined;
@@ -99,6 +108,8 @@ export const useStore = create<AppState>()(
       profileLoading: false,
       theme: 'system',
       themeColor: 'blue',
+      appPin: null,
+      isAppLocked: true, // Default true, so refreshing page requires unlock if pin exists
       activeFamilyId: null,
       joinedFamilies: [],
 
@@ -263,6 +274,9 @@ export const useStore = create<AppState>()(
       setSearchQuery: (query) => set({ searchQuery: query }),
       setTheme: (theme) => set({ theme }),
       setThemeColor: (color) => set({ themeColor: color }),
+      setAppPin: (pin) => set({ appPin: pin, isAppLocked: false }),
+      unlockApp: () => set({ isAppLocked: false }),
+      lockApp: () => set({ isAppLocked: true }),
       setActiveFamilyId: (id) => {
         if (id === null) {
           localStorage.setItem('homebox_manually_set_myhome', 'true');
@@ -302,6 +316,7 @@ export const useStore = create<AppState>()(
         displayName: state.displayName,
         theme: state.theme,
         themeColor: state.themeColor,
+        appPin: state.appPin,
       }),
     }
   )

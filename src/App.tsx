@@ -7,6 +7,7 @@ import type { User } from '@supabase/supabase-js';
 import Layout from './components/Layout';
 import AuthPage from './pages/AuthPage';
 import Home from './pages/Home';
+import AppLock from './components/AppLock';
 
 // 解决 Zeabur 重新部署后，旧缓存请求新分包导致 Failed to fetch dynamically imported module 的问题
 const lazyWithRetries = (componentImport: () => Promise<any>) =>
@@ -33,7 +34,7 @@ const Settings = lazyWithRetries(() => import('./pages/Settings'));
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const { loadFromSupabase, clearLocalData, dataLoaded, theme, themeColor } = useStore();
+  const { loadFromSupabase, clearLocalData, dataLoaded, theme, themeColor, appPin, isAppLocked, lockApp } = useStore();
 
   // Handle Dark mode class
   useEffect(() => {
@@ -57,6 +58,27 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme-color', themeColor);
   }, [themeColor]);
+
+  // Auto Lock when app goes to background
+  useEffect(() => {
+    if (!appPin) return;
+    let timeoutId: number;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // Lock after 30 seconds of being in the background
+        timeoutId = window.setTimeout(() => {
+          lockApp();
+        }, 30000);
+      } else {
+        window.clearTimeout(timeoutId);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.clearTimeout(timeoutId);
+    };
+  }, [appPin, lockApp]);
 
   useEffect(() => {
     // 聚合初始化：一次性拿回 session 并建立监听
@@ -108,27 +130,30 @@ function App() {
 
   // 已登录 → 主应用
   return (
-    <HashRouter>
-      <Layout>
-        <Suspense fallback={
-          <div className="flex-1 flex items-center justify-center min-h-[50vh]">
-            <div className="w-8 h-8 border-4 border-slate-200 border-t-[#3B6D8C] rounded-full animate-spin"></div>
-          </div>
-        }>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/items" element={<Items />} />
-            <Route path="/items/new" element={<ItemForm />} />
-            <Route path="/items/:id" element={<ItemForm />} />
-            <Route path="/locations" element={<Locations />} />
-            <Route path="/floorplan" element={<FloorPlan />} />
-            <Route path="/batch" element={<BatchManage />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </Suspense>
-      </Layout>
-    </HashRouter>
+    <>
+      {appPin && isAppLocked && <AppLock />}
+      <HashRouter>
+        <Layout>
+          <Suspense fallback={
+            <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+              <div className="w-8 h-8 border-4 border-slate-200 border-t-[#3B6D8C] rounded-full animate-spin"></div>
+            </div>
+          }>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/items" element={<Items />} />
+              <Route path="/items/new" element={<ItemForm />} />
+              <Route path="/items/:id" element={<ItemForm />} />
+              <Route path="/locations" element={<Locations />} />
+              <Route path="/floorplan" element={<FloorPlan />} />
+              <Route path="/batch" element={<BatchManage />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </Suspense>
+        </Layout>
+      </HashRouter>
+    </>
   );
 }
 
