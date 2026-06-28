@@ -1,350 +1,65 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Default Theme: Deep Slate Blue */
-  --color-primary: 59 109 140;
-  /* #3B6D8C */
-  --color-primary-light: 107 154 196;
-  /* #6B9AC4 */
-  --color-primary-dark: 42 77 99;
-  /* #2A4D63 */
-  --color-primary-bg: 234 244 248;
-  /* #EAF4F8 */
+/* === Pattern Textures === */
+.swiss-grid-pattern {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+html.dark .swiss-grid-pattern {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
 }
 
-/* theme: emerald */
-html[data-theme-color="emerald"] {
-  --color-primary: 16 185 129;
-  /* #10B981 */
-  --color-primary-light: 52 211 153;
-  /* #34D399 */
-  --color-primary-dark: 4 120 87;
-  /* #047857 */
-  --color-primary-bg: 236 253 245;
-  /* #ECFDF5 */
-}
-
-/* theme: violet */
-html[data-theme-color="violet"] {
-  --color-primary: 139 92 246;
-  /* #8B5CF6 */
-  --color-primary-light: 167 139 250;
-  /* #A78BFA */
-  --color-primary-dark: 91 33 182;
-  /* #5B21B6 */
-  --color-primary-bg: 245 243 255;
-  /* #F5F3FF */
-}
-
-/* theme: rose */
-html[data-theme-color="rose"] {
-  --color-primary: 244 63 94;
-  /* #F43F5E */
-  --color-primary-light: 251 113 133;
-  /* #FB7185 */
-  --color-primary-dark: 190 18 60;
-  /* #BE123C */
-  --color-primary-bg: 255 241 242;
-  /* #FFF1F2 */
-}
-
-/* theme: amber */
-html[data-theme-color="amber"] {
-  --color-primary: 245 158 11;
-  /* #F59E0B */
-  --color-primary-light: 251 191 36;
-  /* #FBBF24 */
-  --color-primary-dark: 180 83 9;
-  /* #B45309 */
-  --color-primary-bg: 255 251 235;
-  /* #FFFBEB */
-}
-
-/* ========== 全局基础样式 ========== */
+/* === Global Styles === */
 body {
-  font-family: 'Nunito', 'Inter', system-ui, sans-serif;
-  background-color: #F8F9FA;
-  color: #2D3748;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #FFFFFF;
+  color: #000000;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image:
-    radial-gradient(at 0% 0%, rgba(59, 109, 140, 0.03) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(143, 188, 143, 0.05) 0px, transparent 50%);
-  background-attachment: fixed;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 html.dark body {
-  background-color: #0F172A;
-  color: #F1F5F9;
-  background-image:
-    radial-gradient(at 0% 0%, rgba(59, 109, 140, 0.1) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(143, 188, 143, 0.07) 0px, transparent 50%);
+  background-color: #000000;
+  color: #FFFFFF;
 }
 
 ::selection {
-  background-color: rgba(var(--color-primary-light), 0.3);
-  color: rgb(var(--color-primary-dark));
+  background-color: #FF3000;
+  color: #FFFFFF;
 }
 
-html.dark ::selection {
-  background-color: rgba(var(--color-primary-light), 0.4);
-  color: rgb(var(--color-primary-bg));
+/* === Utility Classes === */
+*:focus-visible {
+  outline: 2px solid #FF3000;
+  outline-offset: 2px;
 }
 
-/* ========== 卡片 ========== */
-.card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.03), 0 8px 24px -4px rgba(0, 0, 0, 0.02);
-}
-
-html.dark .card {
-  background: rgba(30, 41, 59, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.2);
-}
-
-.card:hover {
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
-  transform: translateY(-4px);
-  border-color: rgba(var(--color-primary-light), 0.3);
-}
-
-html.dark .card:hover {
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
-  border-color: rgba(var(--color-primary-light), 0.4);
-}
-
-.card-highlight {
-  background: linear-gradient(135deg, rgb(var(--color-primary-dark)) 0%, rgb(var(--color-primary)) 100%);
-  color: white;
-  box-shadow: 0 0 15px rgba(var(--color-primary), 0.3);
-  transition: all 0.3s ease;
-}
-
-.card-highlight:hover {
-  box-shadow: 0 0 25px rgba(var(--color-primary), 0.5);
-  transform: scale(1.02);
-}
-
-/* ========== 按钮 ========== */
-.btn-primary {
-  background-color: rgb(var(--color-primary));
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 1rem;
-  font-weight: 700;
-  box-shadow: 0 4px 20px -2px rgba(var(--color-primary), 0.2);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border: none;
-  cursor: pointer;
-}
-
-html.dark .btn-primary {
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
-}
-
-.btn-primary:hover {
-  background-color: rgb(var(--color-primary-dark));
-  box-shadow: 0 0 15px rgba(var(--color-primary), 0.3);
-}
-
-html.dark .btn-primary:hover {
-  background-color: rgb(var(--color-primary-light));
-}
-
-.btn-primary:active {
-  transform: scale(0.95);
-}
-
-.btn-secondary {
-  background-color: white;
-  color: #718096;
-  padding: 0.75rem 1.5rem;
-  border-radius: 1rem;
-  font-weight: 700;
-  border: 1px solid #f0f0f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-
-html.dark .btn-secondary {
-  background-color: #1E293B;
-  color: #94A3B8;
-  border-color: #334155;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.btn-secondary:hover {
-  background-color: #f9fafb;
-  color: rgb(var(--color-primary));
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-html.dark .btn-secondary:hover {
-  background-color: #334155;
-  color: rgb(var(--color-primary-light));
-}
-
-.btn-secondary:active {
-  transform: scale(0.95);
-}
-
-/* ========== 输入框 ========== */
-.input-field {
-  width: 100%;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(229, 231, 235, 0.6);
-  outline: none;
-  transition: all 0.3s ease;
-  color: #2D3748;
-  font-weight: 500;
-}
-
-html.dark .input-field {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #F8F9FA;
-}
-
-.input-field::placeholder {
-  color: #a0aec0;
-}
-
-html.dark .input-field::placeholder {
-  color: #64748B;
-}
-
-.input-field:focus {
-  background: white;
-  border-color: rgb(var(--color-primary-light));
-  box-shadow: 0 0 0 4px rgba(var(--color-primary-light), 0.1);
-}
-
-html.dark .input-field:focus {
-  background: #1E293B;
-  border-color: rgb(var(--color-primary-light));
-  box-shadow: 0 0 0 4px rgba(var(--color-primary-light), 0.2);
-}
-
-/* ========== 导航项 ========== */
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  border-radius: 1rem;
-  transition: all 0.2s ease;
-  font-weight: 700;
-  color: #a0aec0;
-  text-decoration: none;
-}
-
-.nav-item:hover {
-  background-color: #f7fafc;
-  color: #2D3748;
-}
-
-html.dark .nav-item:hover {
-  background-color: #1E293B;
-  color: #F1F5F9;
-}
-
-.nav-item.active {
-  background-color: rgb(var(--color-primary-bg));
-  color: rgb(var(--color-primary));
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
-}
-
-html.dark .nav-item.active {
-  background-color: rgba(var(--color-primary), 0.2);
-  color: rgb(var(--color-primary-light));
-}
-
-/* ========== 动画 ========== */
-.animate-enter {
-  animation: enter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-@keyframes enter {
-  from {
-    opacity: 0;
-    transform: translateY(15px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes shake {
-
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0);
-  }
-}
-
-.animate-shake {
-  animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
-}
-
-/* ========== 自定义滚动条 ========== */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
-  border-radius: 9999px;
+  background: #000000;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #FFFFFF;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e0;
+/* Animations */
+@keyframes swiss-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.swiss-enter {
+  animation: swiss-enter 0.25s ease-out forwards;
 }

@@ -1,6 +1,9 @@
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useState } from 'react';
-import { Plus, Trash2, Edit, Home, X, AlertTriangle, ChevronDown, ChevronRight, QrCode } from 'lucide-react';
+import { Plus, Trash2, Edit, Home, X, ChevronDown, ChevronRight, QrCode } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { Button, Input, Card } from '../components/ui';
+import Spinner from '../components/ui/Spinner';
 import QRCodeGenerator from '../components/QRCodeGenerator';
 
 // 位置类型图标映射
@@ -12,45 +15,8 @@ const TYPE_CONFIG: Record<string, { icon: string; label: string }> = {
   box: { icon: '📦', label: '盒子' },
 };
 
-// 确认对话框
-function ConfirmDialog({
-  open, title, message, onConfirm, onCancel
-}: {
-  open: boolean; title: string; message: string; onConfirm: () => void; onCancel: () => void
-}) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onCancel}>
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-      <div
-        className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 max-w-sm w-full animate-enter border border-transparent dark:border-slate-700"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-6 h-6 text-red-500 dark:text-red-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{message}</p>
-          </div>
-        </div>
-        <div className="flex gap-3 mt-6">
-          <button onClick={onCancel} className="btn-secondary flex-1">取消</button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 px-6 py-3 rounded-2xl font-bold text-white transition-all bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 border-none shadow-sm"
-          >
-            确认删除
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Locations() {
-  const { locations, items, addLocation, updateLocation, deleteLocation } = useStore();
+  const { locations, items, addLocation, updateLocation, deleteLocation, dataLoaded } = useStore();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set());
@@ -131,9 +97,9 @@ export default function Locations() {
   };
 
   return (
-    <div className="space-y-6 animate-enter max-w-3xl mx-auto">
+    <div className="space-y-6 swiss-enter max-w-4xl mx-auto">
       <ConfirmDialog
-        open={!!deleteTarget}
+        isOpen={!!deleteTarget}
         title="删除位置"
         message={`确定要删除"${deleteTarget?.name}"吗？该位置下的物品将变为"未分配"状态。`}
         onConfirm={handleDeleteConfirm}
@@ -143,45 +109,45 @@ export default function Locations() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold dark:text-gray-100">存储位置</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{locations.length} 个位置，{items.length} 件物品</p>
+          <h2 className="text-2xl font-black uppercase tracking-wider text-black dark:text-white">存储位置</h2>
+          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-1">{locations.length} 个位置，{items.length} 件物品</p>
         </div>
-        <button
+        <Button
           onClick={() => {
             setShowForm(!showForm);
             setEditingId(null);
             setForm({ name: '', type: 'room', parentId: '' });
           }}
-          className="btn-primary"
+          variant="primary" size="sm"
         >
           <Plus className="w-4 h-4" />
           添加位置
-        </button>
+        </Button>
       </div>
 
       {/* Add/Edit Form — Modal Style */}
       {showForm && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/60" />
           <div
-            className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 max-w-md w-full animate-enter border border-transparent dark:border-slate-700"
+            className="relative bg-white dark:bg-black border-2 border-black dark:border-white p-8 max-w-md w-full swiss-enter"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold dark:text-gray-100">{editingId ? '编辑位置' : '添加新位置'}</h3>
-              <button onClick={() => setShowForm(false)} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700">
-                <X className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+              <h3 className="text-xl font-black uppercase tracking-wider text-black dark:text-white">{editingId ? '编辑位置' : '添加新位置'}</h3>
+              <button onClick={() => setShowForm(false)} className="border-2 border-black dark:border-white p-1 hover:bg-swiss-red hover:border-swiss-red hover:text-white transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-2">名称</label>
-                <input
+                <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">名称</label>
+                <Input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="input-field"
+                  className="w-full"
                   placeholder="例如：主卧衣柜"
                   required
                   autoFocus
@@ -189,16 +155,16 @@ export default function Locations() {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-2">类型</label>
+                <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">类型</label>
                 <div className="grid grid-cols-5 gap-2">
                   {Object.entries(TYPE_CONFIG).map(([key, config]) => (
                     <button
                       key={key}
                       type="button"
                       onClick={() => setForm({ ...form, type: key as any })}
-                      className={`p-3 rounded-xl text-center transition-all border ${form.type === key
-                        ? 'bg-[#EAF4F8] border-[#3B6D8C] text-[#3B6D8C] dark:bg-blue-900/30 dark:border-blue-500 dark:text-blue-400 shadow-md'
-                        : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-slate-500'
+                      className={`p-3 text-center transition-all border-2 ${form.type === key
+                        ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white'
+                        : 'bg-transparent border-black dark:border-white text-gray-600 dark:text-gray-400 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black'
                         }`}
                     >
                       <span className="text-xl block">{config.icon}</span>
@@ -210,11 +176,11 @@ export default function Locations() {
 
               {rooms.length > 0 && form.type !== 'room' && (
                 <div>
-                  <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-2">所属房间</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">所属房间</label>
                   <select
                     value={form.parentId || ''}
                     onChange={(e) => setForm({ ...form, parentId: e.target.value === '' ? '' : e.target.value })}
-                    className="input-field"
+                    className="w-full px-3 py-2 border-2 border-black dark:border-white text-sm font-bold text-gray-700 dark:text-gray-200 outline-none transition-all bg-transparent"
                   >
                     <option value="">不指定房间</option>
                     {rooms.map(room => (
@@ -225,16 +191,16 @@ export default function Locations() {
               )}
 
               <div className="flex gap-3 pt-2">
-                <button type="submit" className="btn-primary flex-1">
+                <Button type="submit" variant="primary" className="flex-1">
                   {editingId ? '保存' : '添加'}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => { setShowForm(false); setEditingId(null); }}
-                  className="btn-secondary"
+                  variant="outline"
                 >
                   取消
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -242,20 +208,24 @@ export default function Locations() {
       )}
 
       {/* Locations List */}
-      {locations.length === 0 ? (
-        <div className="card text-center py-16">
-          <div className="w-20 h-20 mx-auto rounded-full bg-gray-50 dark:bg-slate-900/50 border border-transparent dark:border-slate-700 flex items-center justify-center mb-4">
+      {!dataLoaded ? (
+        <div className="flex justify-center py-20">
+          <Spinner />
+        </div>
+      ) : locations.length === 0 ? (
+        <Card className="text-center py-16">
+          <div className="w-20 h-20 mx-auto border-2 border-black dark:border-white flex items-center justify-center mb-4">
             <Home className="w-10 h-10 text-gray-300 dark:text-gray-500" />
           </div>
           <h3 className="text-lg font-bold text-gray-600 dark:text-gray-300 mb-2">还没有添加存储位置</h3>
           <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">先去平面图绘制房间，或在此手动添加</p>
-          <button
+          <Button
             onClick={() => setShowForm(true)}
-            className="btn-primary mx-auto"
+            variant="primary" className="mx-auto"
           >
             <Plus className="w-4 h-4" /> 添加第一个位置
-          </button>
-        </div>
+          </Button>
+        </Card>
       ) : (
         <div className="space-y-3">
           {rooms.map(room => {
@@ -264,22 +234,22 @@ export default function Locations() {
             const isExpanded = expandedRooms.has(room.id);
 
             return (
-              <div key={room.id} className="card overflow-hidden">
+              <div key={room.id} className="border-2 border-black dark:border-white p-4 transition-colors">
                 <div className="flex items-center gap-4">
                   {/* Expand Toggle */}
                   {children.length > 0 ? (
-                    <button onClick={() => toggleRoom(room.id)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-all">
-                      {isExpanded ? <ChevronDown className="w-5 h-5 text-gray-400 dark:text-gray-500" /> : <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />}
+                    <button onClick={() => toggleRoom(room.id)} className="border-2 border-black dark:border-white p-1 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors">
+                      {isExpanded ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
                     </button>
                   ) : (
                     <div className="w-7" />
                   )}
 
-                  <div className="w-12 h-12 rounded-2xl bg-[#EAF4F8] dark:bg-slate-700/50 flex items-center justify-center text-2xl flex-shrink-0">
+                  <div className="w-12 h-12 border-2 border-black dark:border-white flex items-center justify-center text-2xl flex-shrink-0">
                     🏠
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-900 dark:text-gray-100 truncate">{room.name}</p>
+                    <p className="font-bold text-black dark:text-white truncate">{room.name}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                       {children.length > 0 && `${children.length} 个收纳点 · `}{totalItems} 件物品
                     </p>
@@ -287,50 +257,50 @@ export default function Locations() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => setQrTarget({ id: room.id, name: room.name })}
-                      className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
+                      className="p-2 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                       title="打印空间码"
                     >
                       <QrCode className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                     </button>
                     <button
                       onClick={() => handleEdit(room)}
-                      className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-all"
+                      className="p-2 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                     >
                       <Edit className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                     </button>
                     <button
                       onClick={() => setDeleteTarget({ id: room.id, name: room.name })}
-                      className="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30 transition-all"
+                      className="p-2 border-2 border-swiss-red text-swiss-red hover:bg-swiss-red hover:text-white transition-colors"
                     >
-                      <Trash2 className="w-4 h-4 text-red-400 dark:text-red-500" />
+                      <Trash2 className="w-4 h-4 text-swiss-red" />
                     </button>
                   </div>
                 </div>
 
                 {/* Children */}
                 {isExpanded && children.length > 0 && (
-                  <div className="mt-4 ml-10 space-y-2 pt-4 border-t border-gray-100 dark:border-slate-700/50">
+                  <div className="mt-4 ml-10 space-y-2 pt-4 border-t-2 border-black dark:border-white">
                     {children.map(child => {
                       const config = TYPE_CONFIG[child.type] || TYPE_CONFIG.box;
                       return (
                         <div
                           key={child.id}
-                          className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50/80 dark:bg-slate-900/50 group hover:bg-gray-100 dark:hover:bg-slate-900 transition-all border border-transparent dark:border-slate-800"
+                          className="flex items-center gap-3 p-3 border-2 border-black dark:border-white group hover:bg-gray-100 dark:hover:bg-gray-900 transition-all"
                         >
                           <span className="text-lg">{config.icon}</span>
                           <div className="flex-1 min-w-0">
-                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{child.name}</span>
+                            <span className="text-sm font-bold text-black dark:text-white">{child.name}</span>
                             <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">{getItemCount(child.id)} 件</span>
                           </div>
                           <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => setQrTarget({ id: child.id, name: child.name })} className="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 bg-white md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent shadow-sm md:shadow-none" title="打印空间码">
+                            <button onClick={() => setQrTarget({ id: child.id, name: child.name })} className="p-1.5 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black bg-white md:bg-transparent dark:bg-black md:dark:bg-transparent" title="打印空间码">
                               <QrCode className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                             </button>
-                            <button onClick={() => handleEdit(child)} className="p-1.5 rounded-lg hover:bg-white dark:hover:bg-slate-800 bg-white md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent shadow-sm md:shadow-none">
+                            <button onClick={() => handleEdit(child)} className="p-1.5 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black bg-white md:bg-transparent dark:bg-black md:dark:bg-transparent">
                               <Edit className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                             </button>
-                            <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 bg-white md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent shadow-sm md:shadow-none">
-                              <Trash2 className="w-3.5 h-3.5 text-red-400 dark:text-red-500" />
+                            <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-1.5 border-2 border-swiss-red text-swiss-red hover:bg-swiss-red hover:text-white bg-white md:bg-transparent dark:bg-black md:dark:bg-transparent">
+                              <Trash2 className="w-3.5 h-3.5 text-swiss-red" />
                             </button>
                           </div>
                         </div>
@@ -344,26 +314,26 @@ export default function Locations() {
 
           {/* Orphan locations */}
           {locations.filter(l => l.type !== 'room' && !l.parentId).length > 0 && (
-            <div className="card">
+            <Card>
               <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 mb-3">未归属房间</h3>
               <div className="space-y-2">
                 {locations.filter(l => l.type !== 'room' && !l.parentId).map(child => {
                   const config = TYPE_CONFIG[child.type] || TYPE_CONFIG.box;
                   return (
-                    <div key={child.id} className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-slate-900/50 group border border-transparent dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-900 transition-colors">
+                    <div key={child.id} className="flex items-center gap-3 p-3 border-2 border-black dark:border-white group hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors">
                       <span className="text-lg">{config.icon}</span>
-                      <span className="text-sm font-bold text-gray-700 dark:text-gray-300 flex-1">{child.name}</span>
-                      <button onClick={() => setQrTarget({ id: child.id, name: child.name })} className="p-2 mx-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 md:opacity-0 group-hover:opacity-100 transition-opacity bg-white md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent shadow-sm md:shadow-none" title="打印空间码">
+                      <span className="text-sm font-bold text-black dark:text-white flex-1">{child.name}</span>
+                      <button onClick={() => setQrTarget({ id: child.id, name: child.name })} className="p-2 mx-1 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black md:opacity-0 group-hover:opacity-100 transition-colors bg-white md:bg-transparent dark:bg-black md:dark:bg-transparent" title="打印空间码">
                         <QrCode className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                       </button>
-                      <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 md:opacity-0 group-hover:opacity-100 transition-opacity bg-white md:bg-transparent dark:bg-slate-800 md:dark:bg-transparent shadow-sm md:shadow-none">
-                        <Trash2 className="w-3.5 h-3.5 text-red-400 dark:text-red-500" />
+                      <button onClick={() => setDeleteTarget({ id: child.id, name: child.name })} className="p-2 border-2 border-swiss-red text-swiss-red hover:bg-swiss-red hover:text-white md:opacity-0 group-hover:opacity-100 transition-colors bg-white md:bg-transparent dark:bg-black md:dark:bg-transparent">
+                        <Trash2 className="w-3.5 h-3.5 text-swiss-red" />
                       </button>
                     </div>
                   );
                 })}
               </div>
-            </div>
+            </Card>
           )}
         </div>
       )}

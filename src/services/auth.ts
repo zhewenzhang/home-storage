@@ -1,57 +1,57 @@
-import { supabase } from '../lib/supabase';
-import type { User, Session } from '@supabase/supabase-js';
+import { auth, db } from '../lib/firebase';
+import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut as firebaseSignOut, 
+    onAuthStateChanged as firebaseOnAuthStateChanged,
+    updateProfile,
+    User as FirebaseUser
+} from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+
+export type User = FirebaseUser;
 
 export interface AuthState {
-    user: User | null;
-    session: Session | null;
+    user: FirebaseUser | null;
     loading: boolean;
 }
 
 // 邮箱注册
 export async function signUp(email: string, password: string, displayName?: string) {
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-            data: { display_name: displayName || email.split('@')[0] },
-        },
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    const name = displayName || email.split('@')[0];
+    await updateProfile(user, { displayName: name });
+
+    // 同步到 profiles 集合
+    await setDoc(doc(db, 'profiles', user.uid), {
+        display_name: name,
+        updated_at: Date.now()
     });
-    if (error) throw error;
-    return data;
+
+    return user;
 }
 
 // 邮箱登录
 export async function signIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-    });
-    if (error) throw error;
-    return data;
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
 }
 
 // 登出
 export async function signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-}
-
-// 获取当前 session
-export async function getSession() {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    return data.session;
+    await firebaseSignOut(auth);
 }
 
 // 获取当前用户
 export async function getUser() {
-    const { data } = await supabase.auth.getUser();
-    return data.user;
+    return auth.currentUser;
 }
 
 // 监听认证状态变化
-export function onAuthStateChange(callback: (user: User | null) => void) {
-    return supabase.auth.onAuthStateChange((_event, session) => {
-        callback(session?.user ?? null);
+export function onAuthStateChange(callback: (user: FirebaseUser | null) => void) {
+    return firebaseOnAuthStateChanged(auth, (user) => {
+        callback(user);
     });
 }

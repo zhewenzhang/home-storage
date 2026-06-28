@@ -140,7 +140,14 @@ export default function AIChat() {
                         failed.push(action);
                     }
                 } else if (action.action === 'delete_item') {
-                    const item = curItems.find(i => i.name === action.name);
+                    const item = curItems.find(i => {
+                      if (i.name !== action.name) return false;
+                      if (action.locationName) {
+                        const loc = locs.find(l => l.name === action.locationName);
+                        if (loc && i.locationId !== loc.id) return false;
+                      }
+                      return true;
+                    });
                     if (item) { deleteItem(item.id); success.push(action); }
                     else failed.push(action);
                 }
@@ -305,7 +312,7 @@ export default function AIChat() {
 
         setIsVisionScanning(true);
         try {
-            // 1. 上传图片到 Supabase
+            // 1. 上传图片到 Firebase
             const url = await uploadImage(file);
             if (!url) throw new Error('上传失败');
 

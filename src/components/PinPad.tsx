@@ -45,9 +45,9 @@ export default function PinPad({ pin, setPin, maxLength = 4, error = false }: Pi
                 {[...Array(maxLength)].map((_, i) => (
                     <div
                         key={i}
-                        className={`w-3.5 h-3.5 rounded-full transition-all duration-200 ${pin.length > i
-                            ? 'bg-primary dark:bg-blue-500 scale-125 shadow-md shadow-primary/30'
-                            : 'bg-gray-200 dark:bg-gray-700'
+                        className={`w-4 h-4 border-2 transition-all duration-200 ${pin.length > i
+                            ? 'bg-black dark:bg-white border-black dark:border-white'
+                            : 'border-gray-300 dark:border-gray-600 bg-transparent'
                             }`}
                     />
                 ))}
@@ -59,7 +59,8 @@ export default function PinPad({ pin, setPin, maxLength = 4, error = false }: Pi
                     <button
                         key={num}
                         onClick={() => handleInput(num.toString())}
-                        className="h-14 md:h-16 rounded-2xl bg-white dark:bg-slate-800 text-2xl font-bold text-gray-800 dark:text-gray-100 shadow-sm border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all active:scale-95 active:shadow-inner"
+                        className="h-14 md:h-16 border-2 border-black dark:border-white bg-transparent text-2xl font-bold text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                        aria-label={num.toString()}
                     >
                         {num}
                     </button>
@@ -67,13 +68,15 @@ export default function PinPad({ pin, setPin, maxLength = 4, error = false }: Pi
                 <div /> {/* Empty slot for alignment */}
                 <button
                     onClick={() => handleInput('0')}
-                    className="h-14 md:h-16 rounded-2xl bg-white dark:bg-slate-800 text-2xl font-bold text-gray-800 dark:text-gray-100 shadow-sm border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all active:scale-95 active:shadow-inner"
+                    className="h-14 md:h-16 border-2 border-black dark:border-white bg-transparent text-2xl font-bold text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                    aria-label="0"
                 >
                     0
                 </button>
                 <button
                     onClick={handleDelete}
-                    className="h-14 md:h-16 rounded-2xl flex items-center justify-center bg-transparent text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-800 hover:text-gray-600 dark:hover:text-gray-200 transition-all active:scale-95"
+                    className="h-14 md:h-16 border-2 border-black dark:border-white flex items-center justify-center bg-transparent text-gray-400 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                    aria-label="刪除"
                 >
                     <Delete className="w-6 h-6" />
                 </button>

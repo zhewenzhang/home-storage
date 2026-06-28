@@ -4,19 +4,18 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/home-storage/favicon.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://openrouter.ai; img-src 'self' data: blob: https://firebasestorage.googleapis.com https://*.supabase.co https://*.googleusercontent.com https://api.iconify.design; media-src 'self' data: blob:;">
+  <!-- 性能优化：预连接 Firebase Storage 域名，提前建立 TLS 连接 -->
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com" />
+  <!-- 性能优化：DNS 预解析 -->
+  <link rel="dns-prefetch" href="//fonts.googleapis.com" />
   <title>HomeBox - 智能家庭储物管理</title>
   <style>
-    :root {
-      --br: #63b3ed;
-      --bg: linear-gradient(135deg, #1a2a3a 0%, #2A4D63 100%);
-    }
-
     body {
       margin: 0;
-      background: #1a2a3a;
-      font-family: system-ui, -apple-system, sans-serif;
+      background: #000000;
+      font-family: 'Inter', system-ui, sans-serif;
       overflow: hidden;
     }
 
@@ -27,7 +26,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: var(--bg);
+      background: #000000;
       z-index: 9999;
       transition: opacity 0.3s ease;
     }
@@ -36,83 +35,60 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      animation: float 3s infinite ease-in-out;
     }
 
     .l-b {
       width: 80px;
       height: 80px;
-      background: white;
-      border-radius: 20px;
+      border: 3px solid #FFFFFF;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-      margin-bottom: 25px;
-      position: relative;
+      margin-bottom: 24px;
     }
 
     .l-b::after {
       content: "📦";
-      font-size: 40px;
+      font-size: 36px;
     }
 
     .l-t {
-      color: white;
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: 4px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      color: #FFFFFF;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      text-transform: uppercase;
     }
 
     .l-s {
       color: rgba(255, 255, 255, 0.4);
-      font-size: 12px;
-      margin-top: 10px;
-      letter-spacing: 1px;
+      font-size: 10px;
+      margin-top: 8px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 700;
     }
 
     .l-p {
-      width: 140px;
+      width: 120px;
       height: 3px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      margin-top: 25px;
+      background: rgba(255, 255, 255, 0.15);
+      margin-top: 24px;
       overflow: hidden;
     }
 
     .l-f {
       width: 100%;
       height: 100%;
-      background: white;
+      background: #FF3000;
       transform-origin: left;
-      animation: loader 2s infinite ease-in-out;
-    }
-
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-10px);
-      }
+      animation: loader 1.5s infinite ease-in-out;
     }
 
     @keyframes loader {
-      0% {
-        transform: translateX(-100%);
-      }
-
-      50% {
-        transform: translateX(0);
-      }
-
-      100% {
-        transform: translateX(100%);
-      }
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(0); }
+      100% { transform: translateX(100%); }
     }
   </style>
 </head>
@@ -123,7 +99,7 @@
       <div class="l-c">
         <div class="l-b"></div>
         <div class="l-t">HOMEBOX</div>
-        <div class="l-s">正在开启您的智能家庭云柜...</div>
+        <div class="l-s">正在开启您的智能家庭云柜</div>
         <div class="l-p">
           <div class="l-f"></div>
         </div>

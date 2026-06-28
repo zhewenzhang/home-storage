@@ -1,13 +1,14 @@
 import React, { useState, useEffect, Suspense } from 'react';
+import { useToast } from './components/Toast';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { supabase } from './lib/supabase';
 import { useStore } from './store/useStore';
-import type { User } from '@supabase/supabase-js';
+import { onAuthStateChange, getUser, User } from './services/auth';
 
 import Layout from './components/Layout';
 import AuthPage from './pages/AuthPage';
 import Home from './pages/Home';
 import AppLock from './components/AppLock';
+import Spinner from './components/ui/Spinner';
 
 // 解决 Zeabur 重新部署后，旧缓存请求新分包导致 Failed to fetch dynamically imported module 的问题
 const lazyWithRetries = (componentImport: () => Promise<any>) =>
@@ -34,7 +35,17 @@ const Settings = lazyWithRetries(() => import('./pages/Settings'));
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const { loadFromSupabase, clearLocalData, dataLoaded, theme, themeColor, appPin, isAppLocked, lockApp } = useStore();
+  const { loadFromSupabase, clearLocalData, theme, appPin, isAppLocked, lockApp, errorMessage } = useStore();
+  const { addToast } = useToast();
+
+  // 立即移除 index.html 加载动画 - 不等待 auth
+  useEffect(() => {
+    const loader = document.getElementById('app-loading');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => loader.remove(), 300);
+    }
+  }, []);
 
   // Handle Dark mode class
   useEffect(() => {
@@ -53,11 +64,6 @@ function App() {
       root.classList.toggle('dark', theme === 'dark');
     }
   }, [theme]);
-
-  // Apply Brand Color Theme
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme-color', themeColor);
-  }, [themeColor]);
 
   // Auto Lock when app goes to background
   useEffect(() => {
@@ -81,46 +87,43 @@ function App() {
   }, [appPin, lockApp]);
 
   useEffect(() => {
-    // 聚合初始化：一次性拿回 session 并建立监听
+    if (errorMessage) {
+      addToast('error', errorMessage);
+      useStore.getState().setErrorMessage(null);
+    }
+  }, [errorMessage, addToast]);
+
+  useEffect(() => {
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      const currentUser = await getUser();
+      setUser(currentUser);
       setAuthLoading(false);
     };
 
     initAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const newUser = session?.user ?? null;
-      // 只有在用户状态真正变化时才 set，减少 React 重新渲染
-      setUser(prev => prev?.id === newUser?.id ? prev : newUser);
+    const unsubscribe = onAuthStateChange((newUser) => {
+      setUser(prev => prev?.uid === newUser?.uid ? prev : newUser);
       if (!newUser) clearLocalData();
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, [clearLocalData]);
 
-  // 用户登录后加载数据
+  // 用户登录后加载数据 - 后台刷新
   useEffect(() => {
-    if (user && !dataLoaded) {
-      loadFromSupabase(user.id);
+    if (user && !authLoading) {
+      loadFromSupabase(user.uid);
     }
-  }, [user, dataLoaded, loadFromSupabase]);
+  }, [user, authLoading, loadFromSupabase]);
 
-  // 移除 index.html 中的首开加载动画
-  useEffect(() => {
-    if (user || !authLoading) {
-      const loader = document.getElementById('app-loading');
-      if (loader) {
-        loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 300); // 缩短移除等待
-      }
-    }
-  }, [user, authLoading]);
-
-  // 加载中 - 仅在没有缓存数据时显示重度加载页
+  // 等待 auth 初始化时显示轻量 spinner，不阻塞首次渲染
   if (authLoading) {
-    return null; // 让 index.html 的加载动画继续显示
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-black">
+        <Spinner />
+      </div>
+    );
   }
 
   // 未登录 → 登录页
@@ -136,7 +139,7 @@ function App() {
         <Layout>
           <Suspense fallback={
             <div className="flex-1 flex items-center justify-center min-h-[50vh]">
-              <div className="w-8 h-8 border-4 border-slate-200 border-t-[#3B6D8C] rounded-full animate-spin"></div>
+              <Spinner />
             </div>
           }>
             <Routes>

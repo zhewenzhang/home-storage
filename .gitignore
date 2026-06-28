@@ -4,3 +4,9 @@ dist
 .env.*
 !.env.example
 .DS_Store
+
+# 临时和导出的敏感备份数据
+public/supabase_data.json
+users.json
+.firebase
+.gemini

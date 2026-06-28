@@ -68,10 +68,10 @@ export default defineConfig({
             }
           },
           {
-            urlPattern: /.*\.supabase\.co\/storage\/v1\/object\/public\/.*/,
+            urlPattern: /^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/.*\/o\/.*/,
             handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'supabase-image-cache',
+              cacheName: 'firebase-image-cache',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
@@ -94,7 +94,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor-ui': ['react', 'react-dom', 'react-router-dom', 'framer-motion', 'lucide-react'],
-          'vendor-db': ['@supabase/supabase-js', 'zustand'],
+          'vendor-db': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage', 'zustand'],
         }
       }
     },

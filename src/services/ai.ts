@@ -1,7 +1,7 @@
 // OpenRouter AI 服务
-const API_KEY = (import.meta as any).env.VITE_AI_API_KEY || '';
+const API_KEY = import.meta.env.VITE_AI_API_KEY || '';
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'stepfun/step-3.5-flash:free';
+const MODEL = import.meta.env.VITE_AI_MODEL || 'stepfun/step-3.5-flash:free';
 
 export interface ChatMessage {
     role: 'system' | 'user' | 'assistant';

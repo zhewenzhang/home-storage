@@ -1,47 +1,13 @@
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, Save, Trash2, AlertTriangle, Image as ImageIcon, X, Loader2, Camera, Sparkles } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Image as ImageIcon, X, Loader2, Camera, Sparkles } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { DEFAULT_CATEGORIES, Item, Category } from '../types';
 import { uploadImage, deleteImage } from '../services/storage';
 import { analyzeImageWithAI } from '../services/ai';
-
-// 确认对话框组件
-function ConfirmDialog({
-  open, title, message, onConfirm, onCancel
-}: {
-  open: boolean; title: string; message: string; onConfirm: () => void; onCancel: () => void
-}) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={onCancel}>
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-      <div
-        className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 max-w-sm w-full animate-enter border border-transparent dark:border-slate-700"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-6 h-6 text-red-500 dark:text-red-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{message}</p>
-          </div>
-        </div>
-        <div className="flex gap-3 mt-6">
-          <button onClick={onCancel} className="btn-secondary flex-1">取消</button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 px-6 py-3 rounded-2xl font-bold text-white transition-all bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 shadow-sm border-none"
-          >
-            确认删除
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+import { useToast } from '../components/Toast';
+import { Button, Card, Input } from '../components/ui';
 
 export default function ItemForm() {
   const { id } = useParams();
@@ -49,6 +15,7 @@ export default function ItemForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { items, locations, addItem, updateItem, deleteItem } = useStore();
+  const { addToast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isEdit = Boolean(id);
@@ -113,40 +80,34 @@ export default function ItemForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate type and size (e.g., max 5MB)
     if (!file.type.startsWith('image/')) {
-      alert('只能上传图片文件');
+      addToast('error', '只能上传图片文件');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('图片大小不能超过 5MB');
+      addToast('error', '图片大小不能超过 5MB');
       return;
     }
 
     setIsUploading(true);
     try {
-      // If there's an existing image, we don't strictly *need* to delete it immediately 
-      // (Supabase storage can overwrite or we just leave it orphan for now to be safe until final submit), 
-      // but let's just upload the new one.
       const url = await uploadImage(file);
       if (url) {
         setForm(prev => ({ ...prev, imageUrl: url }));
       } else {
-        alert('图片上传失败，请重试');
+        addToast('error', '图片上传失败，请重试');
       }
     } catch (error) {
-      alert('图片上传失败，请重试');
+      addToast('error', '图片上传失败，请重试');
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleRemoveImage = async () => {
-    // Delete from state immediately
     const oldUrl = form.imageUrl;
     setForm(prev => ({ ...prev, imageUrl: '' }));
 
-    // Attempt backend delete if it's a real supabase URL
     if (oldUrl) {
       deleteImage(oldUrl).catch(console.error);
     }
@@ -165,20 +126,20 @@ export default function ItemForm() {
           expiryDate: result.expiryDate || prev.expiryDate,
         }));
       } else {
-        alert('AI 识别未返回结果，请确保 API 密钥正确且图片清晰');
+        addToast('warning', 'AI 识别未返回结果，请确保 API 密钥正确且图片清晰');
       }
     } catch (error) {
       console.error(error);
-      alert('AI 识别请求失败');
+      addToast('error', 'AI 识别请求失败');
     } finally {
       setIsAnalyzing(false);
     }
   };
 
   return (
-    <div className="animate-enter max-w-2xl mx-auto">
+    <div className="swiss-enter max-w-2xl mx-auto">
       <ConfirmDialog
-        open={showDeleteConfirm}
+        isOpen={showDeleteConfirm}
         title="删除物品"
         message={`确定要删除"${form.name}"吗？此操作无法撤回。`}
         onConfirm={handleDelete}
@@ -189,44 +150,44 @@ export default function ItemForm() {
       <div className="flex items-center gap-3 mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 flex items-center justify-center hover:shadow-md hover:bg-gray-50 dark:hover:bg-slate-700 transition-all pointer-events-auto shadow-sm"
+          className="w-10 h-10 border-2 border-black dark:border-white flex items-center justify-center hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black pointer-events-auto"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+          <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-bold flex-1 dark:text-gray-100">
+        <h1 className="text-2xl font-black uppercase tracking-wider text-black dark:text-white flex-1">
           {isEdit ? '编辑物品' : '添加新物品'}
         </h1>
         {isEdit && (
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="w-10 h-10 rounded-2xl bg-red-50 dark:bg-red-900/30 flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/50 transition-all pointer-events-auto"
+            className="w-10 h-10 border-2 border-swiss-red text-swiss-red flex items-center justify-center hover:bg-swiss-red hover:text-white pointer-events-auto"
           >
-            <Trash2 className="w-5 h-5 text-red-500 dark:text-red-400" />
+            <Trash2 className="w-5 h-5" />
           </button>
         )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 物品名称 */}
-        <div className="card">
-          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">物品名称 *</label>
-          <input
+        <Card>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">物品名称 *</label>
+          <Input
             type="text"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="input-field"
+            className="w-full"
             placeholder="例如：笔记本电脑、冬季被子..."
             required
           />
-        </div>
+        </Card>
 
         {/* 照片集 (Image Upload) */}
-        <div className="card">
-          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <Camera className="w-4 h-4 text-emerald-500" /> 物品照片
+        <Card>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+            <Camera className="w-4 h-4" /> 物品照片
           </label>
 
-          <div className="relative group rounded-2xl overflow-hidden bg-gray-50 dark:bg-slate-900/50 border-2 border-dashed border-gray-200 dark:border-slate-700 transition-all hover:border-emerald-300 dark:hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20">
+          <div className="relative group border-2 border-dashed border-black dark:border-white hover:border-swiss-red">
             {form.imageUrl ? (
               <div className="relative aspect-video w-full flex items-center justify-center bg-gray-900">
                 <img
@@ -237,7 +198,7 @@ export default function ItemForm() {
                 <button
                   type="button"
                   onClick={handleRemoveImage}
-                  className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 backdrop-blur-sm transition-colors z-10"
+                  className="absolute top-3 right-3 w-8 h-8 bg-black/50 text-white flex items-center justify-center z-10"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -247,9 +208,9 @@ export default function ItemForm() {
                     type="button"
                     onClick={handleAIAnalyze}
                     disabled={isAnalyzing}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-black/60 backdrop-blur-md rounded-full text-white text-sm font-bold shadow-lg border border-white/20 hover:scale-105 hover:bg-black/70 active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-black text-white text-sm font-bold border-2 border-white"
                   >
-                    {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin text-purple-400" /> : <Sparkles className="w-4 h-4 text-purple-400" />}
+                    {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
                     {isAnalyzing ? '正在用 AI 提取信息...' : '✨ 让 AI 来认一下'}
                   </button>
                 </div>
@@ -258,15 +219,15 @@ export default function ItemForm() {
               <label className="flex flex-col items-center justify-center p-8 cursor-pointer">
                 {isUploading ? (
                   <>
-                    <Loader2 className="w-10 h-10 text-emerald-500 animate-spin mb-3" />
-                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">正在上传至家庭云柜...</span>
+                    <Loader2 className="w-10 h-10 animate-spin mb-3" />
+                    <span className="text-sm font-bold mb-1">正在上传至家庭云柜...</span>
                   </>
                 ) : (
                   <>
-                    <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl shadow-sm flex items-center justify-center mb-3 border border-transparent dark:border-slate-700">
+                    <div className="w-14 h-14 border-2 border-black dark:border-white flex items-center justify-center mb-3">
                       <ImageIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <span className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-1">点击拍照或上传图片</span>
+                    <span className="text-sm font-bold mb-1">点击拍照或上传图片</span>
                     <span className="text-xs text-gray-400 dark:text-gray-500">支持 JPG, PNG, WEBP (上限 5MB)</span>
                   </>
                 )}
@@ -281,22 +242,22 @@ export default function ItemForm() {
               </label>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* 分类 & 数量 */}
-        <div className="card">
+        <Card>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">分类</label>
+              <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">分类</label>
               <div className="flex flex-wrap gap-2">
                 {DEFAULT_CATEGORIES.map(cat => (
                   <button
                     key={cat}
                     type="button"
                     onClick={() => setForm({ ...form, category: cat })}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${form.category === cat
-                      ? 'bg-primary dark:bg-blue-600 text-white border-transparent shadow-md'
-                      : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-600 hover:border-primary dark:hover:border-blue-400'
+                    className={`px-4 py-2 text-sm font-bold uppercase tracking-wide border-2 border-black dark:border-white ${form.category === cat
+                      ? 'bg-black dark:bg-white text-white dark:text-black'
+                      : 'bg-transparent text-gray-600 dark:text-gray-400 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black'
                       } `}
                   >
                     {cat}
@@ -305,44 +266,42 @@ export default function ItemForm() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">数量</label>
+              <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">数量</label>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, quantity: Math.max(1, form.quantity - 1) })}
-                  className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-lg transition-all active:scale-90 text-gray-800 dark:text-gray-100"
+                  className="w-12 h-12 border-2 border-black dark:border-white flex items-center justify-center font-bold text-lg hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                 >
                   −
                 </button>
-                <input
+                <Input
                   type="number"
                   min="1"
                   value={form.quantity}
                   onChange={(e) => setForm({ ...form, quantity: parseInt(e.target.value) || 1 })}
-                  className="input-field text-center w-20 text-lg font-bold"
+                  className="text-center w-20"
                 />
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, quantity: form.quantity + 1 })}
-                  className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-lg transition-all active:scale-90 text-gray-800 dark:text-gray-100"
+                  className="w-12 h-12 border-2 border-black dark:border-white flex items-center justify-center font-bold text-lg hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
                 >
                   +
                 </button>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* 存放位置 — 按层级显示 */}
-        <div className="card">
-          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">存放位置</label>
+        </Card>
+        <Card>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">存放位置</label>
           {locations.length === 0 ? (
-            <div className="text-center py-6 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border border-transparent dark:border-slate-700">
+            <div className="text-center py-6 border-2 border-black dark:border-white">
               <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">还没有添加位置</p>
               <button
                 type="button"
                 onClick={() => navigate('/floorplan')}
-                className="text-sm font-bold text-primary dark:text-blue-400 hover:underline"
+                className="text-sm font-bold text-black dark:text-white hover:underline"
               >
                 去平面图添加 →
               </button>
@@ -351,7 +310,7 @@ export default function ItemForm() {
             <select
               value={form.locationId}
               onChange={(e) => setForm({ ...form, locationId: e.target.value })}
-              className="input-field"
+              className="w-full px-3 py-2 border-2 border-black dark:border-white text-sm font-bold text-gray-700 dark:text-gray-200 outline-none transition-all bg-transparent"
             >
               <option value="">选择位置...</option>
               {rooms.map(room => (
@@ -373,19 +332,19 @@ export default function ItemForm() {
               )}
             </select>
           )}
-        </div>
+        </Card>
 
         {/* 📅 保质期设置 */}
-        <div className="card">
-          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3 flex items-center gap-2">
-            📅 保质期 <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">(选填)</span>
+        <Card>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
+            📅 保质期 <span className="text-xs text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal">(选填)</span>
           </label>
           <div className="space-y-4">
-            <input
+            <Input
               type="date"
               value={form.expiryDate || ''}
               onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
-              className="input-field"
+              className="w-full"
             />
             {/* 快捷按钮 */}
             <div className="flex flex-wrap gap-2">
@@ -408,31 +367,31 @@ export default function ItemForm() {
                     d.setMonth(d.getMonth() + btn.months);
                     setForm({ ...form, expiryDate: d.toISOString().split('T')[0] });
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${btn.months === 0 ? 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-600' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/50 hover:bg-orange-100 dark:hover:bg-orange-900/50'}`}
+                  className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wide border-2 border-black dark:border-white ${btn.months === 0 ? 'bg-transparent text-gray-500 dark:text-gray-400 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black' : 'text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black'}`}
                 >
                   {btn.label}
                 </button>
               ))}
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* 备注 */}
-        <div className="card">
-          <label className="block text-sm font-bold text-gray-600 dark:text-gray-300 mb-3">备注</label>
+        <Card>
+          <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">备注</label>
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="input-field min-h-[120px] resize-none"
+            className="w-full px-3 py-2 border-2 border-black dark:border-white text-sm font-bold text-gray-700 dark:text-gray-200 outline-none transition-all bg-transparent min-h-[120px] resize-none"
             placeholder="可选：添加备注信息，如购买日期、保修期等..."
           />
-        </div>
+        </Card>
 
         {/* Submit */}
-        <button type="submit" className="btn-primary w-full py-4 text-lg">
+        <Button type="submit" variant="primary" className="w-full py-4 text-lg">
           <Save className="w-5 h-5" />
           {isEdit ? '保存修改' : '添加物品'}
-        </button>
+        </Button>
       </form>
     </div>
   );

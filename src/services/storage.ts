@@ -1,32 +1,23 @@
-import { supabase } from '../lib/supabase';
+import { auth, storage } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 export const uploadImage = async (file: File): Promise<string | null> => {
     try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const user = auth.currentUser;
         if (!user) throw new Error('Not authenticated');
 
-        // Create a unique file name
+        // 创建唯一文件名
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-        // Path includes user.id to comply with RLS
-        const filePath = `${user.id}/${fileName}`;
+        // 文件路径：uploads/{userId}/{fileName}
+        const filePath = `uploads/${user.uid}/${fileName}`;
+        const storageRef = ref(storage, filePath);
 
-        // Upload to 'homebox-images' bucket
-        const { error: uploadError } = await supabase.storage
-            .from('homebox-images')
-            .upload(filePath, file, { upsert: true });
-
-        if (uploadError) {
-            console.error('Upload Error:', uploadError);
-            throw uploadError;
-        }
-
-        // Get public URL
-        const { data } = supabase.storage
-            .from('homebox-images')
-            .getPublicUrl(filePath);
-
-        return data.publicUrl;
+        // 上传文件
+        const snapshot = await uploadBytes(storageRef, file);
+        // 获取公网 URL
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        return downloadUrl;
     } catch (error) {
         console.error('Error uploading image:', error);
         return null;
@@ -35,20 +26,10 @@ export const uploadImage = async (file: File): Promise<string | null> => {
 
 export const deleteImage = async (url: string) => {
     try {
-        // Extract path from the URL
-        // Public URL format: .../storage/v1/object/public/homebox-images/userId/fileName
-        const bucketPath = 'homebox-images/';
-        const index = url.indexOf(bucketPath);
-        if (index === -1) return;
-
-        const path = url.substring(index + bucketPath.length);
-
-        console.log('Attempting to delete image at path:', path);
-        const { error } = await supabase.storage
-            .from('homebox-images')
-            .remove([path]);
-
-        if (error) throw error;
+        // Firebase Storage SDK 允许直接从 full download URL 构建引用进行删除
+        const storageRef = ref(storage, url);
+        await deleteObject(storageRef);
+        console.log('Successfully deleted image from Firebase Storage');
     } catch (error) {
         console.error('Error deleting image:', error);
     }
