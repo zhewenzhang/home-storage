@@ -316,7 +316,9 @@ export default function FloorPlan() {
             {roomLocations.map(location => {
               const isSelected = selectedId === location.id;
               const b = location.bounds;
-              const WALL = 4;
+              const roomConfig = ROOM_TYPES[location.roomType || 'living'] || ROOM_TYPES.living;
+              
+              const WALL = 6; // 加粗墙面，使实体感更强
               const SCALE = 0.3 / GRID_SIZE;
               const wM = (b.width * SCALE).toFixed(2);
               const hM = (b.height * SCALE).toFixed(2);
@@ -325,18 +327,27 @@ export default function FloorPlan() {
               return (
                 <div
                   key={location.id}
-                  className={`absolute bg-white dark:bg-black ${isSelected ? 'border-swiss-red' : 'border-black dark:border-white'}`}
+                  className={`absolute dark:!bg-zinc-950 transition-all ${
+                    isSelected ? 'shadow-[0_0_0_4px_rgba(255,48,0,0.15)] z-20' : 'shadow-[0_4px_16px_rgba(0,0,0,0.06)] z-10'
+                  }`}
                   style={{
-                    left: b.x, top: b.y, width: b.width, height: b.height,
+                    left: b.x, 
+                    top: b.y, 
+                    width: b.width, 
+                    height: b.height,
                     borderWidth: `${WALL}px`,
                     borderStyle: 'solid',
+                    borderColor: isSelected ? '#FF3000' : roomConfig.wallColor,
+                    backgroundColor: roomConfig.fill,
                     transition: isDragging ? 'none' : 'box-shadow 0.15s, border-color 0.15s',
-                    zIndex: isSelected ? 20 : 10,
                   }}
                 >
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
-                    <span className="text-sm font-bold text-gray-800 dark:text-gray-200 tracking-wide">{location.name}</span>
-                    <span className="text-xs font-bold mt-1 text-gray-400 dark:text-gray-500">{area}m²</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm">{roomConfig.icon}</span>
+                      <span className="text-sm font-black text-gray-800 dark:text-gray-100 tracking-wide">{location.name}</span>
+                    </div>
+                    <span className="text-[10px] font-bold mt-1 text-gray-400 dark:text-gray-500">{area} m²</span>
                   </div>
 
                   <div className="absolute pointer-events-none select-none" style={{ left: '50%', top: -22, transform: 'translateX(-50%)' }}>
