@@ -662,3 +662,97 @@ export async function analyzeImageWithAI(imageUrl: string): Promise<AIVisionResu
         return null;
     }
 }
+
+// ====== AI Vision 图像识别 批量物品自动录入 ======
+
+export interface AIBatchVisionResult {
+    name: string;
+    category: string;
+    quantity: number;
+    expiryDate: string;
+    description?: string;
+}
+
+export async function analyzeBatchImageWithAI(imageUrl: string): Promise<AIBatchVisionResult[]> {
+    if (!API_KEY || API_KEY.indexOf('your-ai-api-key') > -1) {
+        console.warn('AI API Key not configured');
+        return [];
+    }
+
+    const systemPrompt = `你是一个精准的商品批量提取API。用户上传了一张包含一件或多件（一堆）物品的图片（例如超市采购后的一堆囤货、摆在桌面上的几件日常用品等）。
+你的任务是仔细辨识图片中的【所有不同物品】，并以严格的JSON格式输出一个包含物品列表的数组。
+每个物品包含以下字段:
+- "name": 商品或物品的名称（尽量简短、准确，抛弃无用的修饰词）
+- "category": 物品分类（必须是此列表中最适合的一个："电子产品", "工具", "衣物", "书籍", "厨房用品", "药品", "纪念品", "其他"）
+- "quantity": 该物品在图中出现的数量（默认为 1，如果同一物品明显有多件，请写出实际数量，必须是整数数字）
+- "expiryDate": 预估保质期或到期日（格式必须为 "YYYY-MM-DD"；如果是食品、药品、彩妆等易腐坏物品，请通过包装文字或常识进行预估，如果完全没有或不需要保质期则留空 ""）
+- "description": 对该物品的简短描述或成色状态评估（不超过30字）
+
+重要：
+1. 你的回复必须且只能是一串合法的 JSON！绝对不能包含其他任何说明文字、网页代码、或者 markdown 代码块语法（如 \`\`\`json 等）。
+2. JSON 根节点必须是一个数组，示例如下:
+[
+  { "name": "可口可乐罐装", "category": "其他", "quantity": 6, "expiryDate": "2026-12-28", "description": "经典味汽水" },
+  { "name": "海飞丝洗发水", "category": "其他", "quantity": 1, "expiryDate": "2028-06-01", "description": "家庭装去屑洗发水" }
+]
+3. 如果图片中完全看不清任何物品，请返回空数组 []。`;
+
+    try {
+        const visionModel = 'google/gemini-2.5-flash';
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`,
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'HomeBox-BatchVision',
+            },
+            body: JSON.stringify({
+                model: visionModel,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    {
+                        role: 'user',
+                        content: [
+                            { type: "text", text: "请辨识这张图里有哪些囤货物品，并返回对应的 JSON 数组。" },
+                            { type: "image_url", image_url: { url: imageUrl } }
+                        ]
+                    }
+                ],
+                max_tokens: 1000,
+                temperature: 0.1, // 低温保证JSON数组格式的极高稳定性
+            }),
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.error('[AI Batch Vision] API 返回错误状态:', response.status, errText);
+            return [];
+        }
+
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content?.trim();
+
+        if (!content) return [];
+
+        const jsonStr = content.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(jsonStr);
+
+        if (!Array.isArray(parsed)) {
+            console.warn('[AI Batch Vision] AI 返回非数组格式:', parsed);
+            return [];
+        }
+
+        return parsed.map((item: any) => ({
+            name: item.name || '未知物品',
+            category: item.category || '其他',
+            quantity: Number(item.quantity) || 1,
+            expiryDate: item.expiryDate || '',
+            description: item.description || '',
+        }));
+    } catch (err) {
+        console.error('[AI Batch Vision] 解析图片失败:', err);
+        return [];
+    }
+}

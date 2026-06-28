@@ -1,9 +1,10 @@
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Package, MapPin, ArrowRight } from 'lucide-react';
+import { Plus, Package, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { useMemo } from 'react';
 import ExpirationWarning from '../components/ExpirationWarning';
 import { ButtonLink, Card } from '../components/ui';
+import AIBatchImportModal from '../components/AIBatchImportModal';
 
 
 const ROOM_TYPES: Record<string, { name: string; fill: string; wallColor: string; icon: string }> = {
@@ -26,6 +27,7 @@ const CABINET_TYPES: Record<string, { icon: string; color: string }> = {
 };
 
 export default function Home() {
+  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const {
     locations,
     items,
@@ -96,14 +98,39 @@ export default function Home() {
             </div>
           </div>
 
-          <ButtonLink
-            to="/items/new"
-            variant="primary" className="whitespace-nowrap"
-          >
-            <Plus className="w-4 h-4" />
-            <span>添加物品</span>
-          </ButtonLink>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setIsBatchModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 border-2 border-black dark:border-white bg-black dark:bg-white text-white dark:text-black font-bold text-sm hover:bg-swiss-red hover:border-swiss-red hover:text-white transition-all shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#fff] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              <Sparkles className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+              <span>AI 批量收纳</span>
+            </button>
+            <ButtonLink
+              to="/items/new"
+              variant="primary" className="whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" />
+              <span>添加物品</span>
+            </ButtonLink>
+          </div>
         </div>
+      </div>
+
+      {/* Mobile AI Quick Entry */}
+      <div className="md:hidden border-2 border-black dark:border-white bg-gradient-to-r from-yellow-500/10 to-swiss-red/10 dark:from-yellow-500/20 dark:to-swiss-red/20 p-5 flex items-center justify-between">
+        <div className="space-y-1 pr-2">
+          <h4 className="font-black text-sm uppercase tracking-wide flex items-center gap-1.5 text-black dark:text-white">
+            <Sparkles className="w-4 h-4 text-yellow-400 fill-yellow-400 animate-pulse" /> AI 拍照批量收纳
+          </h4>
+          <p className="text-[10px] text-gray-500 dark:text-gray-400">买了一大袋囤货？拍张照片，AI帮您自动拆解并分类！</p>
+        </div>
+        <button
+          onClick={() => setIsBatchModalOpen(true)}
+          className="flex-shrink-0 bg-black dark:bg-white text-white dark:text-black px-4 py-2 border-2 border-black dark:border-white font-bold text-xs uppercase hover:bg-swiss-red active:translate-y-0.5 transition-colors"
+        >
+          立即拍照
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
@@ -355,6 +382,16 @@ export default function Home() {
           )}
         </div>
       </div>
+      {isBatchModalOpen && (
+        <AIBatchImportModal
+          onClose={() => setIsBatchModalOpen(false)}
+          onSuccess={() => {
+            setIsBatchModalOpen(false);
+            // 刷新本地全局数据
+            useStore.getState().loadFromSupabase();
+          }}
+        />
+      )}
     </div>
   );
 }
