@@ -23,9 +23,9 @@ export default function Settings() {
     const [editNameValue, setEditNameValue] = useState('');
     const [isSavingName, setIsSavingName] = useState(false);
     
-    // 数据迁移状态
     const [backupCheck, setBackupCheck] = useState<{ hasBackup: boolean; data: any } | null>(null);
     const [importing, setImporting] = useState(false);
+    const [showChangelog, setShowChangelog] = useState(false);
 
     useEffect(() => {
         fetch('/supabase_data.json')
@@ -479,10 +479,10 @@ export default function Settings() {
                         <span className="text-sm font-bold flex items-center gap-2"><Shield className="w-4 h-4 text-gray-500 dark:text-gray-400" />家庭云端数据隐私协议</span>
                         <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                     </div>
-                    <div className="flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer text-gray-700 dark:text-gray-300">
-                        <span className="text-sm font-bold flex items-center gap-2"><HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400" />使用帮助与产品反馈</span>
+                    <div onClick={() => setShowChangelog(true)} className="flex items-center justify-between p-5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer text-gray-700 dark:text-gray-300">
+                        <span className="text-sm font-bold flex items-center gap-2"><HelpCircle className="w-4 h-4 text-gray-500 dark:text-gray-400" />使用帮助与产品更新记录</span>
                         <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-400">v2.2.0</span>
+                            <span className="text-xs text-gray-400 hover:text-black dark:hover:text-white hover:underline transition-colors mr-1">v{__APP_VERSION__}</span>
                             <button
                                 onClick={(e) => { e.stopPropagation(); handleForceUpdate(); }}
                                 className="text-[10px] font-bold px-2 py-0.5 border-2 border-black dark:border-white bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -547,6 +547,66 @@ export default function Settings() {
             {/*底部留白*/}
             {showPrivacyPolicy && (
                 <PrivacyPolicyModal onClose={() => setShowPrivacyPolicy(false)} />
+            )}
+
+            {showChangelog && (
+                <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white dark:bg-black p-6 w-full max-w-lg swiss-enter relative border-2 border-black dark:border-white max-h-[85vh] overflow-y-auto">
+                        <button onClick={() => setShowChangelog(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                            <X className="w-5 h-5" />
+                        </button>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                            HomeBox 版本更新历史
+                        </h3>
+                        <div className="space-y-6 text-sm text-gray-600 dark:text-gray-300">
+                            <div>
+                                <h4 className="font-bold text-black dark:text-white flex items-center gap-2">
+                                    <span className="px-2 py-0.5 border-2 border-black dark:border-white bg-gray-100 dark:bg-gray-800 text-[10px]">v2.5.0</span>
+                                    彻底切换至 Firebase (当前版本)
+                                </h4>
+                                <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">2026年6月28日</p>
+                                <ul className="list-disc pl-4 mt-2 space-y-1 text-xs">
+                                    <li>系统底层服务完全清空并剔除 Supabase SDK，全面重构至更稳固、支持多租户的 Firebase 架构。</li>
+                                    <li>设计基于本地凭证的安全 REST API 导入引擎，已成功将 10 个物品和 19 个空间平滑迁移至 Firestore。</li>
+                                    <li>修改全局状态层，在您使用 Google 账号登录的瞬间自动触发后台静默数据资产“所有权认领”。</li>
+                                    <li>全面捕获并汉化 Firebase Auth 错误代码，优化了 Auth 登录引导提示与编译 Lint 报错。</li>
+                                    <li>在本地项目根目录安全配置了 <code>superpowers</code> 和 <code>gstack</code> 硅基 Agent 强化技能包。</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-black dark:text-white flex items-center gap-2">
+                                    <span className="px-2 py-0.5 border border-black dark:border-white bg-gray-100 dark:bg-gray-800 text-[10px]">v2.4.0</span>
+                                    PWA 离线支持与体验升级
+                                </h4>
+                                <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">2026年5月</p>
+                                <ul className="list-disc pl-4 mt-2 space-y-1 text-xs">
+                                    <li>支持渐进式 Web 应用（PWA），通过 Service Worker 强缓存提供离线加载与使用能力。</li>
+                                    <li>优化了底层大状态渲染的分包编译机制，提升加载帧率。</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-black dark:text-white flex items-center gap-2">
+                                    <span className="px-2 py-0.5 border border-black dark:border-white bg-gray-100 dark:bg-gray-800 text-[10px]">v2.3.0</span>
+                                    AI 家庭资产大盘体检
+                                </h4>
+                                <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">2026年4月</p>
+                                <ul className="list-disc pl-4 mt-2 space-y-1 text-xs">
+                                    <li>引入智能 AI 家庭管家，自动巡检家庭空间大盘中未填保质期等隐患，并出具常识和囤货报告。</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-black dark:text-white flex items-center gap-2">
+                                    <span className="px-2 py-0.5 border border-black dark:border-white bg-gray-100 dark:bg-gray-800 text-[10px]">v2.2.0</span>
+                                    Canvas 户型平面图定位
+                                </h4>
+                                <p className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">2026年2月</p>
+                                <ul className="list-disc pl-4 mt-2 space-y-1 text-xs">
+                                    <li>首创二维家庭平面图交互，以图形化的“物理实感”让收纳查找更加直观清晰。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* App Lock Validation / Setup Modal */}
