@@ -316,9 +316,15 @@ export const useStore = create<AppState>()(
         deleteLocationDB(id).catch(err => { console.error('[Store] 删除位置失败:', err); set({ errorMessage: '删除位置失败，请重试' }); });
       },
 
-      setFloorPlan: (floorPlan) => {
+      setFloorPlan: async (floorPlan) => {
         set({ floorPlan });
-        updateFloorPlanDB(floorPlan).catch(err => { console.error('[Store] 平面图同步失败:', err); set({ errorMessage: '平面图同步失败，请重试' }); });
+        try {
+          const targetId = await getCurrentTargetId(get().activeFamilyId);
+          await updateFloorPlanDB(floorPlan, targetId);
+        } catch (err) {
+          console.error('[Store] 平面图同步失败:', err);
+          set({ errorMessage: '平面图同步失败，请重试' });
+        }
       },
 
       setSelectedLocationId: (id) => set({ selectedLocationId: id }),

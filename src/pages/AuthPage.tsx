@@ -25,14 +25,16 @@ export default function AuthPage() {
             }
         } catch (err: any) {
             const msg = err.message || '操作失败';
-            if (msg.includes('Invalid login')) {
-                setError('邮箱或密码错误');
-            } else if (msg.includes('already registered') || msg.includes('already been registered')) {
+            const code = err.code || '';
+            
+            if (msg.includes('invalid-credential') || code.includes('invalid-credential') || msg.includes('Invalid login')) {
+                setError('邮箱或密码错误。如果您是首次访问新系统，请先切换到上方的「注册」选项卡创建您的私有云端空间。');
+            } else if (msg.includes('email-already-in-use') || code.includes('email-already-in-use') || msg.includes('already registered')) {
                 setError('该邮箱已注册，请直接登录');
                 setIsLogin(true);
-            } else if (msg.includes('Password should be')) {
+            } else if (msg.includes('weak-password') || code.includes('weak-password') || msg.includes('Password should be')) {
                 setError('密码至少 6 位');
-            } else if (msg.includes('valid email')) {
+            } else if (msg.includes('invalid-email') || code.includes('invalid-email') || msg.includes('valid email')) {
                 setError('请输入有效邮箱');
             } else {
                 setError(msg);

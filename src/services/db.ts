@@ -2,7 +2,7 @@
 import { db } from '../lib/firebase';
 import { 
     collection, doc, getDocs, setDoc, updateDoc, deleteDoc, 
-    query, where, orderBy, writeBatch, limit, getDoc
+    query, where, orderBy, writeBatch, limit
 } from 'firebase/firestore';
 import type { Item, Location, FloorPlan } from '../types';
 
@@ -154,30 +154,15 @@ export async function fetchFloorPlan(familyId: string): Promise<FloorPlan | null
     };
 }
 
-export async function updateFloorPlanDB(fp: FloorPlan) {
+export async function updateFloorPlanDB(fp: FloorPlan, familyId: string) {
     const docRef = doc(db, FLOOR_PLANS_COLL, fp.id);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-        await updateDoc(docRef, {
-            name: fp.name,
-            width: fp.width,
-            height: fp.height,
-        });
-    } else {
-        // 如果文档不存在则直接以 fp.id 创建 (可能首次配置)
-        // 在 Store 中传入的 fp 可能有默认的 id 等信息，需要包含 user_id
-        // 通常在 loadFromSupabase 时如果为空会初始化默认的，保存时再写入
-        // 在 store 侧：setFloorPlan 会调此方法，我们需要确保它有相应的 user_id
-        // 这里提供 upsert 兼容
-        // 我们从 db 侧先查，如果找不到，先暂时写进去。
-        // 为稳妥起见，更新时可以用 setDoc 并合并
-        await setDoc(docRef, {
-            name: fp.name,
-            width: fp.width,
-            height: fp.height,
-        }, { merge: true });
-    }
+    await setDoc(docRef, {
+        user_id: familyId,
+        name: fp.name,
+        width: fp.width,
+        height: fp.height,
+        updated_at: Date.now()
+    }, { merge: true });
 }
 
 // ====== Batch Operations ======
