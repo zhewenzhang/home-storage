@@ -6,6 +6,17 @@ import ExpirationWarning from '../components/ExpirationWarning';
 import { ButtonLink, Card } from '../components/ui';
 
 
+const ROOM_TYPES: Record<string, { name: string; fill: string; wallColor: string; icon: string }> = {
+  living: { name: '客厅', fill: '#FAFAF5', wallColor: '#6B6B5E', icon: '🛋️' },
+  bedroom: { name: '卧室', fill: '#F5F5FA', wallColor: '#5E5E6B', icon: '🛏️' },
+  kitchen: { name: '厨房', fill: '#FAF5EB', wallColor: '#6B5E4B', icon: '🍳' },
+  bathroom: { name: '卫生间', fill: '#F0FAF0', wallColor: '#4B6B5E', icon: '🚿' },
+  balcony: { name: '阳台', fill: '#F0F5F0', wallColor: '#5E6B5E', icon: '🌿' },
+  study: { name: '书房', fill: '#F5F0FA', wallColor: '#5E4B6B', icon: '📚' },
+  dining: { name: '餐厅', fill: '#FAF0EB', wallColor: '#6B4B3E', icon: '🍽️' },
+  storage: { name: '储藏室', fill: '#F0F0F0', wallColor: '#5E5E5E', icon: '📦' },
+};
+
 const CABINET_TYPES: Record<string, { icon: string; color: string }> = {
   cabinet: { icon: '🗄️', color: '#8B6D4B' },
   wardrobe: { icon: '👔', color: '#6B5E8B' },
@@ -21,7 +32,8 @@ export default function Home() {
     selectedLocationId,
     setSelectedLocationId,
     searchQuery,
-    displayName
+    displayName,
+    theme
   } = useStore();
 
   const roomLocations = useMemo(() => locations.filter(l => l.type === 'room'), [locations]);
@@ -156,11 +168,13 @@ export default function Home() {
                         const isMatched = matchedLocationIds.has(location.id);
                         const isDimmed = !!searchQuery && !isMatched;
                         const b = location.bounds;
+                        
+                        const roomConfig = ROOM_TYPES[location.roomType || 'living'] || ROOM_TYPES.living;
                         const SCALE = 0.3 / 20;
                         const wM = (b.width * SCALE).toFixed(2);
                         const hM = (b.height * SCALE).toFixed(2);
                         const area = (b.width * SCALE * b.height * SCALE).toFixed(1);
-                        const WALL = 3;
+                        const WALL = 5; // 首页加粗墙体
 
                         return (
                           <g
@@ -170,22 +184,22 @@ export default function Home() {
                           >
                             {(isSelected || isMatched) && (
                               <rect x={b.x - 6} y={b.y - 6} width={b.width + 12} height={b.height + 12}
-                                strokeWidth="3" fill="none"
-                                className={isMatched ? 'stroke-swiss-red' : 'stroke-black dark:stroke-white'}
+                                strokeWidth="2.5" fill="none"
+                                stroke={isMatched ? '#FF3000' : (theme === 'dark' ? '#FFFFFF' : '#000000')}
                               />
                             )}
                             <rect x={b.x} y={b.y} width={b.width} height={b.height}
                               strokeWidth={WALL}
-                              fill="white"
-                              className={`transition-all duration-200 ease-out ${isSelected || isMatched ? (isMatched ? 'stroke-swiss-red' : 'stroke-black dark:stroke-white') : 'stroke-black dark:stroke-white'}`}
-                              style={{ fill: isSelected ? '#F2F2F2' : '#FFFFFF' }}
+                              stroke={isSelected ? '#FF3000' : roomConfig.wallColor}
+                              fill={theme === 'dark' ? '#09090b' : roomConfig.fill}
+                              className="transition-all duration-200 ease-out"
                             />
                             <text x={b.x + b.width / 2} y={b.y + b.height / 2 - 6}
                               textAnchor="middle" fontSize="13" fontWeight="900"
                               className="fill-black dark:fill-white uppercase"
                               style={{ pointerEvents: 'none' }}
                             >
-                              {location.name}
+                              {roomConfig.icon} {location.name}
                             </text>
                             <text x={b.x + b.width / 2} y={b.y + b.height / 2 + 12}
                               textAnchor="middle" fontSize="10" fontWeight="700"
